@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use App\Enums\UserRoleEnum;
 use App\Models\User;
 use App\Models\Role;
 use MoonShine\UI\Fields\StackFields;
@@ -51,6 +52,14 @@ class MoonShineUserResource extends ModelResource
     public function getTitle(): string
     {
         return __('moonshine::ui.resource.admins_title');
+    }
+
+    protected function modifyQueryBuilder(Builder $builder): Builder
+    {
+        $roleIds = Role::whereIn('name', [UserRoleEnum::ADMIN, UserRoleEnum::TUTOR_WORKER])
+                       ->pluck('id');
+
+        return $builder->whereIn('role_id', $roleIds);
     }
 
     protected function activeActions(): ListOf
@@ -180,7 +189,7 @@ class MoonShineUserResource extends ModelResource
                 'Role',
                 formatted: static fn (Role $model) => $model->name,
                 resource: MoonShineUserRoleResource::class,
-            )->valuesQuery(static fn (Builder $q) => $q->select(['id', 'name'])),
+            )->valuesQuery(static fn (Builder $q) => $q->select(['id', 'name'])->whereIn('name', [UserRoleEnum::ADMIN, UserRoleEnum::TUTOR_WORKER])),
 
             Email::make('E-mail', 'email'),
         ];
