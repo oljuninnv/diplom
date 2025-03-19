@@ -7,16 +7,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use MoonShine\Permissions\Traits\HasMoonShinePermissions;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable, HasFactory;
+    use HasApiTokens, Notifiable, HasFactory, HasMoonShinePermissions;
 
     protected $fillable = [
         'name',
         'email',
         'phone',
         'role_id',
+        'post_id',
         'password',
         'avatar',
         'telegram_user_id',
@@ -34,6 +36,11 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 
     public function telegramUser()

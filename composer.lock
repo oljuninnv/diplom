@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fdc2e6eff7b019fbb0324068ca437017",
+    "content-hash": "c5a780f7b1b47c2031ad19c5af6bfc5d",
     "packages": [
         {
             "name": "brick/math",
@@ -2854,6 +2854,72 @@
                 }
             ],
             "time": "2025-03-17T15:51:04+00:00"
+        },
+        {
+            "name": "moonshine/permissions",
+            "version": "2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/moonshine-software/permissions.git",
+                "reference": "12ec9e3b7c1622198d13f25d817b5cd231e98648"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/moonshine-software/permissions/zipball/12ec9e3b7c1622198d13f25d817b5cd231e98648",
+                "reference": "12ec9e3b7c1622198d13f25d817b5cd231e98648",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": "^8.1|^8.2"
+            },
+            "conflict": {
+                "moonshine/moonshine": "<3.0"
+            },
+            "require-dev": {
+                "brianium/paratest": "^6.8",
+                "mockery/mockery": "^1.4.4",
+                "orchestra/testbench": "^4.0|^5.0|^6.0|^7.0|^8.0",
+                "phpstan/phpstan": "^1.4.7",
+                "phpunit/phpunit": "^9.5.8",
+                "rector/rector": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "MoonShine\\Permissions\\PermissionsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "MoonShine\\Permissions\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Danil Shutsky",
+                    "email": "thecutcode@gmail.com",
+                    "homepage": "https://moonshine-laravel.com"
+                }
+            ],
+            "description": "User permissions for MoonShine",
+            "homepage": "https://moonshine-laravel.com",
+            "keywords": [
+                "moonshine",
+                "permissions"
+            ],
+            "support": {
+                "issues": "https://github.com/moonshine-software/permissions/issues",
+                "source": "https://github.com/moonshine-software/permissions"
+            },
+            "time": "2025-03-15T18:50:24+00:00"
         },
         {
             "name": "moonshine/ru",
@@ -6912,6 +6978,70 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "dev-lnk/moonshine-builder",
+            "version": "2.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dev-lnk/moonshine-builder.git",
+                "reference": "d384f40204b06a1cce01668bf52d5ec8a76a8ff4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dev-lnk/moonshine-builder/zipball/d384f40204b06a1cce01668bf52d5ec8a76a8ff4",
+                "reference": "d384f40204b06a1cce01668bf52d5ec8a76a8ff4",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.2"
+            },
+            "conflict": {
+                "moonshine/moonshine": "<3.0"
+            },
+            "require-dev": {
+                "moonshine/moonshine": "^3.0",
+                "orchestra/testbench": "^9.0",
+                "phpstan/phpstan": "^1.11",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "DevLnk\\MoonShineBuilder\\Providers\\MoonShineBuilderProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/helpers.php"
+                ],
+                "psr-4": {
+                    "DevLnk\\MoonShineBuilder\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ivan Levchenko",
+                    "email": "lkivanmail@gmail.com",
+                    "homepage": "https://github.com/dev-lnk"
+                }
+            ],
+            "description": "Project builder for MoonShine",
+            "keywords": [
+                "builder",
+                "moonshine"
+            ],
+            "support": {
+                "issues": "https://github.com/dev-lnk/moonshine-builder/issues",
+                "source": "https://github.com/dev-lnk/moonshine-builder/tree/2.3.1"
+            },
+            "time": "2025-03-18T12:48:01+00:00"
+        },
         {
             "name": "fakerphp/faker",
             "version": "v1.24.1",

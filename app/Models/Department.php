@@ -1,26 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Department extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'id',
-        'name',
+    protected $fillable = 
+    [
+      'name',
     ];
-
-    public function post()
-    {
-        return $this->belongsToMany(Post::class);
-    }
-
-    public function worker()
-    {
-        return $this->belongsTo(Worker::class);
-    }
 }

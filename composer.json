@@ -13,9 +13,11 @@
         "laravel/sanctum": "^3.2",
         "laravel/tinker": "^2.8",
         "moonshine/moonshine": "^3.8",
+        "moonshine/permissions": "^2.0",
         "moonshine/ru": "^1.0"
     },
     "require-dev": {
+        "dev-lnk/moonshine-builder": "^2.3",
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",

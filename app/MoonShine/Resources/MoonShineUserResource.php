@@ -30,6 +30,7 @@ use MoonShine\UI\Fields\Image;
 use MoonShine\UI\Fields\Password;
 use MoonShine\UI\Fields\PasswordRepeat;
 use MoonShine\UI\Fields\Text;
+use MoonShine\Permissions\Traits\WithPermissions;
 
 #[Icon('users')]
 #[Group('moonshine::ui.resource.system', 'users', translatable: true)]
@@ -39,6 +40,7 @@ use MoonShine\UI\Fields\Text;
  */
 class MoonShineUserResource extends ModelResource
 {
+    use WithPermissions;
     protected string $model = User::class;
 
     protected string $column = 'name';

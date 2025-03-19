@@ -56,13 +56,13 @@ class WorkersResource extends ModelResource
                 'Должность',
                 'post',
                 formatted: static fn(Post $model) => $model->name,
-                resource: PostsResource::class,
+                resource: PostResource::class,
             )->badge(Color::INFO),
             BelongsTo::make(
                 'Department',
                 'department',
                 formatted: static fn(Department $model) => $model->name,
-                resource: DepartmentsResource::class,
+                resource: DepartmentResource::class,
             ),
             Date::make('Дата приёма на должность', 'hire_date')
                 ->format("d.m.Y")
@@ -88,14 +88,14 @@ class WorkersResource extends ModelResource
                     'Department',
                     'department',
                     formatted: static fn(Department $model) => $model->name,
-                    resource: DepartmentsResource::class,
+                    resource: DepartmentResource::class,
                 )
                     ->creatable(),
                 BelongsTo::make(
                     'Должность',
                     'post',
                     formatted: static fn(Post $model) => $model->name,
-                    resource: PostsResource::class,
+                    resource: PostResource::class,
                 )
                     // ->associatedWith('department_id')
                     ->creatable()
@@ -121,7 +121,7 @@ class WorkersResource extends ModelResource
                 'Должность',
                 'Post',
                 formatted: static fn(Post $model) => "$model->name - отдел: {$model->department->name}",
-                resource: PostsResource::class,
+                resource: PostResource::class,
             )
                 ->searchable(),
         ];

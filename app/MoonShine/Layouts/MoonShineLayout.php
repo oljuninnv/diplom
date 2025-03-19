@@ -33,9 +33,9 @@ use MoonShine\UI\Components\{Breadcrumbs,
     Layout\TopBar,
     Layout\Wrapper,
     When};
-use App\MoonShine\Resources\DepartmentsResource;
-use App\MoonShine\Resources\PostsResource;
 use App\MoonShine\Resources\WorkersResource;
+use App\MoonShine\Resources\DepartmentResource;
+use App\MoonShine\Resources\PostResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -55,8 +55,8 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make('Telegram-аккаунты', MoonShineUserResource::class),
             ]),
             MenuGroup::make('Организация',[
-                MenuItem::make('Отделы', DepartmentsResource::class),
-                MenuItem::make('Должности', PostsResource::class),
+                MenuItem::make('Отделы', DepartmentResource::class),
+                MenuItem::make('Должности', PostResource::class),
                 MenuItem::make('Работники', WorkersResource::class),
             ],'building-office'),
             MenuGroup::make('Тестовые задания и заявки',[
@@ -72,6 +72,7 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make('Личные сообщения', MoonShineUserResource::class),
             ],'envelope-open'),
             MenuItem::make('Вернуться на сайт', static fn () => route('home'),'home'),
+
         ];
     }
 

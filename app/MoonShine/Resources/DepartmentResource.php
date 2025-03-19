@@ -5,24 +5,27 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Models\Department;
+
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Fields\ID;
+use MoonShine\UI\Fields\Text;
 use MoonShine\Contracts\UI\FieldContract;
 use MoonShine\Laravel\Enums\Action;
 use MoonShine\Support\Attributes\Icon;
 use MoonShine\Support\ListOf;
-use MoonShine\UI\Fields\Text;
 
 #[Icon('user-group')]
 /**
  * @extends ModelResource<Department>
  */
-class DepartmentsResource extends ModelResource
+class DepartmentResource extends ModelResource
 {
     protected string $model = Department::class;
 
     protected string $title = 'Отдел';
+
+    protected string $column = 'name';
 
     protected bool $createInModal = true;
 
@@ -31,42 +34,31 @@ class DepartmentsResource extends ModelResource
     protected bool $editInModal = true;
 
     protected bool $cursorPaginate = true;
-    
-    /**
-     * @return list<FieldContract>
-     */
-    protected function indexFields(): iterable
+
+    public function indexFields(): iterable
     {
         return [
-            ID::make()->sortable(),
-            Text::make('Название', 'name'),
+			ID::make('id')->sortable(),
+			Text::make('Название', 'name')->sortable(),
         ];
     }
 
-    protected function activeActions(): ListOf
-    {
-        return parent::activeActions()->except(Action::VIEW);
-    }
-
-    protected function detailFields(): iterable
-    {
-        return $this->indexFields();
-    }
-
-    protected function formFields(): iterable
+    public function formFields(): iterable
     {
         return [
             Box::make([
-                ID::make()->sortable(),
-                Text::make('Название', 'name')
-                    ->required(),
-            ]),
+                ...$this->indexFields()
+            ])
         ];
     }
 
-    /**
-     * @return array{name: array|string}
-     */
+    public function detailFields(): iterable
+    {
+        return [
+            ...$this->indexFields()
+        ];
+    }
+
     protected function rules($item): array
     {
         return [
