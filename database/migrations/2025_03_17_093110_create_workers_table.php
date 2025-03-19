@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('workers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
             $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
             $table->date('hire_date');
             $table->enum('level_of_experience', ['junior', 'middle', 'senior']);
