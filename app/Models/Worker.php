@@ -25,4 +25,9 @@ class Worker extends Model
     {
         return $this->belongsTo(Post::class);
     }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 }

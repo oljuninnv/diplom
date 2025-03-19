@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Layouts;
 
+use MoonShine\MenuManager\MenuItem;
+use MoonShine\MenuManager\MenuGroup;
 use MoonShine\Laravel\Layouts\AppLayout;
 use MoonShine\ColorManager\ColorManager;
 use MoonShine\Contracts\ColorManager\ColorManagerContract;
+use App\MoonShine\Resources\MoonShineUserResource;
 use MoonShine\Laravel\Components\Layout\{Locales, Notifications, Profile, Search};
 use MoonShine\UI\Components\{Breadcrumbs,
     Components,
@@ -30,6 +33,9 @@ use MoonShine\UI\Components\{Breadcrumbs,
     Layout\TopBar,
     Layout\Wrapper,
     When};
+use App\MoonShine\Resources\DepartmentsResource;
+use App\MoonShine\Resources\PostsResource;
+use App\MoonShine\Resources\WorkersResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -44,6 +50,28 @@ final class MoonShineLayout extends AppLayout
     {
         return [
             ...parent::menu(),
+            MenuGroup::make('Пользователи',[
+                MenuItem::make('Пользователи', MoonShineUserResource::class),
+                MenuItem::make('Telegram-аккаунты', MoonShineUserResource::class),
+            ]),
+            MenuGroup::make('Организация',[
+                MenuItem::make('Отделы', DepartmentsResource::class),
+                MenuItem::make('Должности', PostsResource::class),
+                MenuItem::make('Работники', WorkersResource::class),
+            ],'building-office'),
+            MenuGroup::make('Тестовые задания и заявки',[
+                MenuItem::make('Тестовые задания', MoonShineUserResource::class),
+                MenuItem::make('Заявки', MoonShineUserResource::class),
+                MenuItem::make('Статус выполнения', MoonShineUserResource::class),
+            ],'document-magnifying-glass'),
+            MenuGroup::make('Отчёты и вакансии',[
+                MenuItem::make('Отчёты', MoonShineUserResource::class),
+                MenuItem::make('Вакансии', MoonShineUserResource::class),
+            ],'document'),
+            MenuGroup::make('Коммуникация',[
+                MenuItem::make('Личные сообщения', MoonShineUserResource::class),
+            ],'envelope-open'),
+            MenuItem::make('Вернуться на сайт', static fn () => route('home'),'home'),
         ];
     }
 

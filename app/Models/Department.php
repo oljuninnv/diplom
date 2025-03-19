@@ -10,6 +10,17 @@ class Department extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'name',
     ];
+
+    public function post()
+    {
+        return $this->belongsToMany(Post::class);
+    }
+
+    public function worker()
+    {
+        return $this->belongsTo(Worker::class);
+    }
 }
