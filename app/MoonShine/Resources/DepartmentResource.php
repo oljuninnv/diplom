@@ -10,10 +10,7 @@ use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\Text;
-use MoonShine\Contracts\UI\FieldContract;
-use MoonShine\Laravel\Enums\Action;
 use MoonShine\Support\Attributes\Icon;
-use MoonShine\Support\ListOf;
 
 #[Icon('user-group')]
 /**
@@ -23,7 +20,7 @@ class DepartmentResource extends ModelResource
 {
     protected string $model = Department::class;
 
-    protected string $title = 'Отдел';
+    protected string $title = 'Отделы';
 
     protected string $column = 'name';
 

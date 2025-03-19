@@ -21,6 +21,7 @@ use MoonShine\Support\Attributes\Icon;
  */
 class PostResource extends ModelResource
 {
+    protected string $title = 'Должности';
     protected string $model = Post::class;
 
     protected string $column = 'name';
@@ -73,6 +74,14 @@ class PostResource extends ModelResource
             )->valuesQuery(static fn(Builder $q) => $q->select(['id', 'name'])),
 
             Text::make('Название', 'name'),
+        ];
+    }
+
+    protected function search(): array
+    {
+        return [
+            'id',
+            'name',
         ];
     }
 

@@ -1,27 +1,27 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
+namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use MoonShine\Permissions\Traits\HasMoonShinePermissions;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable, HasFactory, HasMoonShinePermissions;
 
     protected $fillable = [
-        'name',
-        'email',
-        'phone',
-        'role_id',
-        'post_id',
-        'password',
-        'avatar',
-        'telegram_user_id',
+		'name',
+		'avatar',
+		'email',
+		'phone',
+		'role_id',
+		'telegram_user_id',
     ];
 
     protected $hidden = [
@@ -30,21 +30,16 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at' => 'date',
     ];
 
-    public function role()
+    public function role(): BelongsTo
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
-    public function department()
+    public function telegramUser(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
-    }
-
-    public function telegramUser()
-    {
-        return $this->belongsTo(TelegramUser::class);
+        return $this->belongsTo(TelegramUser::class, 'telegram_user_id');
     }
 }

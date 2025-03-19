@@ -36,6 +36,9 @@ use MoonShine\UI\Components\{Breadcrumbs,
 use App\MoonShine\Resources\WorkersResource;
 use App\MoonShine\Resources\DepartmentResource;
 use App\MoonShine\Resources\PostResource;
+use App\MoonShine\Resources\WorkerResource;
+use App\MoonShine\Resources\TelegramUserResource;
+use App\MoonShine\Resources\UserResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -51,13 +54,13 @@ final class MoonShineLayout extends AppLayout
         return [
             ...parent::menu(),
             MenuGroup::make('Пользователи',[
-                MenuItem::make('Пользователи', MoonShineUserResource::class),
-                MenuItem::make('Telegram-аккаунты', MoonShineUserResource::class),
-            ]),
+                MenuItem::make('Пользователи', UserResource::class),
+                MenuItem::make('Telegram-аккаунты', TelegramUserResource::class),
+            ],'user-group'),
             MenuGroup::make('Организация',[
                 MenuItem::make('Отделы', DepartmentResource::class),
                 MenuItem::make('Должности', PostResource::class),
-                MenuItem::make('Работники', WorkersResource::class),
+                MenuItem::make('Работники', WorkerResource::class),
             ],'building-office'),
             MenuGroup::make('Тестовые задания и заявки',[
                 MenuItem::make('Тестовые задания', MoonShineUserResource::class),
@@ -72,7 +75,6 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make('Личные сообщения', MoonShineUserResource::class),
             ],'envelope-open'),
             MenuItem::make('Вернуться на сайт', static fn () => route('home'),'home'),
-
         ];
     }
 

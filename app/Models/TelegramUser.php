@@ -1,18 +1,16 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class TelegramUser extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'telegram_id',
-        'first_name',
-        'last_name',
-        'username',
+		'telegram_id',
+		'first_name',
+		'last_name',
+		'username',
     ];
 }

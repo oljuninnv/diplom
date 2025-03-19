@@ -1,33 +1,35 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Worker extends Model
 {
     use HasFactory;
-
     protected $fillable = [
-        'user_id',
-        'post_id',
-        'hire_date',
-        'level_of_experience',
+		'user_id',
+		'department_id',
+		'post_id',
+		'hire_date',
+		'level_of_experience',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function post()
+    public function department(): BelongsTo
     {
-        return $this->belongsTo(Post::class);
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
-    public function department()
+    public function post(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Post::class, 'post_id');
     }
 }

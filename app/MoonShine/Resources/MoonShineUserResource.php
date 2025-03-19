@@ -45,7 +45,7 @@ class MoonShineUserResource extends ModelResource
 
     protected string $column = 'name';
 
-    protected array $with = ['role'];
+    protected array $with = ['role','telegramUser'];
 
     protected bool $simplePaginate = true;
 
@@ -88,6 +88,8 @@ class MoonShineUserResource extends ModelResource
                     ->disk('public')
                     ->dir('moonshine_users'),
             ]),
+
+            BelongsTo::make('Telegram-аккаунт', 'telegramUser', resource: TelegramUserResource::class)->sortable(),
 
             Date::make(__('moonshine::ui.resource.created_at'), 'created_at')
                 ->format("d.m.Y")
