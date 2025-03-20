@@ -27,7 +27,11 @@ class MoonShineServiceProvider extends ServiceProvider
      */
     public function boot(CoreContract $core, ConfiguratorContract $config): void
     {
-        // $config->authEnable();
+        $config->authEnable();
+
+        $config->addMiddleware([
+            \App\Http\Middleware\CheckAdminRole::class,
+        ]);
 
         $core
             ->resources([

@@ -11,8 +11,8 @@ class AuthController extends Controller
 {
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
-        
+        Auth::guard('moonshine')->logout();
+
         Auth::logout();
 
         return redirect()->route('home');
@@ -20,26 +20,16 @@ class AuthController extends Controller
 
     public function showLoginForm()
     {
-        return view('auth/restore-password'); 
+        return view('auth/login'); 
     }
 
     public function login(Request $request){
 
         $values = $request->all();
 
-        \Log::info($values);
-
-
         if (Auth::attempt(['email' => $values['email'], 'password' => $values['password']])) {
-            $user = Auth::user();
-
-            if ($user->banned == 1) {
-                Auth::logout();
-                return back()->withErrors([
-                    'credentials' => 'Ваш профиль заблокирован.',
-                ])->withInput();
-            }
-
+            Auth::user();
+            Auth::guard('moonshine')->login(Auth::user());
             return redirect('/');
         }
 

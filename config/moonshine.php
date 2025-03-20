@@ -44,6 +44,7 @@ return [
 
     // Middleware
     'middleware' => [
+        \App\Http\Middleware\CheckAdminRole::class,
         EncryptCookies::class,
         AddQueuedCookiesToResponse::class,
         StartSession::class,
