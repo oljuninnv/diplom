@@ -31,19 +31,25 @@
                                 class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Чат
                             </a>
+                            @if(auth()->user()?->role->name === "Admin")
+                                <a href="/admin" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                        Админ-панель
+                                </a>
+                            @endif
                         </div>
                     </div>
                     <div class="flex items-center">
                         <div class="hidden md:ml-4 md:flex gap-2 md:items-center">
                             @auth
+
                                 <a href="/profile" class="flex items-center space-x-2">
-                                    <img src="{{ auth()->user()?->avatar ? asset('storage/' . auth()->user()->avatar) : asset('images/default-avatar.png') }}"
+                                    <img src="{{ auth()->user()?->avatar ? asset('storage/' . auth()->user()->avatar) : asset('deafault-avatar.jpg') }}"
                                         alt="Аватар пользователя" class="rounded-full h-11 w-11 object-cover">
                                 </a>
                                 <a href="logout" class="text-m text-gray-700 hover:text-gray-900">
                                     Выйти
                                 </a>
-                                @elseguest
+                            @elseguest
                                 <a href="login" class="btn-primary">
                                     Войти
                                 </a>

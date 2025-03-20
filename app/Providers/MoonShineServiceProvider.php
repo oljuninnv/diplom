@@ -29,10 +29,6 @@ class MoonShineServiceProvider extends ServiceProvider
     {
         $config->authEnable();
 
-        $config->addMiddleware([
-            \App\Http\Middleware\CheckAdminRole::class,
-        ]);
-
         $core
             ->resources([
                 MoonShineUserResource::class,

@@ -58,7 +58,7 @@ class MoonShineUserResource extends ModelResource
 
     protected function modifyQueryBuilder(Builder $builder): Builder
     {
-        $roleIds = Role::whereIn('name', [UserRoleEnum::ADMIN, UserRoleEnum::TUTOR_WORKER])
+        $roleIds = Role::where('name', UserRoleEnum::ADMIN)
                        ->pluck('id');
 
         return $builder->whereIn('role_id', $roleIds);
@@ -188,13 +188,6 @@ class MoonShineUserResource extends ModelResource
     protected function filters(): iterable
     {
         return [
-            BelongsTo::make(
-                __('Роль'),
-                'Role',
-                formatted: static fn (Role $model) => $model->name,
-                resource: MoonShineUserRoleResource::class,
-            )->valuesQuery(static fn (Builder $q) => $q->select(['id', 'name'])->whereIn('name', [UserRoleEnum::ADMIN, UserRoleEnum::TUTOR_WORKER])),
-
             Email::make('E-mail', 'email'),
         ];
     }
