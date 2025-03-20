@@ -25,6 +25,10 @@ use MoonShine\UI\Components\Tabs;
 use MoonShine\UI\Components\Tabs\Tab;
 use MoonShine\UI\Fields\Password;
 use MoonShine\UI\Fields\PasswordRepeat;
+use MoonShine\Support\ListOf;
+use MoonShine\UI\Components\ActionButton;
+use App\Actions\GetId;
+use MoonShine\Laravel\MoonShineRequest;
 
 #[Icon('users')]
 /**
@@ -47,6 +51,24 @@ class UserResource extends ModelResource
     protected bool $editInModal = true;
 
     protected bool $cursorPaginate = true;
+
+    public function indexButtons(): ListOf
+    {
+
+        return parent::indexButtons()->add(
+            ActionButton::make('GetId')
+                ->method('GetId')
+        );
+
+    }
+
+    public function GetId(MoonShineRequest $request)
+    {
+        // \Log::info($request->get('resourceItem'));
+        $id = (int)$request->get('resourceItem');
+        $reportAction = new GetId();
+        $reportAction->execute($id);
+    }
 
     public function indexFields(): iterable
     {

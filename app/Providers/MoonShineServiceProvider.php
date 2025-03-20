@@ -11,12 +11,12 @@ use MoonShine\Laravel\DependencyInjection\MoonShine;
 use MoonShine\Laravel\DependencyInjection\MoonShineConfigurator;
 use App\MoonShine\Resources\MoonShineUserResource;
 use App\MoonShine\Resources\MoonShineUserRoleResource;
-use App\MoonShine\Resources\WorkersResource;
 use App\MoonShine\Resources\DepartmentResource;
 use App\MoonShine\Resources\PostResource;
 use App\MoonShine\Resources\WorkerResource;
 use App\MoonShine\Resources\TelegramUserResource;
 use App\MoonShine\Resources\UserResource;
+use App\MoonShine\Resources\MessageResource;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -38,6 +38,7 @@ class MoonShineServiceProvider extends ServiceProvider
                 WorkerResource::class,
                 TelegramUserResource::class,
                 UserResource::class,
+                MessageResource::class,
             ])
             ->pages([
                 ...$config->getPages(),

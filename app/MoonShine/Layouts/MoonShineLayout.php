@@ -33,12 +33,12 @@ use MoonShine\UI\Components\{Breadcrumbs,
     Layout\TopBar,
     Layout\Wrapper,
     When};
-use App\MoonShine\Resources\WorkersResource;
 use App\MoonShine\Resources\DepartmentResource;
 use App\MoonShine\Resources\PostResource;
 use App\MoonShine\Resources\WorkerResource;
 use App\MoonShine\Resources\TelegramUserResource;
 use App\MoonShine\Resources\UserResource;
+use App\MoonShine\Resources\MessageResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -71,9 +71,9 @@ final class MoonShineLayout extends AppLayout
                 MenuItem::make('Отчёты', MoonShineUserResource::class),
                 MenuItem::make('Вакансии', MoonShineUserResource::class),
             ],'document'),
-            MenuGroup::make('Коммуникация',[
-                MenuItem::make('Личные сообщения', MoonShineUserResource::class),
-            ],'envelope-open'),
+            // MenuGroup::make('Коммуникация',[
+            //     MenuItem::make('Личные сообщения', MessageResource::class),
+            // ],'envelope-open'),
             MenuItem::make('Вернуться на сайт', static fn () => route('home'),'home'),
         ];
     }

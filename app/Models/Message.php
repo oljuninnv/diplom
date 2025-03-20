@@ -1,27 +1,26 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Message extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'sender_id',
-        'receiver_id',
-        'message',
-        'document',
+		'sender_id',
+		'receiver_id',
+		'message',
+		'document',
     ];
 
-    public function sender()
+    public function sender_user_id(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
 
-    public function receiver()
+    public function receiver_id_user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'receiver_id');
     }
