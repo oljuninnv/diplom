@@ -22,3 +22,7 @@ Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('login', [AuthController::class, 'login'])->name('auth');
 
 Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/career', function () {
+    return view('career');
+})->name('home');

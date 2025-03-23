@@ -15,8 +15,11 @@ class Post extends Model
     'department_id',
   ];
 
+
+
   public function department(): BelongsTo
   {
+    // dd(1);
     return $this->belongsTo(Department::class, 'department_id');
   }
 }
