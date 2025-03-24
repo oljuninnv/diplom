@@ -25,4 +25,4 @@ Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/career', function () {
     return view('career');
-})->name('home');
+})->name('career');

@@ -65,7 +65,9 @@ return [
         'guard' => 'moonshine',
         'model' => User::class,
         'middleware' => Authenticate::class,
-        'pipelines' => [],
+        'pipelines' => [
+            \App\MoonShine\AuthPipelines\CheckAdmin::class
+        ],
     ],
 
     // Authentication and profile

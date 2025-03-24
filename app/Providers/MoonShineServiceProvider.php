@@ -29,6 +29,10 @@ class MoonShineServiceProvider extends ServiceProvider
     {
         $config->authEnable();
 
+        $config->authPipelines([
+            \App\MoonShine\AuthPipelines\CheckAdmin::class,
+        ]);
+
         $core
             ->resources([
                 MoonShineUserResource::class,
