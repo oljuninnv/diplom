@@ -33,8 +33,6 @@ class WorkerResource extends ModelResource
 
     protected bool $columnSelection = true;
 
-    protected bool $createInModal = true;
-
     protected bool $detailInModal = true;
 
     protected bool $editInModal = true;

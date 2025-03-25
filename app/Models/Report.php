@@ -1,27 +1,21 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Report extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'tutor_id',
-        'user_id',
-        'report',
+		'tutor_id',
+		'user_id',
+		'report',
     ];
 
-    public function tutor()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Worker::class, 'tutor_id');
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

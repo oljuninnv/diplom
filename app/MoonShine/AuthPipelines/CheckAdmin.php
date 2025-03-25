@@ -3,9 +3,7 @@
 namespace App\MoonShine\AuthPipelines;
  
 use Closure;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use App\Enums\UserRoleEnum;
 use Illuminate\Support\Facades\Auth;
  

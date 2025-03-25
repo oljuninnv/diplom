@@ -26,3 +26,7 @@ Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/career', function () {
     return view('career');
 })->name('career');
+
+Route::get('/profile', function () {
+    return view('users.user-information');
+})->name('profile');

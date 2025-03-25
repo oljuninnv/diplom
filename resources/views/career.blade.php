@@ -11,10 +11,11 @@
         <!-- Название компании по центру -->
         <h1 class="text-4xl font-bold text-center mb-8">ATWINTA</h1>
 
-        <!-- О нас -->
         <section class="mb-12">
-            <h2 class="text-3xl font-bold mb-4">О нас</h2>
-            <p class="text-lg">Мы молодая и перспективная IT-компания, специализирующаяся на разработке инновационных решений для бизнеса.</p>
+            <h2 class="text-3xl font-bold mb-4">Работа для лучших в Digital!</h2>
+            <p class="text-lg mb-2">Digital-агентство «Атвинта» с 2011 года объединяет сильных специалистов, чтобы делать сложные веб-проекты.</p>
+            <p class="text-lg mb-2">Наши сотрудники увлечены своей профессией и умеют работать в команде. Поэтому у нас получаются проекты, которые собирают награды и признание профессионального сообщества, а Агентство входит в ТОП-50 digital-агентств России по версии Рейтингу Рунета и Рейтинга Tagline.</p>
+            <p class="text-lg mb-2">Мы развиваемся, проектов становится все больше, команда постоянно растет. Присоединяйся и ты!</p>
         </section>
 
         <!-- Наши преимущества -->
@@ -32,6 +33,10 @@
                 <div class="bg-gray-100 p-6 rounded-lg">
                     <h3 class="text-xl font-semibold mb-2">Профессиональный рост</h3>
                     <p>Возможности для обучения и карьерного роста внутри компании.</p>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">Развитие в профессии</h3>
+                    <p>Агентство частично или полностью оплатит необходимое обучение и повышение квалификации.</p>
                 </div>
             </div>
         </section>
@@ -68,15 +73,18 @@
         </section>
 
         <!-- Форма оставления заявки -->
-        <section>
-            <div>
-                <h2 class="text-3xl font-bold mb-4text-center">Оставьте заявку</h2>
-            <div class="flex">
-                <p class="text-lg">Или свяжитесь с нами по электронной почте:</p>
-                <a href="mailto:info@atwinta.ru" class="text-blue-500 hover:text-blue-700 text-lg font-semibold">info@atwinta.ru</a>
-            </div>  
-            </div>
-                  
+        <section class="py-8">
+            <div class="text-center mx-auto max-w-3xl px-4">
+                <h2 class="text-3xl font-bold mb-6">Хотите с нами работать? Заполните форму</h2>
+                
+                <div class="flex justify-center items-center gap-2 mb-4">
+                    <p class="text-lg text-gray-600">Или свяжитесь с нами по электронной почте:</p>
+                    <a href="mailto:info@atwinta.ru" class="text-blue-500 hover:text-blue-700 text-lg font-semibold">
+                        info@atwinta.ru
+                    </a>
+                </div>             
+                <p class="text-lg text-gray-600">Мы ответим в течение 2-х часов в рабочее время</p>
+            </div>       
         </section>
             <form action="#" method="POST" enctype="multipart/form-data" class="bg-gray-100 p-6 rounded-lg">
                 @csrf
@@ -94,13 +102,16 @@
                 </div>
                 <!-- Поле для выбора должности -->
                 <div class="mb-4">
-                    <label for="position" class="block text-lg font-semibold mb-2">Должность</label>
+                    <label for="position" class="block text-lg font-semibold mb-2">Тип работ</label>
                     <select id="position" name="position" required class="w-full px-4 py-2 border rounded-lg">
-                        <option value="" disabled selected>Выберите должность</option>
-                        <option value="Backend-разработчик">Backend-разработчик</option>
-                        <option value="HR-менеджер">HR-менеджер</option>
-                        <option value="Frontend-разработчик">Frontend-разработчик</option>
-                        <option value="QA-инженер">QA-инженер</option>
+                        <option value="" disabled selected>Тип работ</option>
+                        <option value="Разработка сайтов">Разработка сайтов</option>
+                        <option value="Мобильное приложение">Мобильное приложение</option>
+                        <option value="Техническая поддержка">Техническая поддержка</option>
+                        <option value="SEO-продвижение">SEO-продвижение</option>
+                        <option value="Таргетированная реклама">Таргетированная реклама</option>
+                        <option value="Аутстаф">Аутстаф</option>
+                        <option value="Контекстная реклама">Контекстная реклама</option>
                     </select>
                 </div>
                 <div class="mb-4">

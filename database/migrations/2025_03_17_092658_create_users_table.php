@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->foreignId('telegram_user_id')->nullable()->constrained('telegram_users')->onDelete('cascade');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();

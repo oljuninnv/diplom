@@ -1,22 +1,21 @@
 <?php
 
-namespace App\Models;
+declare(strict_types=1);
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Vacancy extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'post_id',
-        'description',
-        'salary',
+		'post_id',
+		'description',
+		'salary',
     ];
 
-    public function post()
+    public function post(): BelongsTo
     {
-        return $this->belongsTo(Post::class);
+        return $this->belongsTo(Post::class, 'post_id');
     }
 }

@@ -120,7 +120,7 @@ class MoonShineUserResource extends ModelResource
                             resource: MoonShineUserRoleResource::class,
                         )
                             ->creatable()
-                            ->valuesQuery(static fn (Builder $q) => $q->select(['id', 'name'])->whereIn('name', [UserRoleEnum::ADMIN, UserRoleEnum::TUTOR_WORKER])),
+                            ->valuesQuery(static fn (Builder $q) => $q->select(['id', 'name'])->whereIn('name', [UserRoleEnum::ADMIN])),
                         
                         Flex::make([
                             Text::make(__('moonshine::ui.resource.name'), 'name')

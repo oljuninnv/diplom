@@ -15,5 +15,7 @@ class Application extends Model
         'phone',
         'resume',
         'status',
+        'department_id',
+        'vacancy_id'
     ];
 }

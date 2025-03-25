@@ -10,11 +10,20 @@ return new class extends Migration
     {
         Schema::create('applications', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email');
-            $table->string('phone');
+
+            $table->foreignId('user_id')
+              ->constrained('users')
+              ->onDelete('cascade');
+
             $table->string('resume');
+
             $table->enum('status', ['ожидание', 'одобрено', 'отклонено'])->default('ожидание');
+              
+            $table->foreignId('department_id')
+                ->nullable()
+                ->constrained('departments')
+                ->onDelete('cascade');
+
             $table->timestamps();
         });
     }

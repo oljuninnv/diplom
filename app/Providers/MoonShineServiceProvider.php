@@ -17,6 +17,9 @@ use App\MoonShine\Resources\WorkerResource;
 use App\MoonShine\Resources\TelegramUserResource;
 use App\MoonShine\Resources\UserResource;
 use App\MoonShine\Resources\MessageResource;
+use App\MoonShine\Resources\VacancyResource;
+use App\MoonShine\Resources\ReportResource;
+use App\MoonShine\Resources\TaskResource;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -43,6 +46,9 @@ class MoonShineServiceProvider extends ServiceProvider
                 TelegramUserResource::class,
                 UserResource::class,
                 MessageResource::class,
+                VacancyResource::class,
+                ReportResource::class,
+                TaskResource::class,
             ])
             ->pages([
                 ...$config->getPages(),
