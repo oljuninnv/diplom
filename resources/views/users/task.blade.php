@@ -15,8 +15,16 @@
                     <div class="mb-4 md:mb-0">
                         <h2 class="text-xl font-semibold text-gray-800">Название задания</h2>
                         <p class="mt-1 text-gray-600">Описание задания и требования к выполнению</p>
+                        
+                        <!-- Добавленная строка с датой окончания -->
+                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            Срок выполнения: <span class="font-medium ml-1">26.04.2025</span>
+                        </div>
                     </div>
-                    <div class="mt-4 md:mt-0 md:ml-4">  <!-- Добавлен этот div с отступами -->
+                    <div class="mt-4 md:mt-0 md:ml-4">
                         <a href="/path/to/task/file.pdf" download
                             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
@@ -63,44 +71,43 @@
             </div>
         </div>
     </div>
-</main>
 
-<script>
-    // Валидация GitHub ссылки
-    const githubRepoInput = document.getElementById('github-repo');
-    const githubError = document.getElementById('github-error');
-    const githubForm = document.getElementById('github-form');
+    <script>
+        // Валидация GitHub ссылки
+        const githubRepoInput = document.getElementById('github-repo');
+        const githubError = document.getElementById('github-error');
+        const githubForm = document.getElementById('github-form');
 
-    function validateGitHubRepo() {
-        const pattern = /^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/;
-        const isValid = pattern.test(githubRepoInput.value);
+        function validateGitHubRepo() {
+            const pattern = /^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$/;
+            const isValid = pattern.test(githubRepoInput.value);
 
-        if (!isValid && githubRepoInput.value) {
-            githubError.classList.remove('hidden');
-            githubRepoInput.classList.add('border-red-500');
-            return false;
-        } else {
-            githubError.classList.add('hidden');
-            githubRepoInput.classList.remove('border-red-500');
-            return true;
+            if (!isValid && githubRepoInput.value) {
+                githubError.classList.remove('hidden');
+                githubRepoInput.classList.add('border-red-500');
+                return false;
+            } else {
+                githubError.classList.add('hidden');
+                githubRepoInput.classList.remove('border-red-500');
+                return true;
+            }
         }
-    }
 
-    githubRepoInput.addEventListener('input', validateGitHubRepo);
-    githubRepoInput.addEventListener('blur', validateGitHubRepo);
+        githubRepoInput.addEventListener('input', validateGitHubRepo);
+        githubRepoInput.addEventListener('blur', validateGitHubRepo);
 
-    githubForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (validateGitHubRepo()) {
-            // Здесь будет код для отправки формы
-            alert('Форма временно неактивна!');
-        }
-    });
+        githubForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateGitHubRepo()) {
+                // Здесь будет код для отправки формы
+                alert('Форма временно неактивна!');
+            }
+        });
 
-    // Активация формы (убрать класс disabled-form и атрибут disabled у кнопки)
-    // function enableForm() {
-    //     document.getElementById('submit-form').classList.remove('disabled-form');
-    //     document.querySelector('#github-form button[type="submit"]').removeAttribute('disabled');
-    // }
-</script>
+        // Активация формы (убрать класс disabled-form и атрибут disabled у кнопки)
+        // function enableForm() {
+        //     document.getElementById('submit-form').classList.remove('disabled-form');
+        //     document.querySelector('#github-form button[type="submit"]').removeAttribute('disabled');
+        // }
+    </script>
 @endsection
