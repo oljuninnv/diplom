@@ -34,3 +34,7 @@ Route::get('/profile', function () {
 Route::get('/task', function () {
     return view('users.task');
 })->name('task');
+
+Route::get('/chat', function () {
+    return view('users.chat');
+})->name('chat');
