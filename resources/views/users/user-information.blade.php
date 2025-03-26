@@ -107,6 +107,55 @@
                                 <p class="mt-1 text-xs text-gray-500">Для изменения свяжитесь с поддержкой</p>
                             </div>
 
+                            <!-- Информация о работнике -->
+                            @if (auth()->user()->role->name !== 'User')                               
+                             <div class="mb-6 border-t border-gray-200 pt-6">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Служебная информация</h3>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <!-- Отдел -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Отдел</label>
+                                            <div class="relative">
+                                                <input type="text" value="{{ auth()->user()->worker->department->name ?? 'Не указано' }}"
+                                                    class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
+                                                    disabled readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Должность -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Должность</label>
+                                            <div class="relative">
+                                                <input type="text" value="{{ auth()->user()->worker->post->name ?? 'Не указано' }}"
+                                                    class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
+                                                    disabled readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Уровень подготовки -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Уровень подготовки</label>
+                                            <div class="relative">
+                                                <input type="text" value="{{ auth()->user()?->worker->level_of_experience }}"
+                                                    class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
+                                                    disabled readonly>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Дата приема -->
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Дата приема на должность</label>
+                                            <div class="relative">
+                                                <input type="text" value="{{ auth()->user()->worker->hire_date}}"
+                                                    class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
+                                                    disabled readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="flex items-center justify-end pt-6 border-t border-gray-200">
                                 <button type="submit"
                                     class="w-full px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">

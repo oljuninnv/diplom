@@ -43,6 +43,11 @@ class User extends Authenticatable
         return $this->belongsTo(TelegramUser::class, 'telegram_user_id');
     }
 
+    public function worker()
+    {
+        return $this->hasOne(Worker::class);
+    }
+
     public function getAuthPasswordName(): string
     {
         return 'password';
