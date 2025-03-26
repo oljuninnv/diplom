@@ -20,24 +20,28 @@ class UsersTableSeeder extends Seeder
                 'name' => 'User',
                 'email' => 'user1@example.com',
                 'password' => Hash::make('password'),
+                'phone' => '+79245678324',
                 'role_id' => $roles->where('name', UserRoleEnum::USER->value)->first()->id,
             ],
             [
                 'name' => 'Worker',
                 'email' => 'worker1@example.com',
                 'password' => Hash::make('password'),
+                'phone' => '+79254252534',
                 'role_id' => $roles->where('name', UserRoleEnum::WORKER->value)->first()->id,
             ],
             [
                 'name' => 'Tutor',
                 'email' => 'tutor1@example.com',
                 'password' => Hash::make('password'),
+                'phone' => '+79070740021',
                 'role_id' => $roles->where('name', UserRoleEnum::TUTOR_WORKER->value)->first()->id,
             ],
             [
                 'name' => 'Admin',
                 'email' => 'admin1@example.com',
                 'password' => Hash::make('password'),
+                'phone' => '+79050760021',
                 'role_id' => $roles->where('name', UserRoleEnum::ADMIN->value)->first()->id,
             ],
         ];

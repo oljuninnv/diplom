@@ -13,6 +13,10 @@ return new class extends Migration
             $table->foreignId('sender_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('receiver_id')->constrained('users')->onDelete('cascade');
             $table->text('message');
+            $table->foreignId('answer_message_id')
+                  ->nullable()
+                  ->constrained('messages')
+                  ->onDelete('set null');
             $table->string('document')->nullable();
             $table->timestamps();
         });
