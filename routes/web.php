@@ -30,3 +30,7 @@ Route::get('/career', function () {
 Route::get('/profile', function () {
     return view('users.user-information');
 })->name('profile');
+
+Route::get('/task', function () {
+    return view('users.task');
+})->name('task');
