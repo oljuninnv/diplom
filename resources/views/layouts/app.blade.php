@@ -15,25 +15,26 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
-                        <a href="#" class="flex-shrink-0 flex items-center">
+                        <a href="/" class="flex-shrink-0 flex items-center">
                             <h2>ATWINTA</h2>
                         </a>
                         <div class="hidden md:ml-6 md:flex md:space-x-8">
-                            <a href="#"
-                                class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <a href="/profile"
+                                class="{{ request()->is('profile') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Профиль
                             </a>
                             <a href="#"
-                                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                class="{{ request()->is('task*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Задание
                             </a>
                             <a href="#"
-                                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                class="{{ request()->is('chat*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Чат
                             </a>
-                            @if(auth()->user()?->role->name === "Admin")
-                                <a href="/admin" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                        Админ-панель
+                            @if (auth()->user()?->role->name === 'Admin')
+                                <a href="/admin"
+                                    class="{{ request()->is('admin*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                    Админ-панель
                                 </a>
                             @endif
                         </div>
@@ -49,7 +50,7 @@
                                 <a href="logout" class="text-m text-gray-700 hover:text-gray-900">
                                     Выйти
                                 </a>
-                            @elseguest
+                                @elseguest
                                 <a href="login" class="btn-primary">
                                     Войти
                                 </a>
@@ -73,41 +74,63 @@
 
             <div class="md:hidden hidden" id="mobile-menu">
                 <div class="pt-2 pb-3 space-y-1">
-                    <a href="#"
-                        class="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-                        Home
+                    <a href="/profile"
+                        class="{{ request()->is('profile') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700' }} block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                        Профиль
                     </a>
                     <a href="#"
-                        class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-                        About
+                        class="{{ request()->is('task') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700' }} block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                        Задание
                     </a>
                     <a href="#"
-                        class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-                        Services
+                        class="{{ request()->is('chat') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700' }} block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                        Чат
                     </a>
-                    <a href="#"
-                        class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
-                        Contact
-                    </a>
+                    @if (auth()->user()?->role->name === 'Admin')
+                        <a href="/admin"
+                            class="{{ request()->is('admin*') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700' }} block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                            Админ-панель
+                        </a>
+                    @endif
                 </div>
+                
                 <div class="pt-4 pb-3 border-t border-gray-200">
-                    <div class="flex items-center px-4">
-                        @auth
-                            <x-moonshine::layout.profile route="/profile" :log-out-route="route('logout')" :avatar="auth()->user()?->avatar
-                                ? asset('storage/' . auth()->user()->avatar)
-                                : asset('images/default-avatar.png')"
-                                :name-of-user="auth()->user()?->name ?? 'Гость'" />
-                            @elseguest
-                            <x-moonshine::link-button :href="route('login')" class="btn-primary">
+                    @auth
+                        <div class="flex items-center px-4">
+                            <!-- Аватар пользователя -->
+                            <div class="flex-shrink-0 mr-3">
+                                <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('images/default-avatar.png') }}" 
+                                     alt="Аватар" 
+                                     class="h-10 w-10 rounded-full object-cover">
+                            </div>
+                            <!-- Имя пользователя -->
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-700">
+                                    {{ auth()->user()->name ?? 'Гость' }}
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Кнопка выхода -->
+                        <div class="mt-3 px-4">
+                            <a href="{{ route('logout') }}" 
+                               class="w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                                Выйти
+                            </a>
+                        </div>
+                    @else
+                        <!-- Кнопка входа для гостей -->
+                        <div class="px-4">
+                            <a href="{{ route('login') }}" 
+                               class="w-full flex justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                                 Войти
-                            </x-moonshine::link-button>
-                        @endauth
-                    </div>
+                            </a>
+                        </div>
+                    @endauth
                 </div>
             </div>
         </nav>
     </header>
-    <main class="bg-white min-h-screen flex flex-col">
+    <main class="bg-white min-h-screen flex flex-col pt-16">
         @yield('content')
     </main>
 </body>
