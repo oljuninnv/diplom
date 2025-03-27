@@ -1,25 +1,27 @@
 @extends('layouts.app')
 
 @section('content')
-    <main class="pt-8 min-h-screen pb-4">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main class="pt-4 md:pt-8 min-h-screen pb-4">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <!-- Заголовок чата -->
-            <div class="mb-6">
-                <h1 class="text-2xl font-bold text-gray-900">Чаты</h1>
+            <div class="mb-4 md:mb-6">
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Чаты</h1>
             </div>
 
             <!-- Контейнер чата -->
-            <div class="bg-white shadow rounded-lg overflow-hidden flex">
-                <!-- Список собеседников -->
-                <div class="w-1/3 border-r border-gray-200 bg-gray-50 overflow-y-auto" style="height: calc(100vh - 200px);">
+            <div class="bg-white shadow rounded-lg overflow-hidden flex flex-col md:flex-row">
+                <!-- Список собеседников - скрыт на мобильных при открытом чате -->
+                <div id="user-list-container"
+                    class="w-full md:w-1/3 border-r border-gray-200 bg-gray-50 overflow-y-auto md:block"
+                    style="height: calc(100vh - 150px);">
                     <!-- Поиск -->
-                    <div class="p-4 border-b border-gray-200">
+                    <div class="p-3 md:p-4 border-b border-gray-200">
                         <div class="relative">
                             <input type="text" id="user-search" placeholder="Поиск..."
-                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 pl-10 border">
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 pl-10 border text-sm md:text-base">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                    fill="currentColor">
+                                <svg class="h-4 w-4 md:h-5 md:w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd"
                                         d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
                                         clip-rule="evenodd" />
@@ -31,77 +33,89 @@
                     <!-- Список собеседников -->
                     <div id="user-list">
                         <!-- HR-менеджер -->
-                        <div class="user-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative bg-indigo-50"
+                        <div class="user-item p-3 md:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative bg-indigo-50"
                             data-user-id="1" data-unread="2">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                            <div class="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden">
                                 <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="HR-менеджер"
                                     class="h-full w-full object-cover">
                             </div>
-                            <div class="ml-3 flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900">Елена Смирнова</p>
-                                <p class="text-xs text-gray-500 mt-1">HR-менеджер</p>
+                            <div class="ml-2 md:ml-3 flex-1 min-w-0">
+                                <p class="text-xs md:text-sm font-medium text-gray-900">Елена Смирнова</p>
+                                <p class="text-2xs md:text-xs text-gray-500 mt-1">HR-менеджер</p>
                                 <div class="flex justify-between items-center mt-1">
-                                    <p class="text-xs text-gray-500 truncate">HR: Проверим ваше тестовое задание...</p>
-                                    <span class="text-xs text-gray-400">12:45</span>
+                                    <p class="text-2xs md:text-xs text-gray-500 truncate">HR: Проверим ваше тестовое
+                                        задание...</p>
+                                    <span class="text-2xs md:text-xs text-gray-400">12:45</span>
                                 </div>
                             </div>
                             <!-- Индикатор непрочитанных сообщений -->
                             <div
-                                class="absolute right-4 top-4 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                class="absolute right-2 md:right-4 top-3 md:top-4 bg-indigo-600 text-white text-2xs md:text-xs rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center">
                                 2
                             </div>
                         </div>
 
                         <!-- Тьютор -->
-                        <div class="user-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center"
+                        <div class="user-item p-3 md:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center"
                             data-user-id="2" data-unread="0">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                            <div class="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden">
                                 <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Тьютор"
                                     class="h-full w-full object-cover">
                             </div>
-                            <div class="ml-3 flex-1 min-w-0">
-                                <p class="text-sm font-medium text-gray-900">Алексей Иванов</p>
-                                <p class="text-xs text-gray-500 mt-1">Тьютор</p>
+                            <div class="ml-2 md:ml-3 flex-1 min-w-0">
+                                <p class="text-xs md:text-sm font-medium text-gray-900">Алексей Иванов</p>
+                                <p class="text-2xs md:text-xs text-gray-500 mt-1">Тьютор</p>
                                 <div class="flex justify-between items-center mt-1">
-                                    <p class="text-xs text-gray-500 truncate">Вы: Спасибо за пояснения!</p>
-                                    <span class="text-xs text-gray-400">Вчера</span>
+                                    <p class="text-2xs md:text-xs text-gray-500 truncate">Вы: Спасибо за пояснения!</p>
+                                    <span class="text-2xs md:text-xs text-gray-400">Вчера</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Правая часть с чатом -->
-                <div class="w-2/3 flex flex-col">
+                <!-- Правая часть с чатом - скрыта на мобильных по умолчанию -->
+                <div id="chat-container" class="hidden md:flex md:w-2/3 flex-col">
+                    <!-- Кнопка "Назад" для мобильных -->
+                    <div class="md:hidden p-2 border-b border-gray-200 bg-gray-50">
+                        <button id="back-to-list" class="p-1 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                    </div>
+
                     <!-- Информация о выбранном пользователе -->
-                    <div class="border-b border-gray-200 p-4 bg-gray-50 flex items-center" id="selected-user-info">
+                    <div class="border-b border-gray-200 p-3 md:p-4 bg-gray-50 flex items-center" id="selected-user-info">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                            <div class="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden">
                                 <img id="selected-user-avatar" src="https://randomuser.me/api/portraits/women/44.jpg"
                                     alt="Аватар" class="h-full w-full object-cover">
                             </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900" id="selected-user-name">Елена Смирнова</p>
-                                <p class="text-xs text-gray-500" id="selected-user-role">HR-менеджер</p>
+                            <div class="ml-2 md:ml-3">
+                                <p class="text-xs md:text-sm font-medium text-gray-900" id="selected-user-name">Елена
+                                    Смирнова</p>
+                                <p class="text-2xs md:text-xs text-gray-500" id="selected-user-role">HR-менеджер</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- История сообщений -->
-                    <div class="chat-container overflow-y-auto p-4 space-y-4 flex-grow" id="chat-messages">
+                    <div class="chat-container overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 flex-grow"
+                        id="chat-messages">
                         <!-- Сообщения будут загружаться динамически -->
                     </div>
 
                     <!-- Форма отправки сообщения -->
-                    <div class="border-t border-gray-200 p-4 bg-gray-50">
+                    <div class="border-t border-gray-200 p-3 md:p-4 bg-gray-50">
                         <form id="chat-form" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" id="current-user-id" name="user_id" value="1">
-                            <div class="flex items-center space-x-3">
+                            <div class="flex items-center space-x-2 md:space-x-3">
                                 <!-- Поле ввода сообщения -->
                                 <div class="flex-1">
                                     <input type="text" id="message" name="message"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border text-sm md:text-base"
                                         placeholder="Введите сообщение..." required>
                                 </div>
 
@@ -109,21 +123,21 @@
                                 <div class="relative">
                                     <input type="file" id="attachment" name="attachment" class="hidden">
                                     <button type="button" id="attach-btn"
-                                        class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
+                                        class="p-1 md:p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                         </svg>
                                     </button>
                                     <span id="file-name"
-                                        class="absolute top-full left-0 mt-1 text-xs text-gray-500 whitespace-nowrap"></span>
+                                        class="absolute top-full left-0 mt-1 text-2xs md:text-xs text-gray-500 whitespace-nowrap"></span>
                                 </div>
 
                                 <!-- Кнопка отправки -->
                                 <button type="submit"
-                                    class="p-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                    class="p-1 md:p-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -134,15 +148,16 @@
                             <!-- Превью ответа -->
                             <input type="hidden" id="reply-to" name="reply_to" value="">
                             <div id="reply-preview"
-                                class="hidden mt-3 bg-gray-100 p-3 rounded-md text-sm text-gray-700 border-l-4 border-indigo-500">
+                                class="hidden mt-2 md:mt-3 bg-gray-100 p-2 md:p-3 rounded-md text-xs md:text-sm text-gray-700 border-l-4 border-indigo-500">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <p class="font-medium text-xs text-gray-500 mb-1">Ответ на сообщение:</p>
-                                        <p id="reply-content" class="text-sm"></p>
+                                        <p class="font-medium text-2xs md:text-xs text-gray-500 mb-1">Ответ на сообщение:
+                                        </p>
+                                        <p id="reply-content" class="text-xs md:text-sm"></p>
                                     </div>
                                     <button type="button" id="cancel-reply" class="text-gray-400 hover:text-gray-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M6 18L18 6M6 6l12 12" />
                                         </svg>
@@ -174,6 +189,10 @@
             const selectedUserRole = document.getElementById('selected-user-role');
             const selectedUserAvatar = document.getElementById('selected-user-avatar');
             const userSearch = document.getElementById('user-search');
+            const backToListBtn = document.getElementById('back-to-list');
+            const userListContainer = document.getElementById('user-list-container');
+            const chatContainer = document.getElementById('chat-container');
+            const isMobile = window.innerWidth < 768;
 
             // Данные пользователей
             const users = {
@@ -307,8 +326,9 @@
 
                 const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
                 if (userItem) {
-                    const lastMessageEl = userItem.querySelectorAll('.text-xs.text-gray-500')[1];
-                    const lastTimeEl = userItem.querySelector('.text-xs.text-gray-400');
+                    const lastMessageEl = userItem.querySelectorAll(
+                        '.text-xs.text-gray-500, .text-2xs.text-gray-500')[1];
+                    const lastTimeEl = userItem.querySelector('.text-xs.text-gray-400, .text-2xs.text-gray-400');
 
                     if (lastMessageEl) {
                         const prefix = sender === 'candidate' ? 'Вы: ' : `${user.role.split(' ')[0]}: `;
@@ -357,6 +377,36 @@
                         item.classList.remove('bg-indigo-50');
                     }
                 });
+
+                // На мобильных устройствах переключаем вид на чат
+                if (window.innerWidth < 768) {
+                    userListContainer.classList.add('hidden');
+                    chatContainer.classList.remove('hidden');
+                }
+            }
+
+            // Обработчик выбора пользователя
+            userList.addEventListener('click', function(e) {
+                const userItem = e.target.closest('.user-item');
+                if (userItem) {
+                    const userId = userItem.dataset.userId;
+                    loadChatHistory(userId);
+                }
+            });
+
+            // Обработчик кнопки "Назад" на мобильных
+            backToListBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                userListContainer.classList.remove('hidden');
+                chatContainer.classList.add('hidden');
+            });
+
+            // Инициализация - на мобильных показываем список, на десктопах - первый чат
+            if (window.innerWidth >= 768) {
+                loadChatHistory(1);
+            } else {
+                userListContainer.classList.remove('hidden');
+                chatContainer.classList.add('hidden');
             }
 
             // Добавление сообщения в чат
@@ -369,9 +419,9 @@
                 let fileElement = '';
                 if (msg.file) {
                     fileElement = `
-                    <div class="mt-2">
-                        <a href="${msg.fileUrl}" download class="inline-flex items-center text-sm ${isCandidate ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500'}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="mt-1 md:mt-2">
+                        <a href="${msg.fileUrl}" download class="inline-flex items-center text-xs md:text-sm ${isCandidate ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500'}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             ${msg.file}
@@ -383,7 +433,7 @@
                 let replyElement = '';
                 if (msg.replyTo !== null && msg.originalMessage) {
                     replyElement = `
-                    <div class="reply-container bg-${isCandidate ? 'indigo-700' : 'gray-200'} text-${isCandidate ? 'white' : 'gray-800'} text-xs p-2 rounded mb-2 border-l-4 border-${isCandidate ? 'indigo-300' : 'gray-500'} cursor-pointer" 
+                    <div class="reply-container bg-${isCandidate ? 'indigo-700' : 'gray-200'} text-${isCandidate ? 'white' : 'gray-800'} text-2xs md:text-xs p-1 md:p-2 rounded mb-1 md:mb-2 border-l-4 border-${isCandidate ? 'indigo-300' : 'gray-500'} cursor-pointer" 
                          onclick="highlightAndScrollToMessage(${msg.replyTo})">
                         <p class="font-medium">${msg.sender === 'candidate' ? 'Вы' : users[currentUserIdInput.value].name}:</p>
                         <p>${msg.originalMessage}</p>
@@ -392,14 +442,14 @@
                 }
 
                 const messageElement = `
-                <div class="flex ${alignClass} mb-3" data-id="${msg.id}">
-                    <div class="message-bubble ${messageClass} p-3 max-w-xs md:max-w-md lg:max-w-lg">
+                <div class="flex ${alignClass} mb-2 md:mb-3" data-id="${msg.id}">
+                    <div class="message-bubble ${messageClass} p-2 md:p-3 max-w-xs md:max-w-md lg:max-w-lg">
                         ${replyElement}
-                        <p class="text-sm">${msg.text}</p>
+                        <p class="text-xs md:text-sm">${msg.text}</p>
                         ${fileElement}
-                        <div class="flex justify-between items-center mt-2">
-                            <p class="text-xs ${isCandidate ? 'text-gray-300' : 'text-gray-500'}">${msg.time}</p>
-                            <button class="reply-btn text-xs ${isCandidate ? 'text-gray-300' : 'text-indigo-600'} hover:underline" data-id="${msg.id}" data-text="${msg.text}">Ответить</button>
+                        <div class="flex justify-between items-center mt-1 md:mt-2">
+                            <p class="text-2xs md:text-xs ${isCandidate ? 'text-gray-300' : 'text-gray-500'}">${msg.time}</p>
+                            <button class="reply-btn text-2xs md:text-xs ${isCandidate ? 'text-gray-300' : 'text-indigo-600'} hover:underline" data-id="${msg.id}" data-text="${msg.text}">Ответить</button>
                         </div>
                     </div>
                 </div>
@@ -422,11 +472,14 @@
             userSearch.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
                 document.querySelectorAll('.user-item').forEach(item => {
-                    const name = item.querySelector('.text-sm.font-medium').textContent
-                    .toLowerCase();
-                    const role = item.querySelector('.text-xs.text-gray-500').textContent
+                    const name = item.querySelector('.text-sm.font-medium, .text-xs.font-medium')
+                        .textContent
                         .toLowerCase();
-                    const lastMessage = item.querySelectorAll('.text-xs.text-gray-500')[1]
+                    const role = item.querySelector(
+                            '.text-xs.text-gray-500, .text-2xs.text-gray-500').textContent
+                        .toLowerCase();
+                    const lastMessage = item.querySelectorAll(
+                            '.text-xs.text-gray-500, .text-2xs.text-gray-500')[1]
                         .textContent.toLowerCase();
 
                     if (name.includes(searchTerm) || role.includes(searchTerm) || lastMessage
@@ -466,8 +519,8 @@
                 if (fileInput.files.length > 0) {
                     fileName.innerHTML = `
                     <span>${fileInput.files[0].name}</span>
-                    <button type="button" class="ml-2 text-red-500 hover:text-red-700" id="cancel-attachment">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button type="button" class="ml-1 md:ml-2 text-red-500 hover:text-red-700" id="cancel-attachment">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -484,60 +537,71 @@
 
             // Обработчик отправки формы
             chatForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const messageInput = document.getElementById('message');
-    const message = messageInput.value.trim();
-    const userId = currentUserIdInput.value;
+                e.preventDefault();
+                const messageInput = document.getElementById('message');
+                const message = messageInput.value.trim();
+                const userId = currentUserIdInput.value;
 
-    if (message || fileInput.files.length > 0) {
-        const now = new Date();
-        const timeString = formatTime(now);
-        const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
+                if (message || fileInput.files.length > 0) {
+                    const now = new Date();
+                    const timeString = formatTime(now);
+                    const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
 
-        // Получаем текст оригинального сообщения для ответа
-        let originalMessage = '';
-        if (replyToInput.value) {
-            const repliedMsg = chatMessages.querySelector(`[data-id="${replyToInput.value}"] .message-bubble`);
-            if (repliedMsg) {
-                originalMessage = repliedMsg.querySelector('p:not(.font-medium)').textContent;
+                    // Получаем текст оригинального сообщения для ответа
+                    let originalMessage = '';
+                    if (replyToInput.value) {
+                        const repliedMsg = chatMessages.querySelector(
+                            `[data-id="${replyToInput.value}"] .message-bubble`);
+                        if (repliedMsg) {
+                            originalMessage = repliedMsg.querySelector('p:not(.font-medium)').textContent;
+                        }
+                    }
+
+                    // Создаем новое сообщение
+                    const newMessage = {
+                        id: Date.now(),
+                        sender: 'candidate',
+                        text: message,
+                        time: timeString,
+                        file: fileName,
+                        fileUrl: '#',
+                        replyTo: replyToInput.value ? parseInt(replyToInput.value) : null,
+                        originalMessage: originalMessage
+                    };
+
+                    // Добавляем сообщение в историю
+                    if (!chatHistories[userId]) {
+                        chatHistories[userId] = [];
+                    }
+                    chatHistories[userId].push(newMessage);
+
+                    // Добавляем сообщение в чат
+                    addMessageToChat(newMessage);
+
+                    // Обновляем последнее сообщение в списке пользователей
+                    updateLastMessage(userId, message, 'candidate');
+
+                    // Очищаем форму
+                    messageInput.value = '';
+                    fileInput.value = '';
+                    fileName.textContent = ''; // Удаляем имя файла
+                    replyToInput.value = ''; // Удаляем ответ на сообщение
+                    replyPreview.classList.add('hidden'); // Скрываем превью ответа
+                }
+            });
+
+            // Обработчик кнопки "Назад" на мобильных
+            if (backToListBtn) {
+                backToListBtn.addEventListener('click', function() {
+                    userListContainer.classList.remove('hidden');
+                    chatContainer.classList.add('hidden');
+                });
             }
-        }
-
-        // Создаем новое сообщение
-        const newMessage = {
-            id: Date.now(),
-            sender: 'candidate',
-            text: message,
-            time: timeString,
-            file: fileName,
-            fileUrl: '#',
-            replyTo: replyToInput.value ? parseInt(replyToInput.value) : null,
-            originalMessage: originalMessage
-        };
-
-        // Добавляем сообщение в историю
-        if (!chatHistories[userId]) {
-            chatHistories[userId] = [];
-        }
-        chatHistories[userId].push(newMessage);
-
-        // Добавляем сообщение в чат
-        addMessageToChat(newMessage);
-
-        // Обновляем последнее сообщение в списке пользователей
-        updateLastMessage(userId, message, 'candidate');
-
-        // Очищаем форму
-        messageInput.value = '';
-        fileInput.value = '';
-        fileName.textContent = ''; // Удаляем имя файла
-        replyToInput.value = ''; // Удаляем ответ на сообщение
-        replyPreview.classList.add('hidden'); // Скрываем превью ответа
-    }
-});
 
             // Инициализация чата с первым пользователем
-            loadChatHistory(1);
+            if (!isMobile) {
+                loadChatHistory(1);
+            }
 
             // Делаем функцию доступной глобально для обработчиков в HTML
             window.highlightAndScrollToMessage = highlightAndScrollToMessage;
@@ -546,9 +610,15 @@
 
     <style>
         .chat-container {
-            height: calc(100vh - 320px);
+            height: calc(100vh - 250px);
             overflow-y: auto;
             padding-right: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .chat-container {
+                height: calc(100vh - 320px);
+            }
         }
 
         .message-bubble {
@@ -637,7 +707,7 @@
 
         /* Стили для скроллбара */
         .chat-container::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .chat-container::-webkit-scrollbar-track {
@@ -658,17 +728,23 @@
         #file-name {
             display: flex;
             align-items: center;
-            padding: 2px 6px;
+            padding: 2px 4px;
             background-color: #f3f4f6;
             border-radius: 4px;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         #file-name span {
-            max-width: 200px;
+            max-width: 120px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+        }
+
+        @media (min-width: 768px) {
+            #file-name span {
+                max-width: 200px;
+            }
         }
 
         #cancel-attachment {
@@ -682,6 +758,12 @@
 
         #cancel-attachment:hover {
             color: #dc2626;
+        }
+
+        /* Дополнительные классы для очень маленького текста */
+        .text-2xs {
+            font-size: 0.65rem;
+            line-height: 0.9rem;
         }
     </style>
 @endsection

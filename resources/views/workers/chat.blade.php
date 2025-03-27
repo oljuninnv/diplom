@@ -2,24 +2,26 @@
 
 @section('content')
 
-<main class="pt-8 min-h-screen pb-4">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<main class="pt-4 pb-8 min-h-screen">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <!-- Заголовок чата -->
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Чат</h1>
+        <div class="mb-4 sm:mb-6">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Чат</h1>
         </div>
 
         <!-- Контейнер чата -->
-        <div class="bg-white shadow rounded-lg overflow-hidden flex">
-            <!-- Список кандидатов -->
-            <div class="w-1/3 border-r border-gray-200 bg-gray-50 overflow-y-auto" style="height: calc(100vh - 200px);">
+        <div class="bg-white shadow rounded-lg overflow-hidden flex flex-col md:flex-row">
+            <!-- Список кандидатов (скрыт на мобильных при открытом чате) -->
+            <div class="w-full md:w-1/3 border-r border-gray-200 bg-gray-50 overflow-y-auto md:block" 
+                 id="candidates-sidebar" 
+                 style="height: calc(100vh - 180px); max-height: 600px;">
                 <!-- Поиск кандидатов -->
-                <div class="p-4 border-b border-gray-200">
+                <div class="p-3 sm:p-4 border-b border-gray-200">
                     <div class="relative">
                         <input type="text" id="candidate-search" placeholder="Поиск кандидатов..." 
-                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 pl-10 border">
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 pl-10 border text-sm sm:text-base">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                             </svg>
                         </div>
@@ -29,73 +31,73 @@
                 <!-- Список кандидатов -->
                 <div id="candidate-list">
                     <!-- Кандидат 1 -->
-                    <div class="candidate-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative" 
+                    <div class="candidate-item p-3 sm:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative" 
                          data-user-id="1" data-unread="2">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                        <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden">
                             <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Кандидат" class="h-full w-full object-cover">
                         </div>
-                        <div class="ml-3 flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900">Иван Петров</p>
-                            <p class="text-xs text-gray-500 mt-1">Frontend разработчик</p>
-                            <div class="flex justify-between items-center mt-1">
+                        <div class="ml-2 sm:ml-3 flex-1 min-w-0">
+                            <p class="text-xs sm:text-sm font-medium text-gray-900 truncate">Иван Петров</p>
+                            <p class="text-xs text-gray-500 mt-0.5 truncate">Frontend разработчик</p>
+                            <div class="flex justify-between items-center mt-0.5">
                                 <p class="text-xs text-gray-500 truncate">Иван: Да, я отправил тестовое задание. Есть вопросы?</p>
-                                <span class="text-xs text-gray-400">12:45</span>
+                                <span class="text-xs text-gray-400 ml-1">12:45</span>
                             </div>
                         </div>
                         <!-- Индикатор непрочитанных сообщений -->
-                        <div class="absolute right-4 top-4 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        <div class="absolute right-3 top-3 sm:right-4 sm:top-4 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                             2
                         </div>
                     </div>
 
                     <!-- Кандидат 2 -->
-                    <div class="candidate-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center" 
+                    <div class="candidate-item p-3 sm:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center" 
                          data-user-id="2" data-unread="0">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                        <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden">
                             <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Кандидат" class="h-full w-full object-cover">
                         </div>
-                        <div class="ml-3 flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900">Анна Сидорова</p>
-                            <p class="text-xs text-gray-500 mt-1">UX/UI дизайнер</p>
-                            <div class="flex justify-between items-center mt-1">
+                        <div class="ml-2 sm:ml-3 flex-1 min-w-0">
+                            <p class="text-xs sm:text-sm font-medium text-gray-900 truncate">Анна Сидорова</p>
+                            <p class="text-xs text-gray-500 mt-0.5 truncate">UX/UI дизайнер</p>
+                            <div class="flex justify-between items-center mt-0.5">
                                 <p class="text-xs text-gray-500 truncate">Анна: Спасибо за обратную связь...</p>
-                                <span class="text-xs text-gray-400">Вчера</span>
+                                <span class="text-xs text-gray-400 ml-1">Вчера</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Кандидат 3 -->
-                    <div class="candidate-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative" 
+                    <div class="candidate-item p-3 sm:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative" 
                          data-user-id="3" data-unread="1">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                        <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden">
                             <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Кандидат" class="h-full w-full object-cover">
                         </div>
-                        <div class="ml-3 flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900">Дмитрий Волков</p>
-                            <p class="text-xs text-gray-500 mt-1">Backend разработчик</p>
-                            <div class="flex justify-between items-center mt-1">
+                        <div class="ml-2 sm:ml-3 flex-1 min-w-0">
+                            <p class="text-xs sm:text-sm font-medium text-gray-900 truncate">Дмитрий Волков</p>
+                            <p class="text-xs text-gray-500 mt-0.5 truncate">Backend разработчик</p>
+                            <div class="flex justify-between items-center mt-0.5">
                                 <p class="text-xs text-gray-500 truncate">Дмитрий: Здравствуйте, у меня вопрос...</p>
-                                <span class="text-xs text-gray-400">Пн</span>
+                                <span class="text-xs text-gray-400 ml-1">Пн</span>
                             </div>
                         </div>
                         <!-- Индикатор непрочитанных сообщений -->
-                        <div class="absolute right-4 top-4 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        <div class="absolute right-3 top-3 sm:right-4 sm:top-4 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                             1
                         </div>
                     </div>
 
                     <!-- Кандидат 4 -->
-                    <div class="candidate-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center" 
+                    <div class="candidate-item p-3 sm:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center" 
                          data-user-id="4" data-unread="0">
-                        <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                        <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden">
                             <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Кандидат" class="h-full w-full object-cover">
                         </div>
-                        <div class="ml-3 flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900">Елена Ковалева</p>
-                            <p class="text-xs text-gray-500 mt-1">Product Manager</p>
-                            <div class="flex justify-between items-center mt-1">
+                        <div class="ml-2 sm:ml-3 flex-1 min-w-0">
+                            <p class="text-xs sm:text-sm font-medium text-gray-900 truncate">Елена Ковалева</p>
+                            <p class="text-xs text-gray-500 mt-0.5 truncate">Product Manager</p>
+                            <div class="flex justify-between items-center mt-0.5">
                                 <p class="text-xs text-gray-500 truncate">Вы: Отправьте исправленный вариант...</p>
-                                <span class="text-xs text-gray-400">2 нед.</span>
+                                <span class="text-xs text-gray-400 ml-1">2 нед.</span>
                             </div>
                         </div>
                     </div>
@@ -103,9 +105,27 @@
             </div>
 
             <!-- Правая часть с чатом -->
-            <div class="w-2/3 flex flex-col">
+            <div class="w-full md:w-2/3 flex flex-col" id="chat-area">
+                <!-- Кнопка "Назад" для мобильных -->
+                <div class="md:hidden p-2 border-b border-gray-200 bg-gray-50 flex items-center">
+                    <button id="back-to-candidates" class="p-1 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <div class="flex items-center ml-2">
+                        <div class="flex-shrink-0 h-8 w-8 rounded-full overflow-hidden">
+                            <img id="mobile-selected-candidate-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Аватар" class="h-full w-full object-cover">
+                        </div>
+                        <div class="ml-2">
+                            <p class="text-sm font-medium text-gray-900" id="mobile-selected-candidate-name">Иван Петров</p>
+                            <p class="text-xs text-gray-500" id="mobile-selected-candidate-vacancy">Frontend разработчик</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Информация о выбранном кандидате -->
-                <div class="border-b border-gray-200 p-4 bg-gray-50 flex items-center justify-between" id="selected-candidate-info">
+                <div class="hidden md:flex border-b border-gray-200 p-3 sm:p-4 bg-gray-50 items-center justify-between" id="selected-candidate-info">
                     <div class="flex items-center">
                         <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
                             <img id="selected-candidate-avatar" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Аватар" class="h-full w-full object-cover">
@@ -119,27 +139,44 @@
                 </div>
 
                 <!-- История сообщений -->
-                <div class="chat-container overflow-y-auto p-4 space-y-4 flex-grow" id="chat-messages">
+                <div class="chat-container overflow-y-auto p-3 sm:p-4 space-y-3 flex-grow" id="chat-messages">
                     <!-- Сообщения будут загружаться динамически -->
                 </div>
 
                 <!-- Форма отправки сообщения -->
-                <div class="border-t border-gray-200 p-4 bg-gray-50">
+                <div class="border-t border-gray-200 p-3 sm:p-4 bg-gray-50">
                     <form id="chat-form" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" id="current-user-id" name="user_id" value="1">
-                        <div class="flex items-center space-x-3">
+                        
+                        <!-- Превы ответа -->
+                        <div id="reply-preview" class="hidden mb-3 bg-gray-100 p-2 rounded-md text-sm text-gray-700 border-l-4 border-indigo-500">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium text-xs text-gray-500 mb-1">Ответ на сообщение:</p>
+                                    <p id="reply-content" class="text-xs sm:text-sm truncate"></p>
+                                </div>
+                                <button type="button" id="cancel-reply" class="text-gray-400 hover:text-gray-600">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-2 sm:space-x-3">
                             <!-- Поле ввода сообщения -->
                             <div class="flex-1">
                                 <input type="text" id="message" name="message" 
-                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border" 
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border text-sm sm:text-base" 
                                        placeholder="Введите сообщение..." required>
+                                <input type="hidden" id="reply-to" name="reply_to" value="">
                             </div>
                             
                             <!-- Кнопка прикрепления файла -->
                             <div class="relative">
                                 <input type="file" id="attachment" name="attachment" class="hidden">
-                                <button type="button" id="attach-btn" class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+                                <button type="button" id="attach-btn" class="p-1 sm:p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                     </svg>
@@ -149,27 +186,11 @@
                             
                             <!-- Кнопка отправки -->
                             <button type="submit" 
-                                    class="p-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    class="p-1 sm:p-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                 </svg>
                             </button>
-                        </div>
-                        
-                        <!-- Превы ответа -->
-                        <input type="hidden" id="reply-to" name="reply_to" value="">
-                        <div id="reply-preview" class="hidden mt-3 bg-gray-100 p-3 rounded-md text-sm text-gray-700 border-l-4 border-indigo-500">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-medium text-xs text-gray-500 mb-1">Ответ на сообщение:</p>
-                                    <p id="reply-content" class="text-sm"></p>
-                                </div>
-                                <button type="button" id="cancel-reply" class="text-gray-400 hover:text-gray-600">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
                         </div>
                     </form>
                 </div>
@@ -196,7 +217,22 @@
         const selectedCandidateVacancy = document.getElementById('selected-candidate-vacancy');
         const selectedCandidateStatus = document.getElementById('selected-candidate-status');
         const selectedCandidateAvatar = document.getElementById('selected-candidate-avatar');
+        const mobileSelectedCandidateName = document.getElementById('mobile-selected-candidate-name');
+        const mobileSelectedCandidateVacancy = document.getElementById('mobile-selected-candidate-vacancy');
+        const mobileSelectedCandidateAvatar = document.getElementById('mobile-selected-candidate-avatar');
         const candidateSearch = document.getElementById('candidate-search');
+        const backToCandidatesBtn = document.getElementById('back-to-candidates');
+        const candidatesSidebar = document.getElementById('candidates-sidebar');
+        const chatArea = document.getElementById('chat-area');
+        
+        // Определяем мобильное устройство
+        const isMobile = window.innerWidth < 768;
+        
+        // Инициализация состояния для мобильных
+        if (isMobile) {
+            candidatesSidebar.classList.remove('hidden');
+            chatArea.classList.add('hidden');
+        }
         
         // Данные кандидатов
         const candidates = {
@@ -338,6 +374,9 @@
             selectedCandidateVacancy.textContent = candidate.vacancy;
             selectedCandidateStatus.textContent = candidate.status;
             selectedCandidateAvatar.src = candidate.avatar;
+            mobileSelectedCandidateName.textContent = candidate.name;
+            mobileSelectedCandidateVacancy.textContent = candidate.vacancy;
+            mobileSelectedCandidateAvatar.src = candidate.avatar;
             
             // Загружаем сообщения
             if (chatHistories[userId]) {
@@ -364,6 +403,12 @@
                     item.classList.remove('bg-indigo-50');
                 }
             });
+            
+            // На мобильных переключаем на чат
+            if (isMobile) {
+                candidatesSidebar.classList.add('hidden');
+                chatArea.classList.remove('hidden');
+            }
         }
         
         // Добавление сообщения в чат
@@ -375,9 +420,9 @@
             let fileElement = '';
             if (msg.file) {
                 fileElement = `
-                    <div class="mt-2">
-                        <a href="${msg.fileUrl}" download class="inline-flex items-center text-sm ${isHr ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500'}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="mt-1">
+                        <a href="${msg.fileUrl}" download class="inline-flex items-center text-xs sm:text-sm ${isHr ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500'}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             ${msg.file}
@@ -389,21 +434,21 @@
             let replyElement = '';
             if (msg.replyTo !== null && msg.originalMessage) {
                 replyElement = `
-                    <div class="reply-container bg-${isHr ? 'indigo-700' : 'gray-200'} text-${isHr ? 'white' : 'gray-800'} text-xs p-2 rounded mb-2 border-l-4 border-${isHr ? 'indigo-300' : 'gray-500'} cursor-pointer" 
+                    <div class="reply-container bg-${isHr ? 'indigo-700' : 'gray-200'} text-${isHr ? 'white' : 'gray-800'} text-xs p-1 sm:p-2 rounded mb-1 border-l-4 border-${isHr ? 'indigo-300' : 'gray-500'} cursor-pointer" 
                          onclick="highlightAndScrollToMessage(${msg.replyTo})">
                         <p class="font-medium">${msg.sender === 'hr' ? 'Вы' : candidates[currentUserIdInput.value].name}:</p>
-                        <p>${msg.originalMessage}</p>
+                        <p class="truncate">${msg.originalMessage}</p>
                     </div>
                 `;
             }
             
             const messageElement = `
-                <div class="flex ${alignClass} mb-3" data-id="${msg.id}">
-                    <div class="message-bubble ${messageClass} p-3 max-w-xs md:max-w-md lg:max-w-lg">
+                <div class="flex ${alignClass} mb-2" data-id="${msg.id}">
+                    <div class="message-bubble ${messageClass} p-2 sm:p-3 max-w-[80%] sm:max-w-md">
                         ${replyElement}
-                        <p class="text-sm">${msg.text}</p>
+                        <p class="text-xs sm:text-sm">${msg.text}</p>
                         ${fileElement}
-                        <div class="flex justify-between items-center mt-2">
+                        <div class="flex justify-between items-center mt-1">
                             <p class="text-xs ${isHr ? 'text-gray-300' : 'text-gray-500'}">${msg.time}</p>
                             <button class="reply-btn text-xs ${isHr ? 'text-gray-300' : 'text-indigo-600'} hover:underline" data-id="${msg.id}" data-text="${msg.text}">Ответить</button>
                         </div>
@@ -424,12 +469,18 @@
             }
         });
         
+        // Обработчик кнопки "Назад" на мобильных
+        backToCandidatesBtn.addEventListener('click', function() {
+            candidatesSidebar.classList.remove('hidden');
+            chatArea.classList.add('hidden');
+        });
+        
         // Обработчик поиска кандидатов
         candidateSearch.addEventListener('input', function() {
             const searchTerm = this.value.toLowerCase();
             document.querySelectorAll('.candidate-item').forEach(item => {
-                const name = item.querySelector('.text-sm.font-medium').textContent.toLowerCase();
-                const vacancy = item.querySelector('.text-xs.text-gray-500').textContent.toLowerCase();
+                const name = item.querySelector('.font-medium').textContent.toLowerCase();
+                const vacancy = item.querySelectorAll('.text-xs.text-gray-500')[0].textContent.toLowerCase();
                 const lastMessage = item.querySelectorAll('.text-xs.text-gray-500')[1].textContent.toLowerCase();
                 
                 if (name.includes(searchTerm) || vacancy.includes(searchTerm) || lastMessage.includes(searchTerm)) {
@@ -468,8 +519,8 @@
             if (fileInput.files.length > 0) {
                 fileName.innerHTML = `
                     <span>${fileInput.files[0].name}</span>
-                    <button type="button" class="ml-2 text-red-500 hover:text-red-700" id="cancel-attachment">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <button type="button" class="ml-1 text-red-500 hover:text-red-700" id="cancel-attachment">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
@@ -538,8 +589,18 @@
             }
         });
         
+        // Обработчик изменения размера окна
+        window.addEventListener('resize', function() {
+            const newIsMobile = window.innerWidth < 768;
+            if (newIsMobile !== isMobile) {
+                location.reload(); // Перезагружаем страницу при изменении типа устройства
+            }
+        });
+        
         // Инициализация чата с первым кандидатом
-        loadChatHistory(1);
+        if (!isMobile) {
+            loadChatHistory(1);
+        }
 
         // Делаем функцию доступной глобально для обработчиков в HTML
         window.highlightAndScrollToMessage = highlightAndScrollToMessage;
@@ -548,9 +609,16 @@
 
 <style>
     .chat-container {
-        height: calc(100vh - 320px);
+        height: calc(100vh - 280px);
+        max-height: 600px;
         overflow-y: auto;
-        padding-right: 8px;
+        padding-right: 4px;
+    }
+    
+    @media (min-width: 768px) {
+        .chat-container {
+            height: calc(100vh - 320px);
+        }
     }
     
     .message-bubble {
@@ -630,21 +698,25 @@
     }
     
     /* Стили для скроллбара */
-    .chat-container::-webkit-scrollbar {
-        width: 8px;
+    .chat-container::-webkit-scrollbar,
+    #candidates-sidebar::-webkit-scrollbar {
+        width: 6px;
     }
     
-    .chat-container::-webkit-scrollbar-track {
+    .chat-container::-webkit-scrollbar-track,
+    #candidates-sidebar::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 4px;
     }
     
-    .chat-container::-webkit-scrollbar-thumb {
+    .chat-container::-webkit-scrollbar-thumb,
+    #candidates-sidebar::-webkit-scrollbar-thumb {
         background: #c1c1c1;
         border-radius: 4px;
     }
     
-    .chat-container::-webkit-scrollbar-thumb:hover {
+    .chat-container::-webkit-scrollbar-thumb:hover,
+    #candidates-sidebar::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
     }
 
@@ -652,14 +724,15 @@
     #file-name {
         display: flex;
         align-items: center;
-        padding: 2px 6px;
+        padding: 2px 4px;
         background-color: #f3f4f6;
         border-radius: 4px;
-        margin-top: 4px;
+        margin-top: 2px;
+        font-size: 0.75rem;
     }
 
     #file-name span {
-        max-width: 200px;
+        max-width: 120px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -676,6 +749,21 @@
 
     #cancel-attachment:hover {
         color: #dc2626;
+    }
+    
+    /* Анимации для мобильного интерфейса */
+    @media (max-width: 767px) {
+        #candidates-sidebar, #chat-area {
+            transition: transform 0.3s ease;
+        }
+        
+        #candidates-sidebar.hidden {
+            display: none;
+        }
+        
+        #chat-area.hidden {
+            display: none;
+        }
     }
 </style>
 @endsection
