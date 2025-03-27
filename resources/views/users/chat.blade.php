@@ -208,7 +208,10 @@
             const filePreviewName = document.getElementById('file-preview-name');
             const cancelFileBtn = document.getElementById('cancel-file');
             const isMobile = window.innerWidth < 768;
-
+    
+            // Оригинальный заголовок страницы
+            const originalTitle = document.title;
+    
             // Данные пользователей
             const users = {
                 1: {
@@ -236,7 +239,7 @@
                     }
                 }
             };
-
+    
             // История чатов
             const chatHistories = {
                 1: [{
@@ -282,12 +285,12 @@
                     }
                 ]
             };
-
+    
             // Форматирование времени
             function formatTime(date) {
                 const now = new Date();
                 const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-
+    
                 if (diffDays === 0) {
                     return date.toLocaleTimeString([], {
                         hour: '2-digit',
@@ -301,136 +304,137 @@
                     return `${Math.floor(diffDays / 7)} нед.`;
                 }
             }
-
+    
             // Подсветка и прокрутка к сообщению
             function highlightAndScrollToMessage(messageId) {
-                // Удаляем предыдущую подсветку
                 document.querySelectorAll('.highlighted-message').forEach(el => {
                     el.classList.remove('highlighted-message');
                 });
-
+    
                 const messageElement = document.querySelector(`[data-id="${messageId}"] .message-bubble`);
                 if (messageElement) {
-                    // Прокручиваем к сообщению
                     messageElement.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center'
                     });
-
-                    // Добавляем подсветку
+    
                     messageElement.classList.add('highlighted-message');
-
-                    // Убираем подсветку через 3 секунды
+    
                     setTimeout(() => {
                         messageElement.classList.remove('highlighted-message');
                     }, 3000);
                 }
             }
-
+    
             // Обновление последнего сообщения в списке
             function updateLastMessage(userId, message, sender) {
                 const user = users[userId];
                 if (!user) return;
-
+    
                 const now = new Date();
                 user.lastMessage = {
                     text: message,
                     sender: sender,
                     time: formatTime(now)
                 };
-
+    
                 const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
                 if (userItem) {
                     const lastMessageEl = userItem.querySelectorAll(
                         '.text-xs.text-gray-500, .text-2xs.text-gray-500')[1];
                     const lastTimeEl = userItem.querySelector('.text-xs.text-gray-400, .text-2xs.text-gray-400');
-
+    
                     if (lastMessageEl) {
                         const prefix = sender === 'candidate' ? 'Вы: ' : `${user.role.split(' ')[0]}: `;
                         lastMessageEl.textContent = prefix + message;
                     }
-
+    
                     if (lastTimeEl) {
                         lastTimeEl.textContent = user.lastMessage.time;
                     }
                 }
             }
-
+    
+            // Функция обновления заголовка вкладки с количеством непрочитанных сообщений
+            function updateTabTitle() {
+                let totalUnread = 0;
+                Object.values(users).forEach(user => {
+                    totalUnread += user.unread;
+                });
+    
+                document.title = totalUnread > 0 
+                    ? `(${totalUnread}) ${originalTitle}` 
+                    : originalTitle;
+            }
+    
+            // Показываем уведомление о новом сообщении
+            function showNewMessageNotification(userId, message) {
+                const user = users[userId];
+                if (!user || document.hasFocus()) return;
+    
+                if (Notification.permission === "granted") {
+                    new Notification(`${user.name} (${user.role})`, {
+                        body: message,
+                        icon: user.avatar
+                    });
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            new Notification(`${user.name} (${user.role})`, {
+                                body: message,
+                                icon: user.avatar
+                            });
+                        }
+                    });
+                }
+            }
+    
             // Загрузка истории чата
             function loadChatHistory(userId) {
                 chatMessages.innerHTML = '';
                 currentUserIdInput.value = userId;
-
-                // Обновляем информацию о выбранном пользователе
+    
                 const user = users[userId];
                 selectedUserName.textContent = user.name;
                 selectedUserRole.textContent = user.role;
                 selectedUserAvatar.src = user.avatar;
-
-                // Загружаем сообщения
+    
                 if (chatHistories[userId]) {
                     chatHistories[userId].forEach(msg => {
                         addMessageToChat(msg);
                     });
                 }
-
-                // Помечаем выбранного пользователя
+    
                 document.querySelectorAll('.user-item').forEach(item => {
                     if (item.dataset.userId === userId.toString()) {
                         item.classList.add('bg-indigo-50');
-
-                        // Сбрасываем счетчик непрочитанных
+    
                         if (item.dataset.unread !== '0') {
                             item.dataset.unread = '0';
                             const unreadBadge = item.querySelector('.absolute');
                             if (unreadBadge) unreadBadge.remove();
-
-                            // Обновляем данные в объекте users
+    
                             users[userId].unread = 0;
+                            updateTabTitle();
                         }
                     } else {
                         item.classList.remove('bg-indigo-50');
                     }
                 });
-
-                // На мобильных устройствах переключаем вид на чат
+    
                 if (window.innerWidth < 768) {
                     userListContainer.classList.add('hidden');
                     chatContainer.classList.remove('hidden');
                 }
             }
-
-            // Обработчик выбора пользователя
-            userList.addEventListener('click', function(e) {
-                const userItem = e.target.closest('.user-item');
-                if (userItem) {
-                    const userId = userItem.dataset.userId;
-                    loadChatHistory(userId);
-                }
-            });
-
-            // Обработчик кнопки "Назад" на мобильных
-            backToListBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                userListContainer.classList.remove('hidden');
-                chatContainer.classList.add('hidden');
-            });
-
-            // Инициализация - на мобильных показываем список, на десктопах - первый чат
-            if (window.innerWidth >= 768) {
-                loadChatHistory(1);
-            } else {
-                userListContainer.classList.remove('hidden');
-                chatContainer.classList.add('hidden');
-            }
-
+    
             // Добавление сообщения в чат
             function addMessageToChat(msg) {
                 const isCandidate = msg.sender === 'candidate';
                 const messageClass = isCandidate ? 'candidate-message' :
                     msg.sender === 'hr' ? 'hr-message' : 'tutor-message';
                 const alignClass = isCandidate ? 'justify-end' : 'justify-start';
-
+    
                 let fileElement = '';
                 if (msg.file) {
                     fileElement = `
@@ -444,7 +448,7 @@
                     </div>
                 `;
                 }
-
+    
                 let replyElement = '';
                 if (msg.replyTo !== null && msg.originalMessage) {
                     replyElement = `
@@ -455,7 +459,7 @@
                     </div>
                 `;
                 }
-
+    
                 const messageElement = `
                 <div class="flex ${alignClass} mb-2 md:mb-3" data-id="${msg.id}">
                     <div class="message-bubble ${messageClass} p-2 md:p-3 max-w-xs md:max-w-md lg:max-w-lg">
@@ -469,11 +473,11 @@
                     </div>
                 </div>
             `;
-
+    
                 chatMessages.insertAdjacentHTML('beforeend', messageElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-
+    
             // Обработчик выбора пользователя
             userList.addEventListener('click', function(e) {
                 const userItem = e.target.closest('.user-item');
@@ -482,7 +486,7 @@
                     loadChatHistory(userId);
                 }
             });
-
+    
             // Обработчик поиска
             userSearch.addEventListener('input', function() {
                 const searchTerm = this.value.toLowerCase();
@@ -496,7 +500,7 @@
                     const lastMessage = item.querySelectorAll(
                             '.text-xs.text-gray-500, .text-2xs.text-gray-500')[1]
                         .textContent.toLowerCase();
-
+    
                     if (name.includes(searchTerm) || role.includes(searchTerm) || lastMessage
                         .includes(searchTerm)) {
                         item.style.display = 'flex';
@@ -505,57 +509,56 @@
                     }
                 });
             });
-
+    
             // Обработчик кнопки "Ответить"
             chatMessages.addEventListener('click', function(e) {
                 if (e.target.classList.contains('reply-btn')) {
                     const messageId = e.target.dataset.id;
                     const messageText = e.target.dataset.text;
-
+    
                     replyToInput.value = messageId;
                     replyContent.textContent = messageText;
                     replyPreview.classList.remove('hidden');
                     document.getElementById('message').focus();
                 }
             });
-
+    
             // Отмена ответа
             cancelReplyBtn.addEventListener('click', function() {
                 replyToInput.value = '';
                 replyPreview.classList.add('hidden');
             });
-
+    
             // Обработчик прикрепления файла
             attachBtn.addEventListener('click', function() {
                 fileInput.click();
             });
-
+    
             fileInput.addEventListener('change', function() {
                 if (fileInput.files.length > 0) {
                     filePreviewName.textContent = fileInput.files[0].name;
                     filePreview.classList.remove('hidden');
                 }
             });
-
+    
             // Отмена прикрепления файла
             cancelFileBtn.addEventListener('click', function() {
                 fileInput.value = '';
                 filePreview.classList.add('hidden');
             });
-
+    
             // Обработчик отправки формы
             chatForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const messageInput = document.getElementById('message');
                 const message = messageInput.value.trim();
                 const userId = currentUserIdInput.value;
-
+    
                 if (message || fileInput.files.length > 0) {
                     const now = new Date();
                     const timeString = formatTime(now);
                     const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
-
-                    // Получаем текст оригинального сообщения для ответа
+    
                     let originalMessage = '';
                     if (replyToInput.value) {
                         const repliedMsg = chatMessages.querySelector(
@@ -564,8 +567,7 @@
                             originalMessage = repliedMsg.querySelector('p:not(.font-medium)').textContent;
                         }
                     }
-
-                    // Создаем новое сообщение
+    
                     const newMessage = {
                         id: Date.now(),
                         sender: 'candidate',
@@ -576,20 +578,15 @@
                         replyTo: replyToInput.value ? parseInt(replyToInput.value) : null,
                         originalMessage: originalMessage
                     };
-
-                    // Добавляем сообщение в историю
+    
                     if (!chatHistories[userId]) {
                         chatHistories[userId] = [];
                     }
                     chatHistories[userId].push(newMessage);
-
-                    // Добавляем сообщение в чат
+    
                     addMessageToChat(newMessage);
-
-                    // Обновляем последнее сообщение в списке пользователей
                     updateLastMessage(userId, message || 'Файл', 'candidate');
-
-                    // Очищаем форму
+    
                     messageInput.value = '';
                     fileInput.value = '';
                     filePreview.classList.add('hidden');
@@ -597,7 +594,7 @@
                     replyPreview.classList.add('hidden');
                 }
             });
-
+    
             // Обработчик кнопки "Назад" на мобильных
             if (backToListBtn) {
                 backToListBtn.addEventListener('click', function() {
@@ -605,13 +602,66 @@
                     chatContainer.classList.add('hidden');
                 });
             }
-
-            // Инициализация чата с первым пользователем
+    
+            // Обработчик изменения видимости страницы
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    updateTabTitle();
+                }
+            });
+    
+            // Имитация получения нового сообщения (для демонстрации)
+            function simulateNewMessage() {
+                setTimeout(() => {
+                    const userId = 1;
+                    const newMsg = {
+                        id: Date.now(),
+                        sender: 'hr',
+                        text: 'Ваше тестовое задание проверено, ждем вас на собеседование!',
+                        time: formatTime(new Date()),
+                        file: null,
+                        fileUrl: null
+                    };
+    
+                    if (!chatHistories[userId]) chatHistories[userId] = [];
+                    chatHistories[userId].push(newMsg);
+    
+                    // Если чат не открыт, увеличиваем счетчик
+                    if (currentUserIdInput.value != userId) {
+                        users[userId].unread++;
+                        updateTabTitle();
+                        showNewMessageNotification(userId, newMsg.text);
+    
+                        // Обновляем бейдж в списке пользователей
+                        const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+                        if (userItem) {
+                            userItem.dataset.unread = users[userId].unread;
+                            let unreadBadge = userItem.querySelector('.absolute');
+                            if (!unreadBadge) {
+                                unreadBadge = document.createElement('div');
+                                unreadBadge.className = 'absolute right-2 md:right-4 top-3 md:top-4 bg-indigo-600 text-white text-2xs md:text-xs rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center';
+                                userItem.appendChild(unreadBadge);
+                            }
+                            unreadBadge.textContent = users[userId].unread;
+                        }
+                    } else {
+                        // Если чат открыт, просто добавляем сообщение
+                        addMessageToChat(newMsg);
+                    }
+                }, 10000); // Через 10 секунд
+            }
+    
+            // Инициализация
             if (!isMobile) {
                 loadChatHistory(1);
+            } else {
+                userListContainer.classList.remove('hidden');
+                chatContainer.classList.add('hidden');
             }
-
-            // Делаем функцию доступной глобально для обработчиков в HTML
+    
+            updateTabTitle();
+            simulateNewMessage(); // Для демонстрации - можно удалить в реальном приложении
+    
             window.highlightAndScrollToMessage = highlightAndScrollToMessage;
         });
     </script>
