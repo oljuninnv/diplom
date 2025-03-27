@@ -47,6 +47,10 @@ Route::get('/tasks', function () {
     return view('workers.tasks');
 })->name('tasks');
 
+Route::get('/meeting', function () {
+    return view('workers.meeting');
+})->name('meeting');
+
 Route::get('/reset-password', function () {
     return view('auth.reset-password');
 })->name('reset-password');
