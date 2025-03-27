@@ -43,6 +43,10 @@ Route::get('/worker-chat', function () {
     return view('workers.chat');
 })->name('worker-chat');
 
+Route::get('/tasks', function () {
+    return view('workers.tasks');
+})->name('tasks');
+
 Route::get('/reset-password', function () {
     return view('auth.reset-password');
 })->name('reset-password');
