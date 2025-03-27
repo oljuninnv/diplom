@@ -38,3 +38,11 @@ Route::get('/task', function () {
 Route::get('/chat', function () {
     return view('users.chat');
 })->name('chat');
+
+Route::get('/worker-chat', function () {
+    return view('workers.chat');
+})->name('worker-chat');
+
+Route::get('/reset-password', function () {
+    return view('auth.reset-password');
+})->name('reset-password');

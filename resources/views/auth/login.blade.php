@@ -44,7 +44,7 @@
             </div>
 
             <div class="text-center">
-                <a href="#" class="text-sm text-blue-500 hover:text-blue-700">Забыли пароль?</a>
+                <a href="/reset-password" class="text-sm text-blue-500 hover:text-blue-700">Забыли пароль?</a>
             </div>
         </form>
     </div>

@@ -1,144 +1,376 @@
 @extends('layouts.app')
 
 @section('content')
+    <main class="pt-8 min-h-screen pb-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Заголовок чата -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-900">Чаты</h1>
+            </div>
 
-<main class="pt-8 min-h-screen pb-4">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Заголовок чата -->
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Чат поддержки</h1>
-            
-            <!-- Предупреждающее сообщение -->
-            <div class="mt-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                        </svg>
+            <!-- Контейнер чата -->
+            <div class="bg-white shadow rounded-lg overflow-hidden flex">
+                <!-- Список собеседников -->
+                <div class="w-1/3 border-r border-gray-200 bg-gray-50 overflow-y-auto" style="height: calc(100vh - 200px);">
+                    <!-- Поиск -->
+                    <div class="p-4 border-b border-gray-200">
+                        <div class="relative">
+                            <input type="text" id="user-search" placeholder="Поиск..."
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 pl-10 border">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                    fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-yellow-700">
-                            Пожалуйста, обращайтесь в чат только в крайнем случае. Все ваши обращения будут учитываться при оценке задания. Перед обращением убедитесь, что ответа нет в документации.
-                        </p>
+
+                    <!-- Список собеседников -->
+                    <div id="user-list">
+                        <!-- HR-менеджер -->
+                        <div class="user-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative bg-indigo-50"
+                            data-user-id="1" data-unread="2">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="HR-менеджер"
+                                    class="h-full w-full object-cover">
+                            </div>
+                            <div class="ml-3 flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Елена Смирнова</p>
+                                <p class="text-xs text-gray-500 mt-1">HR-менеджер</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <p class="text-xs text-gray-500 truncate">HR: Проверим ваше тестовое задание...</p>
+                                    <span class="text-xs text-gray-400">12:45</span>
+                                </div>
+                            </div>
+                            <!-- Индикатор непрочитанных сообщений -->
+                            <div
+                                class="absolute right-4 top-4 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                2
+                            </div>
+                        </div>
+
+                        <!-- Тьютор -->
+                        <div class="user-item p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center"
+                            data-user-id="2" data-unread="0">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Тьютор"
+                                    class="h-full w-full object-cover">
+                            </div>
+                            <div class="ml-3 flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900">Алексей Иванов</p>
+                                <p class="text-xs text-gray-500 mt-1">Тьютор</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <p class="text-xs text-gray-500 truncate">Вы: Спасибо за пояснения!</p>
+                                    <span class="text-xs text-gray-400">Вчера</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Правая часть с чатом -->
+                <div class="w-2/3 flex flex-col">
+                    <!-- Информация о выбранном пользователе -->
+                    <div class="border-b border-gray-200 p-4 bg-gray-50 flex items-center" id="selected-user-info">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden">
+                                <img id="selected-user-avatar" src="https://randomuser.me/api/portraits/women/44.jpg"
+                                    alt="Аватар" class="h-full w-full object-cover">
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900" id="selected-user-name">Елена Смирнова</p>
+                                <p class="text-xs text-gray-500" id="selected-user-role">HR-менеджер</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- История сообщений -->
+                    <div class="chat-container overflow-y-auto p-4 space-y-4 flex-grow" id="chat-messages">
+                        <!-- Сообщения будут загружаться динамически -->
+                    </div>
+
+                    <!-- Форма отправки сообщения -->
+                    <div class="border-t border-gray-200 p-4 bg-gray-50">
+                        <form id="chat-form" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" id="current-user-id" name="user_id" value="1">
+                            <div class="flex items-center space-x-3">
+                                <!-- Поле ввода сообщения -->
+                                <div class="flex-1">
+                                    <input type="text" id="message" name="message"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border"
+                                        placeholder="Введите сообщение..." required>
+                                </div>
+
+                                <!-- Кнопка прикрепления файла -->
+                                <div class="relative">
+                                    <input type="file" id="attachment" name="attachment" class="hidden">
+                                    <button type="button" id="attach-btn"
+                                        class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                        </svg>
+                                    </button>
+                                    <span id="file-name"
+                                        class="absolute top-full left-0 mt-1 text-xs text-gray-500 whitespace-nowrap"></span>
+                                </div>
+
+                                <!-- Кнопка отправки -->
+                                <button type="submit"
+                                    class="p-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Превью ответа -->
+                            <input type="hidden" id="reply-to" name="reply_to" value="">
+                            <div id="reply-preview"
+                                class="hidden mt-3 bg-gray-100 p-3 rounded-md text-sm text-gray-700 border-l-4 border-indigo-500">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium text-xs text-gray-500 mb-1">Ответ на сообщение:</p>
+                                        <p id="reply-content" class="text-sm"></p>
+                                    </div>
+                                    <button type="button" id="cancel-reply" class="text-gray-400 hover:text-gray-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
+    </main>
 
-        <!-- Контейнер чата -->
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <!-- Выбор получателя -->
-            <div class="border-b border-gray-200 p-4 bg-gray-50">
-                <select id="recipient" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border">
-                    <option value="tutor">Тьютор (технические вопросы)</option>
-                    <option value="hr">HR-менеджер (организационные вопросы)</option>
-                </select>
-            </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userList = document.getElementById('user-list');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const attachBtn = document.getElementById('attach-btn');
+            const fileInput = document.getElementById('attachment');
+            const fileName = document.getElementById('file-name');
+            const replyToInput = document.getElementById('reply-to');
+            const replyPreview = document.getElementById('reply-preview');
+            const replyContent = document.getElementById('reply-content');
+            const cancelReplyBtn = document.getElementById('cancel-reply');
+            const currentUserIdInput = document.getElementById('current-user-id');
+            const selectedUserInfo = document.getElementById('selected-user-info');
+            const selectedUserName = document.getElementById('selected-user-name');
+            const selectedUserRole = document.getElementById('selected-user-role');
+            const selectedUserAvatar = document.getElementById('selected-user-avatar');
+            const userSearch = document.getElementById('user-search');
 
-            <!-- История сообщений -->
-            <div class="chat-container overflow-y-auto p-4 space-y-4" id="chat-messages">
-                <!-- Сообщения будут загружаться динамически -->
-            </div>
+            // Данные пользователей
+            const users = {
+                1: {
+                    id: 1,
+                    name: 'Елена Смирнова',
+                    role: 'HR-менеджер',
+                    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+                    unread: 2,
+                    lastMessage: {
+                        text: 'Проверим ваше тестовое задание',
+                        sender: 'hr',
+                        time: '12:45'
+                    }
+                },
+                2: {
+                    id: 2,
+                    name: 'Алексей Иванов',
+                    role: 'Тьютор',
+                    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+                    unread: 0,
+                    lastMessage: {
+                        text: 'Спасибо за пояснения!',
+                        sender: 'candidate',
+                        time: 'Вчера'
+                    }
+                }
+            };
 
-            <!-- Форма отправки сообщения -->
-            <div class="border-t border-gray-200 p-4 bg-gray-50">
-                <form id="chat-form" enctype="multipart/form-data">
-                    @csrf
-                    <div class="flex items-center space-x-3">
-                        <!-- Поле ввода сообщения -->
-                        <div class="flex-1">
-                            <input type="text" id="message" name="message" 
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border" 
-                                   placeholder="Введите сообщение..." required>
-                        </div>
-                        
-                        <!-- Кнопка прикрепления файла -->
-                        <div class="relative">
-                            <input type="file" id="attachment" name="attachment" class="hidden">
-                            <button type="button" id="attach-btn" class="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                </svg>
-                            </button>
-                            <span id="file-name" class="absolute top-full left-0 mt-1 text-xs text-gray-500 whitespace-nowrap"></span>
-                        </div>
-                        
-                        <!-- Кнопка отправки -->
-                        <button type="submit" 
-                                class="p-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
-                        </button>
-                    </div>
-                    
-                    <!-- Превы ответа -->
-                    <input type="hidden" id="reply-to" name="reply_to" value="">
-                    <div id="reply-preview" class="hidden mt-3 bg-gray-100 p-3 rounded-md text-sm text-gray-700 border-l-4 border-indigo-500">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <p class="font-medium text-xs text-gray-500 mb-1">Ответ на сообщение:</p>
-                                <p id="reply-content" class="text-sm"></p>
-                            </div>
-                            <button type="button" id="cancel-reply" class="text-gray-400 hover:text-gray-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</main>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const recipientSelect = document.getElementById('recipient');
-        const chatMessages = document.getElementById('chat-messages');
-        const chatForm = document.getElementById('chat-form');
-        const attachBtn = document.getElementById('attach-btn');
-        const fileInput = document.getElementById('attachment');
-        const fileName = document.getElementById('file-name');
-        const replyToInput = document.getElementById('reply-to');
-        const replyPreview = document.getElementById('reply-preview');
-        const replyContent = document.getElementById('reply-content');
-        const cancelReplyBtn = document.getElementById('cancel-reply');
-        
-        // Загрузка истории чата
-        function loadChatHistory(recipient) {
-            chatMessages.innerHTML = '';
-            
-            const messages = {
-                tutor: [
-                    {id: 1, sender: 'support', text: 'Чем могу помочь по техническим вопросам?', time: '10:30', file: null, fileUrl: null},
-                    {id: 2, sender: 'user', text: 'Проблема с выполнением задания', time: '10:32', file: 'task.pdf', fileUrl: '#', replyTo: null},
-                    {id: 3, sender: 'support', text: 'Какая именно проблема? Вот инструкция:', time: '10:35', file: 'manual.pdf', fileUrl: '#', replyTo: 2, originalMessage: 'Проблема с выполнением задания'},
-                    {id: 4, sender: 'user', text: 'Не понимаю как реализовать API', time: '10:36', file: null, fileUrl: null, replyTo: 3, originalMessage: 'Какая именно проблема? Вот инструкция:'}
+            // История чатов
+            const chatHistories = {
+                1: [{
+                        id: 1,
+                        sender: 'hr',
+                        text: 'Здравствуйте! Мы получили ваше тестовое задание',
+                        time: '10:30',
+                        file: null,
+                        fileUrl: null
+                    },
+                    {
+                        id: 2,
+                        sender: 'candidate',
+                        text: 'Спасибо! Буду ждать обратной связи',
+                        time: '10:40',
+                        file: null,
+                        fileUrl: null
+                    },
+                    {
+                        id: 3,
+                        sender: 'hr',
+                        text: 'Проверим ваше тестовое задание в течение 2 дней',
+                        time: '12:45',
+                        file: null,
+                        fileUrl: null
+                    }
                 ],
-                hr: [
-                    {id: 1, sender: 'support', text: 'Чем могу помочь по организационным вопросам?', time: '11:15', file: null, fileUrl: null},
-                    {id: 2, sender: 'user', text: 'Нужно изменить данные в профиле', time: '11:20', file: 'data.docx', fileUrl: '#', replyTo: 1, originalMessage: 'Чем могу помочь по организационным вопросам?'}
+                2: [{
+                        id: 1,
+                        sender: 'tutor',
+                        text: 'Добрый день! Готов ответить на ваши вопросы по тестовому заданию',
+                        time: '11:15',
+                        file: null,
+                        fileUrl: null
+                    },
+                    {
+                        id: 2,
+                        sender: 'candidate',
+                        text: 'Спасибо за пояснения!',
+                        time: 'Вчера',
+                        file: null,
+                        fileUrl: null
+                    }
                 ]
             };
-            
-            messages[recipient].forEach(msg => {
-                addMessageToChat(msg);
-            });
-        }
-        
-        // Добавление сообщения в чат
-        function addMessageToChat(msg) {
-            const isUser = msg.sender === 'user';
-            const messageClass = isUser ? 'user-message' : 'support-message';
-            const alignClass = isUser ? 'justify-end' : 'justify-start';
-            
-            let fileElement = '';
-            if (msg.file) {
-                fileElement = `
+
+            // Форматирование времени
+            function formatTime(date) {
+                const now = new Date();
+                const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 0) {
+                    return date.toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } else if (diffDays === 1) {
+                    return 'Вчера';
+                } else if (diffDays < 7) {
+                    return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date.getDay()];
+                } else {
+                    return `${Math.floor(diffDays / 7)} нед.`;
+                }
+            }
+
+            // Подсветка и прокрутка к сообщению
+            function highlightAndScrollToMessage(messageId) {
+                // Удаляем предыдущую подсветку
+                document.querySelectorAll('.highlighted-message').forEach(el => {
+                    el.classList.remove('highlighted-message');
+                });
+
+                const messageElement = document.querySelector(`[data-id="${messageId}"] .message-bubble`);
+                if (messageElement) {
+                    // Прокручиваем к сообщению
+                    messageElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+
+                    // Добавляем подсветку
+                    messageElement.classList.add('highlighted-message');
+
+                    // Убираем подсветку через 3 секунды
+                    setTimeout(() => {
+                        messageElement.classList.remove('highlighted-message');
+                    }, 3000);
+                }
+            }
+
+            // Обновление последнего сообщения в списке
+            function updateLastMessage(userId, message, sender) {
+                const user = users[userId];
+                if (!user) return;
+
+                const now = new Date();
+                user.lastMessage = {
+                    text: message,
+                    sender: sender,
+                    time: formatTime(now)
+                };
+
+                const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+                if (userItem) {
+                    const lastMessageEl = userItem.querySelectorAll('.text-xs.text-gray-500')[1];
+                    const lastTimeEl = userItem.querySelector('.text-xs.text-gray-400');
+
+                    if (lastMessageEl) {
+                        const prefix = sender === 'candidate' ? 'Вы: ' : `${user.role.split(' ')[0]}: `;
+                        lastMessageEl.textContent = prefix + message;
+                    }
+
+                    if (lastTimeEl) {
+                        lastTimeEl.textContent = user.lastMessage.time;
+                    }
+                }
+            }
+
+            // Загрузка истории чата
+            function loadChatHistory(userId) {
+                chatMessages.innerHTML = '';
+                currentUserIdInput.value = userId;
+
+                // Обновляем информацию о выбранном пользователе
+                const user = users[userId];
+                selectedUserName.textContent = user.name;
+                selectedUserRole.textContent = user.role;
+                selectedUserAvatar.src = user.avatar;
+
+                // Загружаем сообщения
+                if (chatHistories[userId]) {
+                    chatHistories[userId].forEach(msg => {
+                        addMessageToChat(msg);
+                    });
+                }
+
+                // Помечаем выбранного пользователя
+                document.querySelectorAll('.user-item').forEach(item => {
+                    if (item.dataset.userId === userId.toString()) {
+                        item.classList.add('bg-indigo-50');
+
+                        // Сбрасываем счетчик непрочитанных
+                        if (item.dataset.unread !== '0') {
+                            item.dataset.unread = '0';
+                            const unreadBadge = item.querySelector('.absolute');
+                            if (unreadBadge) unreadBadge.remove();
+
+                            // Обновляем данные в объекте users
+                            users[userId].unread = 0;
+                        }
+                    } else {
+                        item.classList.remove('bg-indigo-50');
+                    }
+                });
+            }
+
+            // Добавление сообщения в чат
+            function addMessageToChat(msg) {
+                const isCandidate = msg.sender === 'candidate';
+                const messageClass = isCandidate ? 'candidate-message' :
+                    msg.sender === 'hr' ? 'hr-message' : 'tutor-message';
+                const alignClass = isCandidate ? 'justify-end' : 'justify-start';
+
+                let fileElement = '';
+                if (msg.file) {
+                    fileElement = `
                     <div class="mt-2">
-                        <a href="${msg.fileUrl}" download class="inline-flex items-center text-sm ${isUser ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500'}">
+                        <a href="${msg.fileUrl}" download class="inline-flex items-center text-sm ${isCandidate ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500'}">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
@@ -146,147 +378,310 @@
                         </a>
                     </div>
                 `;
-            }
-            
-            let replyElement = '';
-            if (msg.replyTo !== null && msg.originalMessage) {
-                replyElement = `
-                    <div class="reply-container bg-${isUser ? 'indigo-700' : 'gray-200'} text-${isUser ? 'white' : 'gray-800'} text-xs p-2 rounded mb-2 border-l-4 border-${isUser ? 'indigo-300' : 'gray-500'}">
-                        <p class="font-medium">${msg.sender === 'user' ? 'Поддержка' : 'Вы'}:</p>
-                        <p class="truncate">${msg.originalMessage}</p>
+                }
+
+                let replyElement = '';
+                if (msg.replyTo !== null && msg.originalMessage) {
+                    replyElement = `
+                    <div class="reply-container bg-${isCandidate ? 'indigo-700' : 'gray-200'} text-${isCandidate ? 'white' : 'gray-800'} text-xs p-2 rounded mb-2 border-l-4 border-${isCandidate ? 'indigo-300' : 'gray-500'} cursor-pointer" 
+                         onclick="highlightAndScrollToMessage(${msg.replyTo})">
+                        <p class="font-medium">${msg.sender === 'candidate' ? 'Вы' : users[currentUserIdInput.value].name}:</p>
+                        <p>${msg.originalMessage}</p>
                     </div>
                 `;
-            }
-            
-            const messageElement = `
+                }
+
+                const messageElement = `
                 <div class="flex ${alignClass} mb-3" data-id="${msg.id}">
                     <div class="message-bubble ${messageClass} p-3 max-w-xs md:max-w-md lg:max-w-lg">
                         ${replyElement}
                         <p class="text-sm">${msg.text}</p>
                         ${fileElement}
                         <div class="flex justify-between items-center mt-2">
-                            <p class="text-xs ${isUser ? 'text-gray-300' : 'text-gray-500'}">${msg.time}</p>
-                            ${!isUser ? `<button class="reply-btn text-xs ${isUser ? 'text-gray-300' : 'text-indigo-600'} hover:underline" data-id="${msg.id}" data-text="${msg.text}">Ответить</button>` : ''}
+                            <p class="text-xs ${isCandidate ? 'text-gray-300' : 'text-gray-500'}">${msg.time}</p>
+                            <button class="reply-btn text-xs ${isCandidate ? 'text-gray-300' : 'text-indigo-600'} hover:underline" data-id="${msg.id}" data-text="${msg.text}">Ответить</button>
                         </div>
                     </div>
                 </div>
             `;
-            
-            chatMessages.insertAdjacentHTML('beforeend', messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-        
-        // Обработчик кнопки "Ответить"
-        chatMessages.addEventListener('click', function(e) {
-            if (e.target.classList.contains('reply-btn')) {
-                const messageId = e.target.dataset.id;
-                const messageText = e.target.dataset.text;
-                const isUserMessage = e.target.closest('.message-bubble').classList.contains('user-message');
-                
-                replyToInput.value = messageId;
-                replyContent.textContent = messageText;
-                replyPreview.classList.remove('hidden');
-                document.getElementById('message').focus();
+
+                chatMessages.insertAdjacentHTML('beforeend', messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-        });
-        
-        // Отмена ответа
-        cancelReplyBtn.addEventListener('click', function() {
-            replyToInput.value = '';
-            replyPreview.classList.add('hidden');
-        });
-        
-        // Обработчик прикрепления файла
-        attachBtn.addEventListener('click', function() {
-            fileInput.click();
-        });
-        
-        fileInput.addEventListener('change', function() {
-            fileName.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : '';
-        });
-        
-        // Обработчик отправки формы
-        chatForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const messageInput = document.getElementById('message');
-            const message = messageInput.value.trim();
-            
-            if (message || fileInput.files.length > 0) {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
-                
-                // Получаем текст оригинального сообщения для ответа
-                let originalMessage = '';
-                if (replyToInput.value) {
-                    const repliedMsg = chatMessages.querySelector(`[data-id="${replyToInput.value}"] .message-bubble`);
-                    if (repliedMsg) {
-                        originalMessage = repliedMsg.querySelector('p:not(.font-medium)').textContent;
-                    }
+
+            // Обработчик выбора пользователя
+            userList.addEventListener('click', function(e) {
+                const userItem = e.target.closest('.user-item');
+                if (userItem) {
+                    const userId = userItem.dataset.userId;
+                    loadChatHistory(userId);
                 }
-                
-                // Здесь будет код отправки сообщения на сервер
-                // В демо-версии просто добавляем сообщение в чат
-                
-                addMessageToChat({
-                    id: Date.now(),
-                    sender: 'user',
-                    text: message,
-                    time: timeString,
-                    file: fileName,
-                    fileUrl: '#', // В реальном приложении будет URL файла
-                    replyTo: replyToInput.value ? parseInt(replyToInput.value) : null,
-                    originalMessage: originalMessage
+            });
+
+            // Обработчик поиска
+            userSearch.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                document.querySelectorAll('.user-item').forEach(item => {
+                    const name = item.querySelector('.text-sm.font-medium').textContent
+                    .toLowerCase();
+                    const role = item.querySelector('.text-xs.text-gray-500').textContent
+                        .toLowerCase();
+                    const lastMessage = item.querySelectorAll('.text-xs.text-gray-500')[1]
+                        .textContent.toLowerCase();
+
+                    if (name.includes(searchTerm) || role.includes(searchTerm) || lastMessage
+                        .includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
                 });
-                
-                // Очищаем форму
-                messageInput.value = '';
-                fileInput.value = '';
-                document.getElementById('file-name').textContent = '';
+            });
+
+            // Обработчик кнопки "Ответить"
+            chatMessages.addEventListener('click', function(e) {
+                if (e.target.classList.contains('reply-btn')) {
+                    const messageId = e.target.dataset.id;
+                    const messageText = e.target.dataset.text;
+
+                    replyToInput.value = messageId;
+                    replyContent.textContent = messageText;
+                    replyPreview.classList.remove('hidden');
+                    document.getElementById('message').focus();
+                }
+            });
+
+            // Отмена ответа
+            cancelReplyBtn.addEventListener('click', function() {
                 replyToInput.value = '';
                 replyPreview.classList.add('hidden');
+            });
+
+            // Обработчик прикрепления файла
+            attachBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function() {
+                if (fileInput.files.length > 0) {
+                    fileName.innerHTML = `
+                    <span>${fileInput.files[0].name}</span>
+                    <button type="button" class="ml-2 text-red-500 hover:text-red-700" id="cancel-attachment">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+
+                    // Обработчик отмены прикрепления файла
+                    document.getElementById('cancel-attachment').addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        fileInput.value = '';
+                        fileName.textContent = '';
+                    });
+                }
+            });
+
+            // Обработчик отправки формы
+            chatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const messageInput = document.getElementById('message');
+    const message = messageInput.value.trim();
+    const userId = currentUserIdInput.value;
+
+    if (message || fileInput.files.length > 0) {
+        const now = new Date();
+        const timeString = formatTime(now);
+        const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
+
+        // Получаем текст оригинального сообщения для ответа
+        let originalMessage = '';
+        if (replyToInput.value) {
+            const repliedMsg = chatMessages.querySelector(`[data-id="${replyToInput.value}"] .message-bubble`);
+            if (repliedMsg) {
+                originalMessage = repliedMsg.querySelector('p:not(.font-medium)').textContent;
             }
+        }
+
+        // Создаем новое сообщение
+        const newMessage = {
+            id: Date.now(),
+            sender: 'candidate',
+            text: message,
+            time: timeString,
+            file: fileName,
+            fileUrl: '#',
+            replyTo: replyToInput.value ? parseInt(replyToInput.value) : null,
+            originalMessage: originalMessage
+        };
+
+        // Добавляем сообщение в историю
+        if (!chatHistories[userId]) {
+            chatHistories[userId] = [];
+        }
+        chatHistories[userId].push(newMessage);
+
+        // Добавляем сообщение в чат
+        addMessageToChat(newMessage);
+
+        // Обновляем последнее сообщение в списке пользователей
+        updateLastMessage(userId, message, 'candidate');
+
+        // Очищаем форму
+        messageInput.value = '';
+        fileInput.value = '';
+        fileName.textContent = ''; // Удаляем имя файла
+        replyToInput.value = ''; // Удаляем ответ на сообщение
+        replyPreview.classList.add('hidden'); // Скрываем превью ответа
+    }
+});
+
+            // Инициализация чата с первым пользователем
+            loadChatHistory(1);
+
+            // Делаем функцию доступной глобально для обработчиков в HTML
+            window.highlightAndScrollToMessage = highlightAndScrollToMessage;
         });
-        
-        // Инициализация чата
-        loadChatHistory(recipientSelect.value);
-        
-        // Обновление чата при изменении получателя
-        recipientSelect.addEventListener('change', function() {
-            loadChatHistory(this.value);
-        });
-    });
-</script>
-<style>
-    .chat-container {
-        height: calc(100vh - 320px);
-    }
-    .message-bubble {
-        max-width: 80%;
-        word-break: break-word;
-    }
-    .user-message {
-        background-color: #6366f1;
-        color: white;
-        border-radius: 14px 14px 0 14px;
-    }
-    .support-message {
-        background-color: #e5e7eb;
-        color: #111827;
-        border-radius: 14px 14px 14px 0;
-    }
-    .reply-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0;
-    }
-    .reply-container {
-        max-width: 100%;
-        overflow: hidden;
-    }
-    #attach-btn:hover {
-        background-color: #f3f4f6;
-    }
-</style>
+    </script>
+
+    <style>
+        .chat-container {
+            height: calc(100vh - 320px);
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            word-break: break-word;
+            transition: all 0.3s ease;
+        }
+
+        .candidate-message {
+            background-color: #6366f1;
+            color: white;
+            border-radius: 14px 14px 0 14px;
+        }
+
+        .hr-message {
+            background-color: #e5e7eb;
+            color: #111827;
+            border-radius: 14px 14px 14px 0;
+        }
+
+        .tutor-message {
+            background-color: #e5e7eb;
+            color: #111827;
+            border-radius: 14px 14px 14px 0;
+        }
+
+        .reply-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+
+        .reply-btn:hover {
+            opacity: 0.8;
+        }
+
+        .reply-container {
+            max-width: 100%;
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .reply-container:hover {
+            opacity: 0.9;
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: translateX(3px);
+        }
+
+        .highlighted-message {
+            animation: highlightPulse 3s ease-out;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
+            position: relative;
+        }
+
+        @keyframes highlightPulse {
+            0% {
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(99, 102, 241, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+            }
+        }
+
+        #attach-btn:hover {
+            background-color: #f3f4f6;
+        }
+
+        .user-item {
+            transition: background-color 0.2s;
+        }
+
+        .user-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .bg-indigo-50 {
+            background-color: #eef2ff;
+        }
+
+        /* Стили для скроллбара */
+        .chat-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Стили для отображения прикрепленного файла */
+        #file-name {
+            display: flex;
+            align-items: center;
+            padding: 2px 6px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        #file-name span {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #cancel-attachment {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        #cancel-attachment:hover {
+            color: #dc2626;
+        }
+    </style>
 @endsection
