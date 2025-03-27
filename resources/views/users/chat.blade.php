@@ -111,6 +111,41 @@
                         <form id="chat-form" enctype="multipart/form-data">
                             @csrf
                             <input type="hidden" id="current-user-id" name="user_id" value="1">
+                            
+                            <!-- Превью прикрепленного файла -->
+                            <div id="file-preview" class="hidden mb-2 bg-gray-100 p-2 rounded-md text-xs text-gray-700 border-l-4 border-indigo-500">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span id="file-preview-name"></span>
+                                    </div>
+                                    <button type="button" id="cancel-file" class="text-gray-400 hover:text-gray-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Превью ответа -->
+                            <div id="reply-preview"
+                                class="hidden mb-2 bg-gray-100 p-2 rounded-md text-xs text-gray-700 border-l-4 border-indigo-500">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium text-gray-500 mb-1">Ответ на сообщение:</p>
+                                        <p id="reply-content" class="text-sm"></p>
+                                    </div>
+                                    <button type="button" id="cancel-reply" class="text-gray-400 hover:text-gray-600">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <input type="hidden" id="reply-to" name="reply_to" value="">
+
                             <div class="flex items-center space-x-2 md:space-x-3">
                                 <!-- Поле ввода сообщения -->
                                 <div class="flex-1">
@@ -130,8 +165,6 @@
                                                 d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                                         </svg>
                                     </button>
-                                    <span id="file-name"
-                                        class="absolute top-full left-0 mt-1 text-2xs md:text-xs text-gray-500 whitespace-nowrap"></span>
                                 </div>
 
                                 <!-- Кнопка отправки -->
@@ -143,26 +176,6 @@
                                             d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                     </svg>
                                 </button>
-                            </div>
-
-                            <!-- Превью ответа -->
-                            <input type="hidden" id="reply-to" name="reply_to" value="">
-                            <div id="reply-preview"
-                                class="hidden mt-2 md:mt-3 bg-gray-100 p-2 md:p-3 rounded-md text-xs md:text-sm text-gray-700 border-l-4 border-indigo-500">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="font-medium text-2xs md:text-xs text-gray-500 mb-1">Ответ на сообщение:
-                                        </p>
-                                        <p id="reply-content" class="text-xs md:text-sm"></p>
-                                    </div>
-                                    <button type="button" id="cancel-reply" class="text-gray-400 hover:text-gray-600">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
                             </div>
                         </form>
                     </div>
@@ -178,7 +191,6 @@
             const chatForm = document.getElementById('chat-form');
             const attachBtn = document.getElementById('attach-btn');
             const fileInput = document.getElementById('attachment');
-            const fileName = document.getElementById('file-name');
             const replyToInput = document.getElementById('reply-to');
             const replyPreview = document.getElementById('reply-preview');
             const replyContent = document.getElementById('reply-content');
@@ -192,6 +204,9 @@
             const backToListBtn = document.getElementById('back-to-list');
             const userListContainer = document.getElementById('user-list-container');
             const chatContainer = document.getElementById('chat-container');
+            const filePreview = document.getElementById('file-preview');
+            const filePreviewName = document.getElementById('file-preview-name');
+            const cancelFileBtn = document.getElementById('cancel-file');
             const isMobile = window.innerWidth < 768;
 
             // Данные пользователей
@@ -517,22 +532,15 @@
 
             fileInput.addEventListener('change', function() {
                 if (fileInput.files.length > 0) {
-                    fileName.innerHTML = `
-                    <span>${fileInput.files[0].name}</span>
-                    <button type="button" class="ml-1 md:ml-2 text-red-500 hover:text-red-700" id="cancel-attachment">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                `;
-
-                    // Обработчик отмены прикрепления файла
-                    document.getElementById('cancel-attachment').addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        fileInput.value = '';
-                        fileName.textContent = '';
-                    });
+                    filePreviewName.textContent = fileInput.files[0].name;
+                    filePreview.classList.remove('hidden');
                 }
+            });
+
+            // Отмена прикрепления файла
+            cancelFileBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                filePreview.classList.add('hidden');
             });
 
             // Обработчик отправки формы
@@ -579,14 +587,14 @@
                     addMessageToChat(newMessage);
 
                     // Обновляем последнее сообщение в списке пользователей
-                    updateLastMessage(userId, message, 'candidate');
+                    updateLastMessage(userId, message || 'Файл', 'candidate');
 
                     // Очищаем форму
                     messageInput.value = '';
                     fileInput.value = '';
-                    fileName.textContent = ''; // Удаляем имя файла
-                    replyToInput.value = ''; // Удаляем ответ на сообщение
-                    replyPreview.classList.add('hidden'); // Скрываем превью ответа
+                    filePreview.classList.add('hidden');
+                    replyToInput.value = '';
+                    replyPreview.classList.add('hidden');
                 }
             });
 
@@ -724,46 +732,50 @@
             background: #a8a8a8;
         }
 
-        /* Стили для отображения прикрепленного файла */
-        #file-name {
-            display: flex;
-            align-items: center;
-            padding: 2px 4px;
-            background-color: #f3f4f6;
-            border-radius: 4px;
-            margin-top: 2px;
-        }
-
-        #file-name span {
-            max-width: 120px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        @media (min-width: 768px) {
-            #file-name span {
-                max-width: 200px;
-            }
-        }
-
-        #cancel-attachment {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        #cancel-attachment:hover {
-            color: #dc2626;
-        }
-
         /* Дополнительные классы для очень маленького текста */
         .text-2xs {
             font-size: 0.65rem;
             line-height: 0.9rem;
+        }
+
+        /* Стили для превью файла */
+        #file-preview {
+            transition: all 0.2s ease;
+        }
+
+        #file-preview:hover {
+            background-color: #e5e7eb;
+        }
+
+        #cancel-file {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        #cancel-file:hover {
+            color: #dc2626;
+        }
+
+        /* Стили для превью ответа */
+        #reply-preview {
+            transition: all 0.2s ease;
+        }
+
+        #reply-preview:hover {
+            background-color: #e5e7eb;
+        }
+
+        #cancel-reply {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        #cancel-reply:hover {
+            color: #dc2626;
         }
     </style>
 @endsection
