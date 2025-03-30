@@ -14,7 +14,12 @@ class Report extends Model
 		'report',
     ];
 
-    public function user(): BelongsTo
+    public function tutor()
+    {
+        return $this->belongsTo(User::class, 'tutor_id');
+    }
+
+    public function candidate()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

@@ -42,6 +42,7 @@ use App\MoonShine\Resources\MessageResource;
 use App\MoonShine\Resources\VacancyResource;
 use App\MoonShine\Resources\ReportResource;
 use App\MoonShine\Resources\TaskResource;
+use App\MoonShine\Resources\ApplicationResource;
 
 final class MoonShineLayout extends AppLayout
 {
@@ -67,7 +68,7 @@ final class MoonShineLayout extends AppLayout
             ],'building-office'),
             MenuGroup::make('Тестовые задания и заявки',[
                 MenuItem::make('Тестовые задания', TaskResource::class),
-                MenuItem::make('Заявки', MoonShineUserResource::class),
+                MenuItem::make('Заявки', ApplicationResource::class),
                 MenuItem::make('Статус выполнения', MoonShineUserResource::class),
             ],'document-magnifying-glass'),
             MenuGroup::make('Отчёты и вакансии',[

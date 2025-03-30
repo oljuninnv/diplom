@@ -20,6 +20,7 @@ use App\MoonShine\Resources\MessageResource;
 use App\MoonShine\Resources\VacancyResource;
 use App\MoonShine\Resources\ReportResource;
 use App\MoonShine\Resources\TaskResource;
+use App\MoonShine\Resources\ApplicationResource;
 
 class MoonShineServiceProvider extends ServiceProvider
 {
@@ -49,6 +50,7 @@ class MoonShineServiceProvider extends ServiceProvider
                 VacancyResource::class,
                 ReportResource::class,
                 TaskResource::class,
+                ApplicationResource::class,
             ])
             ->pages([
                 ...$config->getPages(),
