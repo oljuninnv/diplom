@@ -44,6 +44,13 @@ class UsersTableSeeder extends Seeder
                 'phone' => '+79050760021',
                 'role_id' => $roles->where('name', UserRoleEnum::ADMIN->value)->first()->id,
             ],
+            [
+                'name' => 'Super-Admin',
+                'email' => 'superadmin1@example.com',
+                'password' => Hash::make('password'),
+                'phone' => '+79050760021',
+                'role_id' => $roles->where('name', UserRoleEnum::SUPER_ADMIN->value)->first()->id,
+            ],
         ];
 
         foreach ($users as $user) {

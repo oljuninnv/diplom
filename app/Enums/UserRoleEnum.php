@@ -8,6 +8,7 @@ enum UserRoleEnum: string
     case WORKER = 'Worker';
     case TUTOR_WORKER = 'Tutor-worker';
     case ADMIN = 'Admin';
+    case SUPER_ADMIN = 'Super-Admin';
 
     public static function getAll(): array
     {
@@ -16,6 +17,7 @@ enum UserRoleEnum: string
             self::WORKER->value => self::WORKER->name,
             self::TUTOR_WORKER->value => self::TUTOR_WORKER->name,
             self::ADMIN->value => self::ADMIN->name,
+            self::SUPER_ADMIN->value => self::SUPER_ADMIN->name,
         ];
     }
 }

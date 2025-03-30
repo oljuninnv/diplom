@@ -15,6 +15,7 @@ class RolesTableSeeder extends Seeder
             ['name' => UserRoleEnum::WORKER->value],
             ['name' => UserRoleEnum::TUTOR_WORKER->value],
             ['name' => UserRoleEnum::ADMIN->value],
+            ['name' => UserRoleEnum::SUPER_ADMIN->value],
         ];
 
         foreach ($roles as $role) {

@@ -27,6 +27,8 @@ class TaskResource extends ModelResource
     protected string $model = Task::class;
     protected string $title = 'Тестовые задания';
 
+    protected string $column = 'title';
+
     protected bool $simplePaginate = true;
     protected bool $columnSelection = true;
     protected bool $createInModal = true;

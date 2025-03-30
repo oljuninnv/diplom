@@ -6,7 +6,6 @@ namespace App\MoonShine\Resources;
 
 use App\Enums\LevelOfExperienceEnum;
 use App\Models\Worker;
-
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Components\Layout\Box;

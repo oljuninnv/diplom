@@ -6,22 +6,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class TaskStatus extends Model
+class Call extends Model
 {
     protected $fillable = [
-		'user_id',
+		'type',
+		'meeting_link',
+		'date',
+		'time',
+		'candidate_id',
 		'tutor_id',
 		'hr_manager_id',
-		'task_id',
-		'github_repo',
-		'status',
-		'end_date',
-		'number_of_requests',
     ];
 
-    public function user(): BelongsTo
+    public function candidate(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'candidate_id');
     }
 
     public function tutor(): BelongsTo
@@ -32,10 +31,5 @@ class TaskStatus extends Model
     public function hr_manager(): BelongsTo
     {
         return $this->belongsTo(User::class, 'hr_manager_id');
-    }
-
-    public function task(): BelongsTo
-    {
-        return $this->belongsTo(Task::class, 'task_id');
     }
 }
