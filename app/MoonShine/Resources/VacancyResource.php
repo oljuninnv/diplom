@@ -24,6 +24,8 @@ class VacancyResource extends ModelResource
 
 	protected array $with = ['post'];
 
+    protected string $column = 'post.name';
+
     protected string $title = 'Вакансии';
 
     protected bool $simplePaginate = true;

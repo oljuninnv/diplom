@@ -17,6 +17,12 @@ use MoonShine\UI\Fields\Date;
 use MoonShine\Support\Attributes\Icon;
 use MoonShine\UI\Fields\DateRange;
 use App\Enums\ApplicationStatusEnum;
+use MoonShine\UI\Components\ActionButton;
+use MoonShine\Support\ListOf;
+use App\Actions\ApplicationAction;
+use MoonShine\Laravel\MoonShineRequest;
+use MoonShine\Support\Enums\JsEvent;
+use Moonshine\Support\AlpineJs;
 
 #[Icon('chat-bubble-bottom-center-text')]
 /**
@@ -58,6 +64,36 @@ class ApplicationResource extends ModelResource
         ];
     }
 
+    protected function indexButtons(): ListOf    
+    {
+        return parent::indexButtons()->add(
+                ActionButton::make('Одобрить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('approve'),
+                ActionButton::make('Отклонить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('decline')->async(),
+                ActionButton::make('Назначить созвон')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('assignCall')->async()
+            );
+    }
+
+    public function approve(MoonShineRequest $request)
+    {
+        $id = (int)$request->get('resourceItem');
+        $reportAction = new ApplicationAction();
+        $reportAction->approve($id);
+    }
+
+    public function decline(MoonShineRequest $request)
+    {
+        $id = (int)$request->get('resourceItem');
+        $reportAction = new ApplicationAction();
+        $reportAction->decline($id);
+
+    }
+
+    // public function assignCall(MoonShineRequest $request)
+    // {
+    //     $id = (int)$request->get('resourceItem');
+    //     $reportAction = new ApplicationAction();
+    //     $reportAction->approve($id);
+    // }
     public function formFields(): iterable
     {
         return [
