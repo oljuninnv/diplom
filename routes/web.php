@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CareerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,9 +24,8 @@ Route::post('login', [AuthController::class, 'login'])->name('auth');
 
 Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::get('/career', function () {
-    return view('career');
-})->name('career');
+Route::get('/career', [CareerController::class, 'index'])->name('career');
+Route::post('/career', [CareerController::class, 'submitApplication'])->name('career.submit');
 
 Route::get('/profile', function () {
     return view('users.user-information');
