@@ -11,9 +11,9 @@ enum TaskLevelEnum: string
     public static function getAll(): array
     {
         return [
-            self::junior->value => self::junior->name,
-            self::middle->value => self::middle->name,
-            self::senior->value => self::senior->name,
+            self::junior->value => self::junior->value,
+            self::middle->value => self::middle->value,
+            self::senior->value => self::senior->value,
         ];
     }
 }

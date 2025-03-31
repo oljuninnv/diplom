@@ -13,11 +13,11 @@ enum UserRoleEnum: string
     public static function getAll(): array
     {
         return [
-            self::USER->value => self::USER->name,
-            self::WORKER->value => self::WORKER->name,
-            self::TUTOR_WORKER->value => self::TUTOR_WORKER->name,
-            self::ADMIN->value => self::ADMIN->name,
-            self::SUPER_ADMIN->value => self::SUPER_ADMIN->name,
+            self::USER->value => self::USER->value,
+            self::WORKER->value => self::WORKER->value,
+            self::TUTOR_WORKER->value => self::TUTOR_WORKER->value,
+            self::ADMIN->value => self::ADMIN->value,
+            self::SUPER_ADMIN->value => self::SUPER_ADMIN->value,
         ];
     }
 }

@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Enums\ApplicationStatusEnum;
+use App\Enums\UserRoleEnum;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
+use App\Models\Role;
+use App\Models\Application;
 use App\Models\Vacancy;
 use App\Models\Department;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CareerApplication;
 use App\Mail\UserApplicationConfirmation;
+use App\Http\Requests\CareerApplicationRequest;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class CareerController extends Controller
 {
@@ -32,35 +39,74 @@ class CareerController extends Controller
     /**
      * Обрабатывает отправку формы заявки
      */
-    public function submitApplication(Request $request)
+    public function submitApplication(CareerApplicationRequest $request)
     {
-        // Валидация данных
-        $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|string|max:20',
-            'position' => 'required|string|max:255',
-            'resume' => 'required|file|mimes:pdf,doc,docx|max:2048',
-        ]);
-
-        // Сохраняем файл
-        $resumePath = $request->file('resume')->store('resumes');
-        $validatedData['resume_path'] = $resumePath;
+        // Валидация данных с кастомными сообщениями об ошибках
+        $validatedData = $request->validated();
 
         try {
-            // Отправляем письмо администратору
-            Mail::send(new CareerApplication($validatedData));
+            // Сохраняем файл с оригинальным именем
+            $resumeFile = $request->file('resume');
+            $resumePath = $resumeFile->storeAs(
+                'moonshine_applications',
+                time() . '_' . Str::slug($validatedData['name']) . '.' . $resumeFile->extension(),
+                'public'
+            );
 
-            // Отправляем письмо-подтверждение пользователю
-            Mail::to($validatedData['email'])->send(new UserApplicationConfirmation($validatedData));
+            // Получаем или создаем роль пользователя
+            $userRole = Role::firstOrCreate(
+                ['name' => UserRoleEnum::USER->value],
+                ['description' => 'Standard application user']
+            );
+
+            // Создаем пользователя
+            $user = User::create([
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'phone' => $validatedData['phone'],
+                'role_id' => $userRole->id,
+                'email_verified_at' => now(), // Помечаем email как подтвержденный
+            ]);
+
+            // Создаем заявку
+            Application::create([
+                'user_id' => $user->id,
+                'resume' => $resumePath,
+                'status' => ApplicationStatusEnum::PENDING->value,
+                'department_id' => $validatedData['position'],
+            ]);
+
+            $mailData = array_merge($validatedData, [
+                'resume_path' => $resumePath,
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'phone' => $validatedData['phone'],
+                'position' => Department::find($validatedData['position'])->name ?? $validatedData['position'],
+            ]);
+
+            // Отправка писем с обработкой возможных ошибок
+            try {
+                Mail::send(new CareerApplication($mailData));
+                Mail::to($validatedData['email'])->send(new UserApplicationConfirmation($mailData));
+            } catch (\Exception $mailException) {
+                Log::error('Ошибка отправки email: ' . $mailException->getMessage());
+            }
 
             return redirect()->route('career')
-                ->with('success', 'Ваша заявка успешно отправлена! На ваш email было отправлено подтверждение.');
+                ->with('success', 'Заявка успешно отправлена! Проверьте ваш email для подтверждения.');
+
         } catch (\Exception $e) {
-            Log::error('Ошибка отправки письма: ' . $e->getMessage());
 
-            return redirect()->route('career')
-                ->with('error', 'Произошла ошибка при отправке заявки. Пожалуйста, попробуйте позже.');
+            Log::error('Application Error: ' . $e->getMessage());
+            Log::error('Stack Trace: ' . $e->getTraceAsString());
+
+            if (isset($resumePath)) {
+                Storage::disk('public')->delete($resumePath);
+            }
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Произошла ошибка: ' . $e->getMessage());
         }
     }
 }
