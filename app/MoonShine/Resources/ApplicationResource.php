@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use MoonShine\UI\Fields\Hidden;
+use MoonShine\UI\Components\Modal;
 use App\Models\Application;
-
+use MoonShine\UI\Components\FormBuilder;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Components\Layout\Box;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\File;
+use App\Enums\UserRoleEnum;
+use App\Models\User;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
 use MoonShine\UI\Fields\Text;
 use MoonShine\UI\Fields\Select;
@@ -21,8 +25,6 @@ use MoonShine\UI\Components\ActionButton;
 use MoonShine\Support\ListOf;
 use App\Actions\ApplicationAction;
 use MoonShine\Laravel\MoonShineRequest;
-use MoonShine\Support\Enums\JsEvent;
-use Moonshine\Support\AlpineJs;
 
 #[Icon('chat-bubble-bottom-center-text')]
 /**
@@ -32,6 +34,8 @@ class ApplicationResource extends ModelResource
 {
     protected string $model = Application::class;
     protected string $title = 'Заявки';
+
+    protected string $column = 'id';
 
     protected bool $simplePaginate = true;
 
@@ -64,36 +68,72 @@ class ApplicationResource extends ModelResource
         ];
     }
 
-    protected function indexButtons(): ListOf    
+    protected function indexButtons(): ListOf
     {
         return parent::indexButtons()->add(
-                ActionButton::make('Одобрить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('approve'),
-                ActionButton::make('Отклонить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('decline')->async(),
-                ActionButton::make('Назначить созвон')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('assignCall')->async()
-            );
+            ActionButton::make('Одобрить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('approve'),
+            ActionButton::make('Отклонить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('decline'),
+            ActionButton::make('Назначить созвон')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
+                ->inModal(
+                    'Назначить созвон',
+                    fn(Application $application) => FormBuilder::make()
+                        ->name('assignCallModal')
+                        ->fields([
+                            Hidden::make('id')->setValue($application->id),
+                            Date::make('Дата', 'date')->sortable()->required(),
+                            Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
+                            Select::make('Тьютор', 'tutor')
+                                ->options(
+                                    User::query()
+                                        ->whereHas('role', function ($query) {
+                                            $query->where('name', UserRoleEnum::TUTOR_WORKER);
+                                        })
+                                        ->pluck('name', 'id')
+                                        ->toArray()
+                                )
+                                ->required()
+                                ->sortable()
+                                ->searchable(),
+                            Select::make('HR-мэнеджер', 'hr-manager')
+                                ->options(
+                                    User::query()
+                                        ->whereHas('role', function ($query) {
+                                            $query->where('name', UserRoleEnum::ADMIN);
+                                        })
+                                        ->pluck('name', 'id')
+                                        ->toArray()
+                                )
+                                ->required()
+                                ->sortable()
+                                ->searchable(),
+                        ])
+                        ->asyncMethod('assignCall')
+                        ->submit('Назначить')
+                )
+
+            // ->toggleModal('my-modal')
+        );
     }
 
     public function approve(MoonShineRequest $request)
     {
-        $id = (int)$request->get('resourceItem');
+        $id = (int) $request->get('resourceItem');
         $reportAction = new ApplicationAction();
         $reportAction->approve($id);
     }
 
     public function decline(MoonShineRequest $request)
     {
-        $id = (int)$request->get('resourceItem');
+        $id = (int) $request->get('resourceItem');
         $reportAction = new ApplicationAction();
         $reportAction->decline($id);
 
     }
 
-    // public function assignCall(MoonShineRequest $request)
-    // {
-    //     $id = (int)$request->get('resourceItem');
-    //     $reportAction = new ApplicationAction();
-    //     $reportAction->approve($id);
-    // }
+    public function assignCall(MoonShineRequest $request)
+    {
+        \Log::info($request->all());
+    }
     public function formFields(): iterable
     {
         return [

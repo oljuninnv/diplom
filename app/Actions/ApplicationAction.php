@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Application;
 use App\Enums\ApplicationStatusEnum;
+use App\Models\Call;
 
 class ApplicationAction
 {
@@ -24,6 +25,16 @@ class ApplicationAction
      * Отклонить заявку
      */
     public function decline(int $id): string
+    {
+        $application = Application::findOrFail($id);
+        $application->update([
+            'status' => ApplicationStatusEnum::REJECTED->value
+        ]);
+        
+        return 'Заявка отклонена.';
+    }
+
+    public function assignCall(int $id): string
     {
         $application = Application::findOrFail($id);
         $application->update([
