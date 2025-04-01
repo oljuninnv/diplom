@@ -87,7 +87,7 @@ class TaskStatusResource extends ModelResource
                     ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::ADMIN->value)))
                     ->required()
                     ->searchable(),
-                Select::make('Задание', 'task')
+                Select::make('Задание', 'task_id')
                     ->required()
                     ->options(Task::query()->get()->pluck('title', 'id')->toArray())
                     ->searchable()

@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use MoonShine\UI\Fields\Hidden;
-use MoonShine\UI\Components\Modal;
+use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
+use App\Models\Task;
+use App\Models\Post;
+use App\Models\Department;
 use App\Models\Application;
 use MoonShine\UI\Components\FormBuilder;
 use MoonShine\Laravel\Resources\ModelResource;
@@ -71,7 +74,46 @@ class ApplicationResource extends ModelResource
     protected function indexButtons(): ListOf
     {
         return parent::indexButtons()->add(
-            ActionButton::make('Одобрить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('approve'),
+            ActionButton::make('Одобрить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
+                ->inModal(
+                    'Назначить тестовое задание',
+                    fn(Application $application) => FormBuilder::make()
+                        ->name('testTaskModal')
+                        ->fields([
+                            Hidden::make('id')->setValue($application->id),
+                            Select::make('Тьютор', 'tutor')
+                                ->options(
+                                    User::query()
+                                        ->whereHas('role', function ($query) {
+                                            $query->where('name', UserRoleEnum::TUTOR_WORKER);
+                                        })
+                                        ->pluck('name', 'id')
+                                        ->toArray()
+                                )
+                                ->required()
+                                ->sortable()
+                                ->searchable(),
+                            Select::make('HR-мэнеджер', 'hr-manager')
+                                ->options(
+                                    User::query()
+                                        ->whereHas('role', function ($query) {
+                                            $query->where('name', UserRoleEnum::ADMIN);
+                                        })
+                                        ->pluck('name', 'id')
+                                        ->toArray()
+                                )
+                                ->required()
+                                ->sortable()
+                                ->searchable(),
+                            Select::make('Задание', 'task_id')
+                                ->nullable()
+                                ->required()
+                                ->options(Task::query()->get()->pluck('title', 'id')->toArray())
+                                ->searchable(),
+                        ])
+                        ->asyncMethod('approve')
+                        ->submit('Назначить')
+                ),
             ActionButton::make('Отклонить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('decline'),
             ActionButton::make('Назначить созвон')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
                 ->inModal(
@@ -110,16 +152,14 @@ class ApplicationResource extends ModelResource
                         ->asyncMethod('assignCall')
                         ->submit('Назначить')
                 )
-
-            // ->toggleModal('my-modal')
         );
     }
 
     public function approve(MoonShineRequest $request)
     {
-        $id = (int) $request->get('resourceItem');
         $reportAction = new ApplicationAction();
-        $reportAction->approve($id);
+        $reportAction->approve($request->all());
+
     }
 
     public function decline(MoonShineRequest $request)
