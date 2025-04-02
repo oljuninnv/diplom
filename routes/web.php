@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\RestorePasswordController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,9 +55,9 @@ Route::get('/career', [CareerController::class, 'index'])->name('career');
 Route::post('/career', [CareerController::class, 'submitApplication'])->name('career.submit');
 
 // Страница профиля
-Route::get('/profile', function () {
-    return view('users.user-information');
-})->name('profile');
+Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile');
+Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
 // Задание
 Route::get('/task', function () {

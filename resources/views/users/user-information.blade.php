@@ -22,7 +22,7 @@
                 <!-- Вкладка личной информации -->
                 <div id="personal-content" class="tab-content p-6">
                     <div class="max-w-3xl mx-auto">
-                        <form action="{{ route('home') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
 
@@ -83,6 +83,7 @@
                                         @endif
                                     </div>
                                     <input type="file" id="avatar" name="avatar"
+                                        accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
                                         class="flex-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                                 </div>
                                 <p class="mt-1 text-xs text-gray-500">Рекомендуемый размер: 200×200 пикселей</p>
@@ -108,46 +109,51 @@
                             </div>
 
                             <!-- Информация о работнике -->
-                            @if (auth()->user()->role->name !== 'User')                               
-                             <div class="mb-6 border-t border-gray-200 pt-6">
+                            @if (auth()->user()->role->name !== 'User')
+                                <div class="mb-6 border-t border-gray-200 pt-6">
                                     <h3 class="text-lg font-medium text-gray-900 mb-4">Служебная информация</h3>
-                                    
+
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <!-- Отдел -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Отдел</label>
                                             <div class="relative">
-                                                <input type="text" value="{{ auth()->user()->worker->department->name ?? 'Не указано' }}"
+                                                <input type="text"
+                                                    value="{{ auth()->user()->worker->department->name ?? 'Не указано' }}"
                                                     class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
                                                     disabled readonly>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Должность -->
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Должность</label>
                                             <div class="relative">
-                                                <input type="text" value="{{ auth()->user()->worker->post->name ?? 'Не указано' }}"
+                                                <input type="text"
+                                                    value="{{ auth()->user()->worker->post->name ?? 'Не указано' }}"
                                                     class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
                                                     disabled readonly>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Уровень подготовки -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Уровень подготовки</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Уровень
+                                                подготовки</label>
                                             <div class="relative">
-                                                <input type="text" value="{{ auth()->user()?->worker->level_of_experience }}"
+                                                <input type="text"
+                                                    value="{{ auth()->user()?->worker->level_of_experience }}"
                                                     class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
                                                     disabled readonly>
                                             </div>
                                         </div>
-                                        
+
                                         <!-- Дата приема -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Дата приема на должность</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Дата приема на
+                                                должность</label>
                                             <div class="relative">
-                                                <input type="text" value="{{ auth()->user()->worker->hire_date}}"
+                                                <input type="text" value="{{ auth()->user()->worker->hire_date }}"
                                                     class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
                                                     disabled readonly>
                                             </div>
@@ -169,9 +175,19 @@
                 <!-- Вкладка смены пароля -->
                 <div id="password-content" class="tab-content hidden p-6">
                     <div class="max-w-3xl mx-auto">
-                        <form action="{{ route('home') }}" method="POST">
+                        <form action="{{ route('profile.password.update') }}" method="POST">
                             @csrf
                             @method('PUT')
+
+                            @if ($errors->any())
+                                <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                                    <ul class="list-disc list-inside">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
 
                             <div class="mb-6">
                                 <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">Новый
