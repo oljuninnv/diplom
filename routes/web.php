@@ -24,6 +24,12 @@ Route::post('login', [AuthController::class, 'login'])->name('auth');
 
 Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/auth/restore-password/{user}', [AuthController::class, 'showRestorePasswordForm'])
+    ->name('restore-password.form');
+
+Route::post('/auth/restore-password/{user}', [AuthController::class, 'restorePassword'])
+    ->name('restore-password');
+
 Route::get('/career', [CareerController::class, 'index'])->name('career');
 Route::post('/career', [CareerController::class, 'submitApplication'])->name('career.submit');
 
