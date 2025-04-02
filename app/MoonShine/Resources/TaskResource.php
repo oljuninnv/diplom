@@ -64,6 +64,7 @@ class TaskResource extends ModelResource
         return [
             Box::make([
                 Text::make('Название', 'title')
+                    ->placeholder('Название (Должность: {должность}, Уровень: {уровень}')
                     ->required(),
                 File::make('Задание', 'task')
                     ->disk(moonshineConfig()->getDisk())

@@ -13,8 +13,12 @@ use App\Models\Application;
 use MoonShine\UI\Components\FormBuilder;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Components\Layout\Box;
+use MoonShine\UI\Fields\HiddenIds;
 use MoonShine\UI\Fields\ID;
 use MoonShine\UI\Fields\File;
+use MoonShine\UI\Components\Layout\Div;
+use MoonShine\UI\Collections\Fields;
+use MoonShine\UI\Components\Modal;
 use App\Enums\UserRoleEnum;
 use App\Models\User;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
@@ -121,7 +125,7 @@ class ApplicationResource extends ModelResource
                     fn(Application $application) => FormBuilder::make()
                         ->name('assignCallModal')
                         ->fields([
-                            Hidden::make('id')->setValue($application->id),
+                            ID::make('id')->setValue($application->id),
                             Date::make('Дата', 'date')->sortable()->required(),
                             Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
                             Select::make('Тьютор', 'tutor')
@@ -151,9 +155,102 @@ class ApplicationResource extends ModelResource
                         ])
                         ->asyncMethod('assignCall')
                         ->submit('Назначить')
-                )
+                ),
+            // ActionButton::make('Test')->inModal(
+            //     'Одобрить заявку',
+            //     fn() => '',
+            //     builder: fn(Modal $modal) => $modal->setComponents([
+            //         $this->form()
+            //     ]),
+            // ),
         );
+
     }
+
+    // private function form(): FormBuilder
+    // {
+    //     return FormBuilder::make()
+    //         ->name('asign')
+    //         ->fields([
+    //             Hidden::make('id', 'id'),
+    //             Date::make('Дата', 'date')->sortable()->required(),
+    //             Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
+    //             Select::make('Тьютор', 'tutor')
+    //                 ->options(
+    //                     User::query()
+    //                         ->whereHas('role', function ($query) {
+    //                             $query->where('name', UserRoleEnum::TUTOR_WORKER);
+    //                         })
+    //                         ->pluck('name', 'id')
+    //                         ->toArray()
+    //                 )
+    //                 ->required()
+    //                 ->sortable()
+    //                 ->searchable(),
+    //             Select::make('HR-мэнеджер', 'hr-manager')
+    //                 ->options(
+    //                     User::query()
+    //                         ->whereHas('role', function ($query) {
+    //                             $query->where('name', UserRoleEnum::ADMIN);
+    //                         })
+    //                         ->pluck('name', 'id')
+    //                         ->toArray()
+    //                 )
+    //                 ->required()
+    //                 ->sortable()
+    //                 ->searchable(),
+    //             Select::make('Отделы', 'department_id')
+    //                 ->nullable()
+    //                 ->options(Department::query()->get()->pluck('name', 'id')->toArray())
+    //                 ->reactive(function (FieldsContract $fields, ?string $value) {
+    //                     $fields->findByColumn('post_id')
+    //                             ?->options(
+    //                             Post::where('department_id', $value)
+    //                                 ->get()
+    //                                 ->pluck('name', 'id')
+    //                                 ->toArray()
+    //                         );
+
+    //                     return $fields;
+    //                 })
+    //                 ->searchable()
+    //                 ->required(),
+
+    //             Select::make('Должность', 'post_id')
+    //                 ->nullable()
+    //                 ->options(Post::query()->get()->pluck('name', 'id')->toArray())
+    //                 ->reactive(function (FieldsContract $fields, ?string $value) {
+    //                     $fields->findByColumn('task_id')
+    //                             ?->options(
+    //                             Task::where('post_id', $value)
+    //                                 ->get()
+    //                                 ->pluck('title', 'id')
+    //                                 ->toArray()
+    //                         );
+
+    //                     return $fields;
+    //                 })
+    //                 ->required()
+    //                 ->searchable(),
+
+    //             Select::make('Задание', 'task_id')
+    //                 ->nullable()
+    //                 ->options(Task::query()->get()->pluck('title', 'id')->toArray())
+    //                 ->reactive()
+    //                 ->required()
+    //                 ->searchable(),
+    //         ])->asyncMethod('assignCall')
+    //         ->submit('Назначить');
+    // }
+
+    // protected function pageComponents(): array
+    // {
+    //     return [
+    //         Div::make([
+    //             $this->form()
+    //         ])->style('display: none'),
+    //     ];
+    // }
 
     public function approve(MoonShineRequest $request)
     {

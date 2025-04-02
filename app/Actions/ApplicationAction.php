@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Enums\ApplicationStatusEnum;
 use App\Models\Call;
 use App\Mail\ApplicationApprovedMail;
+use App\Mail\ApplicationRejectedMail;
 use App\Mail\UserAddedMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
@@ -75,6 +76,12 @@ class ApplicationAction
             'status' => ApplicationStatusEnum::REJECTED->value
         ]);
 
+        $user = User::findOrFail($application->user_id);
+
+        Mail::to($user->email)->send(
+            new ApplicationRejectedMail($user)
+        );
+
         return 'Заявка отклонена.';
     }
 
@@ -84,7 +91,7 @@ class ApplicationAction
         $application->update([
             'status' => ApplicationStatusEnum::REJECTED->value
         ]);
-
+        
         return 'Заявка отклонена.';
     }
 }
