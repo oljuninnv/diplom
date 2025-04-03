@@ -19,6 +19,10 @@ class TaskStatus extends Model
 		'number_of_requests',
     ];
 
+    protected $casts = [
+        'end_date' => 'datetime',
+    ];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

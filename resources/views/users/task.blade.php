@@ -8,24 +8,32 @@
             <p class="mt-2 text-lg text-gray-600">Выполните задание и отправьте ссылку на репозиторий</p>
         </div>
 
+        @if(session('success'))
+            <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <!-- Карточка с заданием -->
         <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
             <div class="p-6 sm:p-8">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div class="mb-4 md:mb-0">
-                        <h2 class="text-xl font-semibold text-gray-800">Название задания</h2>
-                        <p class="mt-1 text-gray-600">Описание задания и требования к выполнению</p>
+                        <h2 class="text-xl font-semibold text-gray-800">{{ $taskStatus->task->title }}</h2>
+                        <p class="mt-1 text-gray-600">{{ $taskStatus->task->description ?? 'Описание задания и требования к выполнению' }}</p>
                         
                         <!-- Добавленная строка с датой окончания -->
+                        @if($taskStatus->end_date)
                         <div class="mt-2 flex items-center text-sm text-gray-500">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            Срок выполнения: <span class="font-medium ml-1">26.04.2025</span>
+                            Срок выполнения: <span class="font-medium ml-1">{{ $taskStatus->end_date->format('d.m.Y') }}</span>
                         </div>
+                        @endif
                     </div>
                     <div class="mt-4 md:mt-0 md:ml-4">
-                        <a href="/path/to/task/file.pdf" download
+                        <a href="{{ $fileUrl }}" download
                             class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                 fill="currentColor">
@@ -41,30 +49,40 @@
         </div>
 
         <!-- Форма для отправки решения -->
-        <div class="bg-white shadow rounded-lg overflow-hidden disabled-form" id="submit-form">
+        <div class="bg-white shadow rounded-lg overflow-hidden" id="submit-form">
             <div class="p-6 sm:p-8">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Отправить решение</h2>
-
-                <form id="github-form">
-                    @csrf
-
-                    <div class="mb-6">
-                        <label for="github-repo" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на GitHub
-                            репозиторий</label>
-                        <input type="url" id="github-repo" name="github_repo"
-                            class="github-input mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
-                            placeholder="https://github.com/username/repository"
-                            pattern="^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$" required>
-                        <p id="github-error" class="mt-1 text-xs text-red-500 hidden">Введите корректную ссылку на
-                            GitHub репозиторий (например, https://github.com/username/repository)</p>
-                        <p class="mt-1 text-xs text-gray-500">Форма временно неактивна. Отправка будет доступна позже.
-                        </p>
+        
+                @if(!$canEdit)
+                    <div class="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
+                        Решение отправлено на проверку. Вы не можете изменить ссылку на репозиторий.
+                        Если же вы ошиблись с репоизторием или не закончили задание, то напишите вашему HR-менеджеру
                     </div>
-
+                @endif
+        
+                <form id="github-form" action="{{ route('task.submit') }}" method="POST">
+                    @csrf
+        
+                    <div class="mb-6">
+                        <label for="github-repo" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на GitHub репозиторий</label>
+                        <input type="url" id="github-repo" name="github_repo"
+                            class="github-input mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring focus:ring-indigo-500 focus:border-indigo-500 @if(!$canEdit) bg-gray-100 cursor-not-allowed @endif"
+                            placeholder="https://github.com/username/repository"
+                            pattern="^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$" 
+                            value="{{ old('github_repo', $taskStatus->github_repo ?? '') }}"
+                            @if(!$canEdit) readonly @endif
+                            required>
+                        <p id="github-error" class="mt-1 text-xs text-red-500 hidden">Введите корректную ссылку на GitHub репозиторий</p>
+                        @error('github_repo')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+        
                     <div class="flex justify-end">
-                        <button type="submit" disabled
-                            class="px-6 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
-                            Отправить
+                        <button type="submit"
+                            class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 @if(!$canEdit) bg-gray-400 cursor-not-allowed @endif"
+                            @if(!$canEdit) disabled @endif>
+                            @if($canEdit) Отправить @else Отправлено @endif
                         </button>
                     </div>
                 </form>
@@ -97,17 +115,9 @@
         githubRepoInput.addEventListener('blur', validateGitHubRepo);
 
         githubForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (validateGitHubRepo()) {
-                // Здесь будет код для отправки формы
-                alert('Форма временно неактивна!');
+            if (!validateGitHubRepo()) {
+                e.preventDefault();
             }
         });
-
-        // Активация формы (убрать класс disabled-form и атрибут disabled у кнопки)
-        // function enableForm() {
-        //     document.getElementById('submit-form').classList.remove('disabled-form');
-        //     document.querySelector('#github-form button[type="submit"]').removeAttribute('disabled');
-        // }
     </script>
 @endsection

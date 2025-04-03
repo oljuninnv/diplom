@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\RestorePasswordController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CandidateTaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,9 +61,10 @@ Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name
 Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
 // Задание
-Route::get('/task', function () {
-    return view('users.task');
-})->name('task');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/task', [CandidateTaskController::class, 'show'])->name('task');
+    Route::post('/task/submit', [CandidateTaskController::class, 'submit'])->name('task.submit');
+});
 
 // Чат кандидата
 Route::get('/chat', function () {
