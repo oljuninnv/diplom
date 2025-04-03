@@ -6,6 +6,8 @@ use App\Http\Controllers\CareerController;
 use App\Http\Controllers\RestorePasswordController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CandidateTaskController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\TaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -67,9 +69,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Чат кандидата
-Route::get('/chat', function () {
-    return view('users.chat');
-})->name('chat');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/chat/{interlocutor?}', [ChatController::class, 'index'])->name('chat');
+    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+});
 
 // Чат сотрудников
 Route::get('/worker-chat', function () {
@@ -77,9 +80,15 @@ Route::get('/worker-chat', function () {
 })->name('worker-chat');
 
 // Список задач
-Route::get('/tasks', function () {
-    return view('workers.tasks');
-})->name('tasks');
+Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
+Route::prefix('api/tasks')->group(function () {
+    Route::get('/', [TaskController::class, 'getTasks']);
+    Route::get('/candidate/{id}', [TaskController::class, 'getCandidateInfo']);
+    Route::get('/task/{userId}/{taskId}', [TaskController::class, 'getTaskInfo']);
+    Route::put('/status/{userId}/{taskId}', [TaskController::class, 'updateStatus']);
+    Route::post('/report/{userId}/{taskId}', [TaskController::class, 'createReport']);
+    Route::get('/statuses', [TaskController::class, 'getStatuses']);
+});
 
 // Созвоны
 Route::get('/meeting', function () {

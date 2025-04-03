@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\MoonShine\Resources;
 
 use App\Models\Report;
+use App\Models\TaskStatus;
 use App\Models\User;
 use MoonShine\Laravel\Resources\ModelResource;
 use MoonShine\UI\Components\Layout\Box;
@@ -28,7 +29,7 @@ class ReportResource extends ModelResource
     protected string $model = Report::class;
     protected string $title = 'Отчёты';
 
-    protected array $with = ['tutor', 'candidate'];
+    protected array $with = ['tutor', 'candidate', 'task'];
 
     protected bool $simplePaginate = true;
     protected bool $columnSelection = true;
@@ -48,6 +49,23 @@ class ReportResource extends ModelResource
             BelongsTo::make('Кандидат', 'candidate', resource: UserResource::class)
                 ->valuesQuery(fn(Builder $q) => $q->whereIn('role_id', Role::where('name', UserRoleEnum::USER)->pluck('id')))
                 ->sortable()
+                ->searchable(),
+                Select::make('Задание', 'task_id')
+                ->options(
+                    TaskStatus::with(['user', 'task'])
+                        ->get()
+                        ->mapWithKeys(function ($taskStatus) {
+                            return [
+                                $taskStatus->id => sprintf(
+                                    '%s - %s',
+                                    $taskStatus->user->name ?? 'Без кандидата',
+                                    $taskStatus->task->title ?? 'Без задания'
+                                )
+                            ];
+                        })
+                        ->toArray()
+                )
+                ->required()
                 ->searchable(),
             File::make('Отчёт', 'report')
                 ->disk(moonshineConfig()->getDisk())
@@ -72,6 +90,23 @@ class ReportResource extends ModelResource
                     ->required()
                     ->searchable()
                     ->creatable(),
+                Select::make('Задание', 'task_id')
+                    ->options(
+                        TaskStatus::with(['user', 'task'])
+                            ->get()
+                            ->mapWithKeys(function ($taskStatus) {
+                                return [
+                                    $taskStatus->id => sprintf(
+                                        '%s - %s',
+                                        $taskStatus->user->name ?? 'Без кандидата',
+                                        $taskStatus->task->title ?? 'Без задания'
+                                    )
+                                ];
+                            })
+                            ->toArray()
+                    )
+                    ->required()
+                    ->searchable(),
                 File::make('Отчёт', 'report')
                     ->disk(moonshineConfig()->getDisk())
                     ->dir('moonshine_reports')

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Task extends Model
 {
@@ -15,6 +16,11 @@ class Task extends Model
 		'level',
 		'deadline',
     ];
+
+    public function getDocumentUrlAttribute()
+  {
+      return $this->document_path ? Storage::url($this->document_path) : null;
+  }
 
     public function post(): BelongsTo
     {

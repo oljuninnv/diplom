@@ -34,6 +34,7 @@
                     <label for="perPage" class="block text-sm font-medium text-gray-700 mb-1">На странице</label>
                     <select id="perPage"
                         class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="2">2</option>
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
                         <option value="20">20</option>
@@ -126,208 +127,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Фиктивные данные
-            const candidates = [{
-                    id: 1,
-                    name: "Иван Иванов",
-                    avatar: "https://i.pravatar.cc/150?img=1",
-                    email: "ivan@example.com",
-                    phone: "+7 (123) 456-7890",
-                    telegram: "@ivanov",
-                    task: {
-                        id: 101,
-                        title: "Разработка SPA на Vue.js",
-                        difficulty: "Средняя",
-                        description: "Создать одностраничное приложение с использованием Vue 3 и Vuex",
-                        document: "/tasks/vue-test.pdf",
-                        github: "https://github.com/ivanov/vue-test-task",
-                        status: "в процессе",
-                        deadline: "15.06.2023",
-                        created_at: "2023-05-10"
-                    }
-                },
-                {
-                    id: 2,
-                    name: "Мария Петрова",
-                    avatar: "https://i.pravatar.cc/150?img=2",
-                    email: "maria@example.com",
-                    phone: "+7 (123) 456-7891",
-                    telegram: "@petrova",
-                    task: {
-                        id: 102,
-                        title: "Создание API на Node.js",
-                        difficulty: "Высокая",
-                        description: "Разработать RESTful API с использованием Express.js",
-                        document: "/tasks/node-api.pdf",
-                        status: "завершено",
-                        deadline: "01.07.2023",
-                        created_at: "2023-06-01"
-                    }
-                },
-                {
-                    id: 3,
-                    name: "Алексей Смирнов",
-                    avatar: "https://i.pravatar.cc/150?img=3",
-                    email: "alexey@example.com",
-                    phone: "+7 (123) 456-7892",
-                    telegram: "@smirnov",
-                    task: {
-                        id: 103,
-                        title: "Разработка мобильного приложения",
-                        difficulty: "Средняя",
-                        description: "Создать кроссплатформенное приложение на React Native",
-                        document: "/tasks/react-native-app.pdf",
-                        status: "в процессе",
-                        deadline: "20.08.2023",
-                        created_at: "2023-07-15"
-                    }
-                },
-                {
-                    id: 4,
-                    name: "Ольга Васильева",
-                    avatar: "https://i.pravatar.cc/150?img=4",
-                    email: "olga@example.com",
-                    phone: "+7 (123) 456-7893",
-                    telegram: "@vasilieva",
-                    task: {
-                        id: 104,
-                        title: "Дизайн веб-сайта",
-                        difficulty: "Низкая",
-                        description: "Создать макет для нового корпоративного сайта",
-                        document: "/tasks/web-design.pdf",
-                        status: "в процессе",
-                        deadline: "10.09.2023",
-                        created_at: "2023-08-01"
-                    }
-                },
-                {
-                    id: 5,
-                    name: "Дмитрий Кузнецов",
-                    avatar: "https://i.pravatar.cc/150?img=5",
-                    email: "dmitry@example.com",
-                    phone: "+7 (123) 456-7894",
-                    telegram: "@kuznetsov",
-                    task: {
-                        id: 105,
-                        title: "Тестирование программного обеспечения",
-                        difficulty: "Средняя",
-                        description: "Провести тестирование нового программного обеспечения",
-                        document: "/tasks/software-testing.pdf",
-                        status: "завершено",
-                        deadline: "30.06.2023",
-                        created_at: "2023-05-20"
-                    }
-                },
-                {
-                    id: 6,
-                    name: "Елена Федорова",
-                    avatar: "https://i.pravatar.cc/150?img=6",
-                    email: "elena@example.com",
-                    phone: "+7 (123) 456-7895",
-                    telegram: "@fedorova",
-                    task: {
-                        id: 106,
-                        title: "Анализ данных",
-                        difficulty: "Высокая",
-                        description: "Провести анализ данных для бизнес-отчета",
-                        document: "/tasks/data-analysis.pdf",
-                        status: "в процессе",
-                        deadline: "15.10.2023",
-                        created_at: "2023-09-01"
-                    }
-                },
-                {
-                    id: 7,
-                    name: "Сергей Николаев",
-                    avatar: "https://i.pravatar.cc/150?img=7",
-                    email: "sergey@example.com",
-                    phone: "+7 (123) 456-7896",
-                    telegram: "@nikolaev",
-                    task: {
-                        id: 107,
-                        title: "Оптимизация базы данных",
-                        difficulty: "Средняя",
-                        description: "Оптимизировать существующую базу данных",
-                        document: "/tasks/db-optimization.pdf",
-                        status: "в процессе",
-                        deadline: "25.11.2023",
-                        created_at: "2023-10-01"
-                    }
-                },
-                {
-                    id: 8,
-                    name: "Анна Сергеева",
-                    avatar: "https://i.pravatar.cc/150?img=8",
-                    email: "anna@example.com",
-                    phone: "+7 (123) 456-7897",
-                    telegram: "@sergeeva",
-                    task: {
-                        id: 108,
-                        title: "Разработка чат-бота",
-                        difficulty: "Высокая",
-                        description: "Создать чат-бота для поддержки клиентов",
-                        document: "/tasks/chatbot-development.pdf",
-                        status: "в процессе",
-                        deadline: "05.12.2023",
-                        created_at: "2023-11-01"
-                    }
-                },
-                {
-                    id: 9,
-                    name: "Виктория Лебедева",
-                    avatar: "https://i.pravatar.cc/150?img=9",
-                    email: "victoria@example.com",
-                    phone: "+7 (123) 456-7898",
-                    telegram: "@lebedeva",
-                    task: {
-                        id: 109,
-                        title: "Создание презентации",
-                        difficulty: "Низкая",
-                        description: "Подготовить презентацию для конференции",
-                        document: "/tasks/presentation.pdf",
-                        status: "завершено",
-                        deadline: "15.06.2023",
-                        created_at: "2023-05-15"
-                    }
-                },
-                {
-                    id: 10,
-                    name: "Артем Григорьев",
-                    avatar: "https://i.pravatar.cc/150?img=10",
-                    email: "artem@example.com",
-                    phone: "+7 (123) 456-7899",
-                    telegram: "@grigorev",
-                    task: {
-                        id: 110,
-                        title: "Разработка игры",
-                        difficulty: "Высокая",
-                        description: "Создать простую 2D-игру на Unity",
-                        document: "/tasks/game-development.pdf",
-                        status: "в процессе",
-                        deadline: "01.01.2024",
-                        created_at: "2023-12-01"
-                    }
-                },
-                {
-                    id: 11,
-                    name: "Ксения Соколова",
-                    avatar: "https://i.pravatar.cc/150?img=11",
-                    email: "kseniya@example.com",
-                    phone: "+7 (123) 456-7800",
-                    telegram: "@sokolova",
-                    task: {
-                        id: 111,
-                        title: "Создание сайта-визитки",
-                        difficulty: "Низкая",
-                        description: "Разработать сайт-визитку для личного бренда",
-                        document: "/tasks/landing-page.pdf",
-                        status: "в процессе",
-                        deadline: "20.02.2024",
-                        created_at: "2024-01-01"
-                    }
-                }
-            ];
-
             // DOM элементы
             const candidatesTable = document.getElementById('candidates-table');
             const searchInput = document.getElementById('search');
@@ -347,17 +146,17 @@
             // Настройки пагинации
             let currentPage = 1;
             let itemsPerPage = parseInt(perPageSelect.value);
-            let filteredCandidates = [...candidates];
+            let totalItems = 0;
 
             // Инициализация
             function init() {
-                renderTable();
+                loadData();
                 setupEventListeners();
             }
 
             // Настройка обработчиков событий
             function setupEventListeners() {
-                searchInput.addEventListener('input', filterCandidates);
+                searchInput.addEventListener('input', debounce(filterCandidates, 300));
                 statusFilter.addEventListener('change', filterCandidates);
                 perPageSelect.addEventListener('change', updateItemsPerPage);
 
@@ -368,98 +167,251 @@
                 paginationElements.nextMobile.addEventListener('click', goToNextPage);
             }
 
-            // Рендер таблицы
-            function renderTable() {
-                const startIndex = (currentPage - 1) * itemsPerPage;
-                const paginatedItems = filteredCandidates.slice(startIndex, startIndex + itemsPerPage);
+            // Загрузка данных с сервера
+            function loadData() {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    perPage: itemsPerPage,
+                    search: searchInput.value,
+                    status: statusFilter.value
+                });
 
-                candidatesTable.innerHTML = paginatedItems.length > 0 ?
-                    paginatedItems.map(candidate => `
-    <tr class="hover:bg-gray-50">
-        <td class="px-6 py-4 whitespace-nowrap">
-            <div class="flex items-center cursor-pointer" onclick="showCandidateModal(${candidate.id})">
-                <img class="h-10 w-10 rounded-full" src="${candidate.avatar}" alt="${candidate.name}">
-                <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">${candidate.name}</div>
-                </div>
-            </div>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-            <div class="text-sm text-gray-900 cursor-pointer" onclick="showTaskModal(${candidate.id})">${candidate.task.title}</div>
-            <div class="text-sm text-gray-500">${candidate.task.difficulty}</div>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
-            ${candidate.task.deadline}
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap">
-    ${candidate.task.github ? 
-        `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
-                ${candidate.task.github}
-            </a>` 
-        : ''
-    }
-</td>
-        <td class="px-6 py-4 whitespace-nowrap">
-            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(candidate.task.status)}">
-                ${candidate.task.status}
-            </span>
-        </td>
-        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <button onclick="showStatusModal(${candidate.id})" class="text-blue-600 hover:text-blue-900 mr-3">Изменить статус</button>
-            <button onclick="showReportModal(${candidate.id})" class="text-indigo-600 hover:text-indigo-900">Создать отчёт</button>
-        </td>
-    </tr>
-`).join('') :
-                    `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Нет данных для отображения</td></tr>`;
-
-                updatePagination();
+                fetch(`/api/tasks?${params}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        totalItems = data.total;
+                        renderTable(data.data);
+                        updatePagination(data);
+                    })
+                    .catch(error => console.error('Error:', error));
             }
 
-            // Функции для модальных окон (должны быть глобальными)
+            // Рендер таблицы
+            function renderTable(candidates) {
+                candidatesTable.innerHTML = candidates.length > 0 ?
+                    candidates.map(candidate => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center cursor-pointer" onclick="showCandidateModal(${candidate.id})">
+                            <img class="h-10 w-10 rounded-full" src="${candidate.avatar}" alt="${candidate.name}">
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${candidate.name}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900 cursor-pointer" onclick="showTaskModal(${candidate.id}, ${candidate.task.id})">${candidate.task.title}</div>
+                        <div class="text-sm text-gray-500">${candidate.task.difficulty}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
+                        ${candidate.task.deadline || 'Не указан'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${candidate.task.github ? 
+                            `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
+                                                                    ${candidate.task.github}
+                                                                </a>` 
+                            : ''
+                        }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(candidate.task.status)}">
+                            ${candidate.task.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="showStatusModal(${candidate.id}, ${candidate.task.id})" class="text-blue-600 hover:text-blue-900 mr-3">Изменить статус</button>
+                        <button onclick="showReportModal(${candidate.id}, ${candidate.task.id})" class="text-indigo-600 hover:text-indigo-900">Создать отчёт</button>
+                    </td>
+                </tr>
+            `).join('') :
+                    `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Нет данных для отображения</td></tr>`;
+            }
+
+            // Функции для модальных окон
             window.showCandidateModal = function(candidateId) {
-                const candidate = candidates.find(c => c.id === candidateId);
-                // Заполняем модальное окно данными кандидата
-                document.getElementById('modal-candidate-name').textContent = candidate.name;
-                document.getElementById('modal-candidate-email').textContent = candidate.email;
-                document.getElementById('modal-candidate-phone').textContent = candidate.phone;
-                document.getElementById('modal-candidate-telegram').textContent = candidate.telegram;
-                // Показываем модальное окно
-                document.getElementById('candidate-modal').classList.remove('hidden');
+                fetch(`/api/tasks/candidate/${candidateId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('modal-candidate-name').textContent = data.name;
+                        document.getElementById('modal-candidate-email').textContent = data.email;
+                        document.getElementById('modal-candidate-phone').textContent = data.phone;
+                        document.getElementById('modal-candidate-telegram').textContent = data.telegram ||
+                            'Не указан';
+                        document.getElementById('candidate-modal').classList.remove('hidden');
+                    });
             };
 
-            window.showTaskModal = function(candidateId) {
-                const candidate = candidates.find(c => c.id === candidateId);
-                // Заполняем модальное окно данными задания
-                document.getElementById('modal-task-title').textContent = candidate.task.title;
-                document.getElementById('modal-task-difficulty').textContent = candidate.task.difficulty;
-                document.getElementById('modal-task-description').textContent = candidate.task.description;
-                document.getElementById('modal-task-document-link').href = candidate.task.document;
-                // Показываем модальное окно
-                document.getElementById('task-modal').classList.remove('hidden');
+            window.showTaskModal = function(candidateId, taskId) {
+                fetch(`/api/tasks/task/${candidateId}/${taskId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('modal-task-title').textContent = data.title;
+                        document.getElementById('modal-task-difficulty').textContent = data.difficulty;
+                        if (data.document) {
+                            document.getElementById('modal-task-document-link').href = data.document;
+                            document.getElementById('modal-task-document-link').classList.remove('hidden');
+                        } else {
+                            document.getElementById('modal-task-document-link').classList.add('hidden');
+                        }
+                        document.getElementById('task-modal').classList.remove('hidden');
+                    });
             };
 
-            window.showStatusModal = function(candidateId) {
-                const candidate = candidates.find(c => c.id === candidateId);
-                // Заполняем модальное окно
-                document.getElementById('status-candidate-name').textContent = candidate.name;
-                // Сбрасываем выбор статуса
-                document.querySelectorAll('input[name="status"]').forEach(radio => radio.checked = false);
-                // Показываем модальное окно
-                document.getElementById('status-modal').classList.remove('hidden');
+            window.showStatusModal = function(candidateId, taskId) {
+                fetch(`/api/tasks/candidate/${candidateId}`)
+                    .then(response => response.json())
+                    .then(candidateData => {
+                        fetch('/api/tasks/statuses')
+                            .then(response => response.json())
+                            .then(statuses => {
+                                const statusContainer = document.getElementById('status-options');
+                                statusContainer.innerHTML = '';
+
+                                for (const [value, label] of Object.entries(statuses)) {
+                                    const div = document.createElement('div');
+                                    div.className = 'flex items-center';
+
+                                    const input = document.createElement('input');
+                                    input.type = 'radio';
+                                    input.id = `status-${value}`;
+                                    input.name = 'status';
+                                    input.value = value;
+                                    input.className =
+                                        'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300';
+
+                                    const labelEl = document.createElement('label');
+                                    labelEl.htmlFor = `status-${value}`;
+                                    labelEl.className = 'ml-3 block text-sm font-medium text-gray-700';
+                                    labelEl.textContent = label;
+
+                                    div.appendChild(input);
+                                    div.appendChild(labelEl);
+                                    statusContainer.appendChild(div);
+                                }
+
+                                document.getElementById('status-candidate-name').textContent =
+                                    `Кандидат: ${candidateData.name}`;
+                                document.getElementById('status-form').dataset.candidateId =
+                                    candidateId;
+                                document.getElementById('status-form').dataset.taskId = taskId;
+                                document.getElementById('status-modal').classList.remove('hidden');
+                            });
+                    });
             };
 
-            window.showReportModal = function(candidateId) {
-                const candidate = candidates.find(c => c.id === candidateId);
-                // Заполняем модальное окно
-                document.getElementById('report-candidate-name').textContent = candidate.name;
-                // Сбрасываем форму
-                document.getElementById('report-form').reset();
-                // Показываем модальное окно
-                document.getElementById('report-modal').classList.remove('hidden');
+            window.submitStatusForm = function() {
+                const form = document.getElementById('status-form');
+                const candidateId = form.dataset.candidateId;
+                const taskId = form.dataset.taskId;
+                const status = form.querySelector('input[name="status"]:checked')?.value;
+
+                if (!status) {
+                    alert('Пожалуйста, выберите статус');
+                    return;
+                }
+
+                fetch(`/api/tasks/status/${candidateId}/${taskId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            status
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('status-modal').classList.add('hidden');
+                            loadData(); // Обновляем таблицу
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            };
+
+            window.showReportModal = function(candidateId, taskId) {
+                fetch(`/api/tasks/candidate/${candidateId}`)
+                    .then(response => response.json())
+                    .then(candidateData => {
+                        document.getElementById('report-candidate-name').textContent =
+                            `Кандидат: ${candidateData.name}`;
+                        document.getElementById('report-form').dataset.candidateId = candidateId;
+                        document.getElementById('report-form').dataset.taskId = taskId;
+                        document.getElementById('report-modal').classList.remove('hidden');
+                    });
+            };
+
+            window.submitReportForm = async function(event) {
+                event.preventDefault();
+
+                const form = document.getElementById('report-form');
+                const candidateId = form.dataset.candidateId;
+                const taskId = form.dataset.taskId;
+                const formData = new FormData(form);
+
+                // Добавляем CSRF-токен в FormData
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+                if (csrfToken) {
+                    formData.append('_token', csrfToken);
+                }
+
+                const fileInput = form.querySelector('input[type="file"]');
+                if (!fileInput.files.length) {
+                    alert('Пожалуйста, выберите файл отчёта');
+                    return;
+                }
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="animate-spin">⏳</span> Отправка...';
+
+                try {
+                    console.log('Sending report:', {
+                        candidateId,
+                        taskId,
+                        file: fileInput.files[0]
+                    });
+
+                    const response = await fetch(`/api/tasks/report/${candidateId}/${taskId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            // Не устанавливаем Content-Type, чтобы браузер сам установил с boundary
+                        },
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(
+                            errorData.message ||
+                            `Ошибка сервера: ${response.status} ${response.statusText}`
+                        );
+                    }
+
+                    const data = await response.json();
+                    alert(data.message || 'Отчёт успешно создан');
+                    document.getElementById('report-modal').classList.add('hidden');
+                    form.reset();
+                    loadData();
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert(error.message.includes('Failed to fetch') ?
+                        'Ошибка сети: проверьте соединение' :
+                        error.message
+                    );
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Создать отчёт';
+                }
             };
 
             // Вспомогательные функции
             function isDeadlinePassed(deadline) {
+                if (!deadline) return false;
                 const deadlineDate = new Date(deadline.split('.').reverse().join('-'));
                 return deadlineDate < new Date();
             }
@@ -476,49 +428,46 @@
                 return classes[status] || 'bg-gray-100 text-gray-800';
             }
 
-            // Фильтрация и сортировка
+            function debounce(func, wait) {
+                let timeout;
+                return function() {
+                    const context = this,
+                        args = arguments;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(context, args), wait);
+                };
+            }
+
+            // Фильтрация
             function filterCandidates() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const status = statusFilter.value;
-
-                filteredCandidates = candidates.filter(candidate => {
-                    const matchesSearch = candidate.name.toLowerCase().includes(searchTerm) ||
-                        candidate.task.title.toLowerCase().includes(searchTerm);
-                    const matchesStatus = status ? candidate.task.status === status : true;
-                    return matchesSearch && matchesStatus;
-                });
-
                 currentPage = 1;
-                renderTable();
+                loadData();
             }
 
             // Пагинация
             function updateItemsPerPage() {
                 itemsPerPage = parseInt(perPageSelect.value);
                 currentPage = 1;
-                renderTable();
+                loadData();
             }
 
-            function updatePagination() {
-                const totalItems = filteredCandidates.length;
-                const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-                paginationElements.from.textContent = (currentPage - 1) * itemsPerPage + 1;
-                paginationElements.to.textContent = Math.min(currentPage * itemsPerPage, totalItems);
-                paginationElements.total.textContent = totalItems;
+            function updatePagination(data) {
+                paginationElements.from.textContent = (data.current_page - 1) * data.per_page + 1;
+                paginationElements.to.textContent = Math.min(data.current_page * data.per_page, data.total);
+                paginationElements.total.textContent = data.total;
 
                 // Обновляем кнопки
-                paginationElements.prev.disabled = currentPage === 1;
-                paginationElements.next.disabled = currentPage === totalPages;
-                paginationElements.prevMobile.disabled = currentPage === 1;
-                paginationElements.nextMobile.disabled = currentPage === totalPages;
+                paginationElements.prev.disabled = data.current_page === 1;
+                paginationElements.next.disabled = data.current_page === data.last_page;
+                paginationElements.prevMobile.disabled = data.current_page === 1;
+                paginationElements.nextMobile.disabled = data.current_page === data.last_page;
 
                 // Обновляем номера страниц
                 paginationElements.numbers.innerHTML = '';
 
                 const maxVisiblePages = 5;
-                let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                let startPage = Math.max(1, data.current_page - Math.floor(maxVisiblePages / 2));
+                let endPage = Math.min(data.last_page, startPage + maxVisiblePages - 1);
 
                 if (endPage - startPage + 1 < maxVisiblePages) {
                     startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -528,11 +477,11 @@
                 for (let i = startPage; i <= endPage; i++) {
                     const pageBtn = document.createElement('button');
                     pageBtn.className =
-                        `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${i === currentPage ? 'bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`;
+                        `relative inline-flex items-center px-4 py-2 border text-sm font-medium ${i === data.current_page ? 'bg-blue-50 border-blue-500 text-blue-600' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`;
                     pageBtn.textContent = i;
                     pageBtn.addEventListener('click', () => {
                         currentPage = i;
-                        renderTable();
+                        loadData();
                     });
                     paginationElements.numbers.appendChild(pageBtn);
                 }
@@ -542,16 +491,15 @@
                 e.preventDefault();
                 if (currentPage > 1) {
                     currentPage--;
-                    renderTable();
+                    loadData();
                 }
             }
 
             function goToNextPage(e) {
                 e.preventDefault();
-                const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
-                if (currentPage < totalPages) {
+                if (currentPage < Math.ceil(totalItems / itemsPerPage)) {
                     currentPage++;
-                    renderTable();
+                    loadData();
                 }
             }
 

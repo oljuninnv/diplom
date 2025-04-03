@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use MoonShine\Permissions\Traits\HasMoonShinePermissions;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -34,6 +35,13 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'date',
     ];
+
+    public function getAvatarUrlAttribute()
+    {
+        return $this->avatar 
+            ? Storage::url($this->avatar) 
+            : 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
+    }
 
     public function role(): BelongsTo
     {

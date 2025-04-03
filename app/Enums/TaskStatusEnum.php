@@ -22,4 +22,13 @@ enum TaskStatusEnum: string
             self::FAILED->value => self::FAILED->value,
         ];
     }
+
+    public static function changeStatus(): array
+    {
+        return [
+            self::APPROVED->value => self::APPROVED->value,
+            self::REVISION->value => self::REVISION->value,
+            self::FAILED->value => self::FAILED->value,
+        ];
+    }
 }

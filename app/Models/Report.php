@@ -11,6 +11,7 @@ class Report extends Model
     protected $fillable = [
 		'tutor_id',
 		'user_id',
+        'task_id',
 		'report',
     ];
 
@@ -22,5 +23,10 @@ class Report extends Model
     public function candidate()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function task()
+    {
+        return $this->belongsTo(TaskStatus::class, 'task_id');
     }
 }
