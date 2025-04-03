@@ -14,6 +14,7 @@ class Message extends Model
         'receiver_id',
         'message',
         'document',
+        'answer_message_id',
         'read_at'
     ];
 
@@ -25,5 +26,10 @@ class Message extends Model
     public function receiver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'receiver_id');
+    }
+
+    public function answeredMessage(): BelongsTo
+    {
+        return $this->belongsTo(Message::class, 'answer_message_id');
     }
 }

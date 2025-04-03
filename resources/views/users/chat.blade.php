@@ -9,11 +9,10 @@
             </div>
 
             <!-- Контейнер чата -->
-            <div class="bg-white shadow rounded-lg overflow-hidden flex flex-col md:flex-row">
-                <!-- Список собеседников - скрыт на мобильных при открытом чате -->
+            <div class="bg-white shadow rounded-lg overflow-hidden flex flex-col md:flex-row h-[calc(100vh-150px)]">
+                <!-- Список собеседников -->
                 <div id="user-list-container"
-                    class="w-full md:w-1/3 border-r border-gray-200 bg-gray-50 overflow-y-auto md:block"
-                    style="height: calc(100vh - 150px);">
+                    class="w-full md:w-1/3 border-r border-gray-200 bg-gray-50 overflow-y-auto h-full">
                     <!-- Поиск -->
                     <div class="p-3 md:p-4 border-b border-gray-200">
                         <div class="relative">
@@ -32,85 +31,151 @@
 
                     <!-- Список собеседников -->
                     <div id="user-list">
-                        <!-- HR-менеджер -->
-                        <div class="user-item p-3 md:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative bg-indigo-50"
-                            data-user-id="1" data-unread="2">
+                        @foreach($interlocutors as $interlocutor)
+                        @php
+                            $lastMessage = \App\Models\Message::where(function($query) use ($interlocutor) {
+                                    $query->where('sender_id', Auth::id())
+                                        ->where('receiver_id', $interlocutor->id);
+                                })
+                                ->orWhere(function($query) use ($interlocutor) {
+                                    $query->where('sender_id', $interlocutor->id)
+                                        ->where('receiver_id', Auth::id());
+                                })
+                                ->latest()
+                                ->first();
+                            
+                            $lastMessageText = $lastMessage ? 
+                                ($lastMessage->sender_id == Auth::id() ? 'Вы: ' . Str::limit($lastMessage->message, 20) : Str::limit($lastMessage->message, 20)) : 
+                                'Нет сообщений';
+                            
+                            $lastMessageTime = $lastMessage ? $lastMessage->created_at->diffForHumans() : '';
+                            
+                            $unreadCount = \App\Models\Message::where('receiver_id', Auth::id())
+                                ->where('sender_id', $interlocutor->id)
+                                ->whereNull('read_at')
+                                ->count();
+                        @endphp
+                        <div class="user-item p-3 md:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative {{ $currentInterlocutor && $currentInterlocutor->id == $interlocutor->id ? 'bg-indigo-50' : '' }}"
+                            data-user-id="{{ $interlocutor->id }}" data-unread="{{ $unreadCount }}" data-name="{{ strtolower($interlocutor->name) }}" data-position="{{ strtolower($interlocutor->position) }}">
                             <div class="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden">
-                                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="HR-менеджер"
+                                <img src="{{ $interlocutor->avatar_url ?? 'https://randomuser.me/api/portraits/women/44.jpg' }}" alt="{{ $interlocutor->name }}"
                                     class="h-full w-full object-cover">
                             </div>
                             <div class="ml-2 md:ml-3 flex-1 min-w-0">
-                                <p class="text-xs md:text-sm font-medium text-gray-900">Елена Смирнова</p>
-                                <p class="text-2xs md:text-xs text-gray-500 mt-1">HR-менеджер</p>
+                                <p class="text-xs md:text-sm font-medium text-gray-900">{{ $interlocutor->name }}</p>
+                                <p class="text-2xs md:text-xs text-gray-500 mt-1">{{ $interlocutor->position }}</p>
                                 <div class="flex justify-between items-center mt-1">
-                                    <p class="text-2xs md:text-xs text-gray-500 truncate">HR: Проверим ваше тестовое
-                                        задание...</p>
-                                    <span class="text-2xs md:text-xs text-gray-400">12:45</span>
+                                    <p class="text-2xs md:text-xs text-gray-500 truncate">{{ $lastMessageText }}</p>
+                                    <span class="text-2xs md:text-xs text-gray-400">{{ $lastMessageTime }}</span>
                                 </div>
                             </div>
-                            <!-- Индикатор непрочитанных сообщений -->
-                            <div
-                                class="absolute right-2 md:right-4 top-3 md:top-4 bg-indigo-600 text-white text-2xs md:text-xs rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center">
-                                2
+                            @if($unreadCount > 0)
+                            <div class="absolute right-2 md:right-4 top-3 md:top-4 bg-indigo-600 text-white text-2xs md:text-xs rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center">
+                                {{ $unreadCount }}
                             </div>
+                            @endif
                         </div>
-
-                        <!-- Тьютор -->
-                        <div class="user-item p-3 md:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center"
-                            data-user-id="2" data-unread="0">
-                            <div class="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden">
-                                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Тьютор"
-                                    class="h-full w-full object-cover">
-                            </div>
-                            <div class="ml-2 md:ml-3 flex-1 min-w-0">
-                                <p class="text-xs md:text-sm font-medium text-gray-900">Алексей Иванов</p>
-                                <p class="text-2xs md:text-xs text-gray-500 mt-1">Тьютор</p>
-                                <div class="flex justify-between items-center mt-1">
-                                    <p class="text-2xs md:text-xs text-gray-500 truncate">Вы: Спасибо за пояснения!</p>
-                                    <span class="text-2xs md:text-xs text-gray-400">Вчера</span>
-                                </div>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
-                <!-- Правая часть с чатом - скрыта на мобильных по умолчанию -->
-                <div id="chat-container" class="hidden md:flex md:w-2/3 flex-col">
-                    <!-- Кнопка "Назад" для мобильных -->
-                    <div class="md:hidden p-2 border-b border-gray-200 bg-gray-50">
-                        <button id="back-to-list" class="p-1 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <!-- Правая часть с чатом -->
+                <div id="chat-container" class="hidden md:flex md:w-2/3 flex-col h-full relative">
+                    @if($currentInterlocutor)
+                    <!-- Шапка чата для мобильной версии -->
+                    <div class="md:hidden flex items-center p-3 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+                        <!-- Кнопка "Назад" -->
+                        <button id="back-to-list" class="p-1 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-200 mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
+                        
+                        <!-- Аватар и имя пользователя -->
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-8 w-8 rounded-full overflow-hidden">
+                                <img id="selected-user-avatar" src="{{ $currentInterlocutor->avatar_url ?? 'https://randomuser.me/api/portraits/women/44.jpg' }}"
+                                    alt="Аватар" class="h-full w-full object-cover">
+                            </div>
+                            <div class="ml-2">
+                                <p class="text-sm font-medium text-gray-900" id="selected-user-name">{{ $currentInterlocutor->name }}</p>
+                                <p class="text-xs text-gray-500" id="selected-user-role">{{ $currentInterlocutor->position }}</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Информация о выбранном пользователе -->
-                    <div class="border-b border-gray-200 p-3 md:p-4 bg-gray-50 flex items-center" id="selected-user-info">
+                    <!-- Информация о выбранном пользователе (десктоп) -->
+                    <div class="hidden md:flex border-b border-gray-200 p-3 md:p-4 bg-gray-50 items-center" id="selected-user-info">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden">
-                                <img id="selected-user-avatar" src="https://randomuser.me/api/portraits/women/44.jpg"
+                                <img id="selected-user-avatar-desktop" src="{{ $currentInterlocutor->avatar_url ?? 'https://randomuser.me/api/portraits/women/44.jpg' }}"
                                     alt="Аватар" class="h-full w-full object-cover">
                             </div>
                             <div class="ml-2 md:ml-3">
-                                <p class="text-xs md:text-sm font-medium text-gray-900" id="selected-user-name">Елена
-                                    Смирнова</p>
-                                <p class="text-2xs md:text-xs text-gray-500" id="selected-user-role">HR-менеджер</p>
+                                <p class="text-xs md:text-sm font-medium text-gray-900" id="selected-user-name-desktop">{{ $currentInterlocutor->name }}</p>
+                                <p class="text-2xs md:text-xs text-gray-500" id="selected-user-role-desktop">{{ $currentInterlocutor->position }}</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- История сообщений -->
-                    <div class="chat-container overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 flex-grow"
+                    <div class="chat-messages overflow-y-auto p-3 md:p-4 flex-grow"
                         id="chat-messages">
-                        <!-- Сообщения будут загружаться динамически -->
+                        @foreach($messages as $message)
+                        <div class="flex {{ $message->sender_id == Auth::id() ? 'justify-end' : 'justify-start' }} mb-2 md:mb-3 group" data-id="{{ $message->id }}" id="message-{{ $message->id }}">
+                            <div class="message-bubble {{ $message->sender_id == Auth::id() ? 'candidate-message' : ($message->sender->position == 'HR-менеджер' ? 'hr-message' : 'tutor-message') }} p-2 md:p-3 max-w-xs md:max-w-md lg:max-w-lg relative transition-all duration-200">
+                                @if($message->answer_message_id)
+                                    @php
+                                        $answeredMessage = $message->answeredMessage;
+                                    @endphp
+                                    @if($answeredMessage)
+                                    <div class="reply-container bg-{{ $message->sender_id == Auth::id() ? 'indigo-700' : 'gray-200' }} text-{{ $message->sender_id == Auth::id() ? 'white' : 'gray-800' }} text-2xs md:text-xs p-1 md:p-2 rounded mb-1 md:mb-2 border-l-4 border-{{ $message->sender_id == Auth::id() ? 'indigo-300' : 'gray-500' }}">
+                                        <p class="font-medium">{{ $answeredMessage->sender_id == Auth::id() ? 'Вы' : $answeredMessage->sender->name }}:</p>
+                                        <button class="view-original-message text-xs text-white hover:text-blue-700 mt-1" 
+                                            data-message-id="{{ $answeredMessage->id }}">
+                                            {{ Str::limit($answeredMessage->message, 50)}}
+                                        </button>
+                                    </div>
+                                    @endif
+                                @endif
+                                
+                                <p class="text-xs md:text-sm">{{ $message->message }}</p>
+                                
+                                @if($message->document)
+                                <div class="mt-1 md:mt-2">
+                                    <a href="{{ Storage::url($message->document) }}" download="{{ $message->original_filename }}" class="inline-flex items-center text-xs md:text-sm {{ $message->sender_id == Auth::id() ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500' }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        {{ $message->document }}
+                                    </a>
+                                </div>
+                                @endif
+                                
+                                <div class="flex justify-between items-center mt-1 md:mt-2">
+                                    <p class="text-2xs md:text-xs {{ $message->sender_id == Auth::id() ? 'text-gray-300' : 'text-gray-500' }}">{{ $message->created_at->format('H:i') }}</p>
+                                    <div class="flex space-x-2">
+                                        <button class="reply-btn text-2xs md:text-xs {{ $message->sender_id == Auth::id() ? 'text-gray-300' : 'text-indigo-600' }} hover:underline" data-id="{{ $message->id }}" data-text="{{ $message->message }}">Ответить</button>
+                                        @if($message->sender_id == Auth::id())
+                                        <form action="{{ route('chat.delete', $message->id) }}" method="POST" class="delete-message-form">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="text-2xs md:text-xs text-red-500 hover:text-red-700 delete-message-btn">Удалить</button>
+                                        </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
 
                     <!-- Форма отправки сообщения -->
-                    <div class="border-t border-gray-200 p-3 md:p-4 bg-gray-50">
-                        <form id="chat-form" enctype="multipart/form-data">
+                    <div class="border-t border-gray-200 p-3 md:p-4 bg-gray-50 sticky bottom-0">
+                        <form id="chat-form" action="{{ route('chat.send') }}" method="POST" enctype="multipart/form-data">
                             @csrf
-                            <input type="hidden" id="current-user-id" name="user_id" value="1">
+                            <input type="hidden" id="current-user-id" name="receiver_id" value="{{ $currentInterlocutor->id }}">
+                            <input type="hidden" id="answer-message-id" name="answer_message_id" value="">
                             
                             <!-- Превью прикрепленного файла -->
                             <div id="file-preview" class="hidden mb-2 bg-gray-100 p-2 rounded-md text-xs text-gray-700 border-l-4 border-indigo-500">
@@ -144,14 +209,13 @@
                                     </button>
                                 </div>
                             </div>
-                            <input type="hidden" id="reply-to" name="reply_to" value="">
 
                             <div class="flex items-center space-x-2 md:space-x-3">
                                 <!-- Поле ввода сообщения -->
                                 <div class="flex-1">
                                     <input type="text" id="message" name="message"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2 px-3 border text-sm md:text-base"
-                                        placeholder="Введите сообщение..." required>
+                                        placeholder="Введите сообщение...">
                                 </div>
 
                                 <!-- Кнопка прикрепления файла -->
@@ -179,6 +243,11 @@
                             </div>
                         </form>
                     </div>
+                    @else
+                    <div class="flex items-center justify-center h-full">
+                        <p class="text-gray-500">Выберите собеседника для начала общения</p>
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -191,498 +260,252 @@
             const chatForm = document.getElementById('chat-form');
             const attachBtn = document.getElementById('attach-btn');
             const fileInput = document.getElementById('attachment');
-            const replyToInput = document.getElementById('reply-to');
+            const answerMessageIdInput = document.getElementById('answer-message-id');
             const replyPreview = document.getElementById('reply-preview');
             const replyContent = document.getElementById('reply-content');
             const cancelReplyBtn = document.getElementById('cancel-reply');
             const currentUserIdInput = document.getElementById('current-user-id');
-            const selectedUserInfo = document.getElementById('selected-user-info');
-            const selectedUserName = document.getElementById('selected-user-name');
-            const selectedUserRole = document.getElementById('selected-user-role');
-            const selectedUserAvatar = document.getElementById('selected-user-avatar');
-            const userSearch = document.getElementById('user-search');
             const backToListBtn = document.getElementById('back-to-list');
             const userListContainer = document.getElementById('user-list-container');
             const chatContainer = document.getElementById('chat-container');
             const filePreview = document.getElementById('file-preview');
             const filePreviewName = document.getElementById('file-preview-name');
             const cancelFileBtn = document.getElementById('cancel-file');
-            const isMobile = window.innerWidth < 768;
-    
-            // Оригинальный заголовок страницы
-            const originalTitle = document.title;
-    
-            // Данные пользователей
-            const users = {
-                1: {
-                    id: 1,
-                    name: 'Елена Смирнова',
-                    role: 'HR-менеджер',
-                    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-                    unread: 2,
-                    lastMessage: {
-                        text: 'Проверим ваше тестовое задание',
-                        sender: 'hr',
-                        time: '12:45'
-                    }
-                },
-                2: {
-                    id: 2,
-                    name: 'Алексей Иванов',
-                    role: 'Тьютор',
-                    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-                    unread: 0,
-                    lastMessage: {
-                        text: 'Спасибо за пояснения!',
-                        sender: 'candidate',
-                        time: 'Вчера'
-                    }
-                }
-            };
-    
-            // История чатов
-            const chatHistories = {
-                1: [{
-                        id: 1,
-                        sender: 'hr',
-                        text: 'Здравствуйте! Мы получили ваше тестовое задание',
-                        time: '10:30',
-                        file: null,
-                        fileUrl: null
-                    },
-                    {
-                        id: 2,
-                        sender: 'candidate',
-                        text: 'Спасибо! Буду ждать обратной связи',
-                        time: '10:40',
-                        file: null,
-                        fileUrl: null
-                    },
-                    {
-                        id: 3,
-                        sender: 'hr',
-                        text: 'Проверим ваше тестовое задание в течение 2 дней',
-                        time: '12:45',
-                        file: null,
-                        fileUrl: null
-                    }
-                ],
-                2: [{
-                        id: 1,
-                        sender: 'tutor',
-                        text: 'Добрый день! Готов ответить на ваши вопросы по тестовому заданию',
-                        time: '11:15',
-                        file: null,
-                        fileUrl: null
-                    },
-                    {
-                        id: 2,
-                        sender: 'candidate',
-                        text: 'Спасибо за пояснения!',
-                        time: 'Вчера',
-                        file: null,
-                        fileUrl: null
-                    }
-                ]
-            };
-    
-            // Форматирование времени
-            function formatTime(date) {
-                const now = new Date();
-                const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
-    
-                if (diffDays === 0) {
-                    return date.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                } else if (diffDays === 1) {
-                    return 'Вчера';
-                } else if (diffDays < 7) {
-                    return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date.getDay()];
-                } else {
-                    return `${Math.floor(diffDays / 7)} нед.`;
-                }
+            const userSearch = document.getElementById('user-search');
+            
+            // Функция для определения мобильного устройства
+            function isMobileDevice() {
+                return window.innerWidth < 768;
             }
-    
-            // Подсветка и прокрутка к сообщению
-            function highlightAndScrollToMessage(messageId) {
-                document.querySelectorAll('.highlighted-message').forEach(el => {
-                    el.classList.remove('highlighted-message');
+            
+            const isMobile = isMobileDevice();
+
+            // Обработчик поиска пользователей
+            if (userSearch) {
+                userSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const userItems = document.querySelectorAll('.user-item');
+                    
+                    userItems.forEach(item => {
+                        const name = item.dataset.name;
+                        const position = item.dataset.position;
+                        
+                        if (name.includes(searchTerm) || position.includes(searchTerm)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
                 });
-    
-                const messageElement = document.querySelector(`[data-id="${messageId}"] .message-bubble`);
-                if (messageElement) {
-                    messageElement.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-    
-                    messageElement.classList.add('highlighted-message');
-    
-                    setTimeout(() => {
-                        messageElement.classList.remove('highlighted-message');
-                    }, 3000);
-                }
             }
-    
-            // Обновление последнего сообщения в списке
-            function updateLastMessage(userId, message, sender) {
-                const user = users[userId];
-                if (!user) return;
-    
-                const now = new Date();
-                user.lastMessage = {
-                    text: message,
-                    sender: sender,
-                    time: formatTime(now)
-                };
-    
-                const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
-                if (userItem) {
-                    const lastMessageEl = userItem.querySelectorAll(
-                        '.text-xs.text-gray-500, .text-2xs.text-gray-500')[1];
-                    const lastTimeEl = userItem.querySelector('.text-xs.text-gray-400, .text-2xs.text-gray-400');
-    
-                    if (lastMessageEl) {
-                        const prefix = sender === 'candidate' ? 'Вы: ' : `${user.role.split(' ')[0]}: `;
-                        lastMessageEl.textContent = prefix + message;
+
+            // Обработчик выбора пользователя
+            if (userList) {
+                userList.addEventListener('click', function(e) {
+                    const userItem = e.target.closest('.user-item');
+                    if (userItem) {
+                        const userId = userItem.dataset.userId;
+                        
+                        if (isMobile) {
+                            // В мобильной версии просто переходим на страницу чата
+                            window.location.href = `/chat/${userId}`;
+                        } else {
+                            window.location.href = `/chat/${userId}`;
+                        }
                     }
-    
-                    if (lastTimeEl) {
-                        lastTimeEl.textContent = user.lastMessage.time;
-                    }
-                }
-            }
-    
-            // Функция обновления заголовка вкладки с количеством непрочитанных сообщений
-            function updateTabTitle() {
-                let totalUnread = 0;
-                Object.values(users).forEach(user => {
-                    totalUnread += user.unread;
                 });
-    
-                document.title = totalUnread > 0 
-                    ? `(${totalUnread}) ${originalTitle}` 
-                    : originalTitle;
             }
-    
-            // Показываем уведомление о новом сообщении
-            function showNewMessageNotification(userId, message) {
-                const user = users[userId];
-                if (!user || document.hasFocus()) return;
-    
-                if (Notification.permission === "granted") {
-                    new Notification(`${user.name} (${user.role})`, {
-                        body: message,
-                        icon: user.avatar
-                    });
-                } else if (Notification.permission !== "denied") {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === "granted") {
-                            new Notification(`${user.name} (${user.role})`, {
-                                body: message,
-                                icon: user.avatar
-                            });
+
+            // Обработчик кнопки "Назад" для мобильных
+            if (backToListBtn) {
+                backToListBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = '/chat';
+                });
+            }
+
+            // Функция для инициализации обработчиков чата
+            function initChatHandlers() {
+                // Обработчик кнопки "Ответить"
+                const messagesContainer = document.getElementById('chat-messages');
+                if (messagesContainer) {
+                    messagesContainer.addEventListener('click', function(e) {
+                        // Обработка кнопки "Ответить"
+                        if (e.target.classList.contains('reply-btn')) {
+                            const messageId = e.target.dataset.id;
+                            const messageText = e.target.dataset.text;
+                            const messageElement = e.target.closest('.message-bubble');
+
+                            answerMessageIdInput.value = messageId;
+                            replyContent.textContent = messageText;
+                            replyPreview.classList.remove('hidden');
+                            document.getElementById('message').focus();
+
+                            // Прокрутка к сообщению с плавной анимацией
+                            if (messageElement) {
+                                messageElement.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+
+                                // Временная подсветка сообщения
+                                messageElement.classList.add('message-highlight');
+                                setTimeout(() => {
+                                    messageElement.classList.remove('message-highlight');
+                                }, 2000);
+                            }
+                        }
+
+                        // Обработка кнопки "Просмотреть сообщение"
+                        if (e.target.classList.contains('view-original-message')) {
+                            e.preventDefault();
+                            const messageId = e.target.dataset.messageId;
+                            const originalMessage = document.getElementById(`message-${messageId}`);
+                            
+                            if (originalMessage) {
+                                originalMessage.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'center'
+                                });
+                                
+                                originalMessage.classList.add('message-highlight');
+                                setTimeout(() => {
+                                    originalMessage.classList.remove('message-highlight');
+                                }, 2000);
+                            }
                         }
                     });
                 }
-            }
-    
-            // Загрузка истории чата
-            function loadChatHistory(userId) {
-                chatMessages.innerHTML = '';
-                currentUserIdInput.value = userId;
-    
-                const user = users[userId];
-                selectedUserName.textContent = user.name;
-                selectedUserRole.textContent = user.role;
-                selectedUserAvatar.src = user.avatar;
-    
-                if (chatHistories[userId]) {
-                    chatHistories[userId].forEach(msg => {
-                        addMessageToChat(msg);
+
+                // Отмена ответа
+                if (cancelReplyBtn) {
+                    cancelReplyBtn.addEventListener('click', function() {
+                        answerMessageIdInput.value = '';
+                        replyPreview.classList.add('hidden');
                     });
                 }
-    
-                document.querySelectorAll('.user-item').forEach(item => {
-                    if (item.dataset.userId === userId.toString()) {
-                        item.classList.add('bg-indigo-50');
-    
-                        if (item.dataset.unread !== '0') {
-                            item.dataset.unread = '0';
-                            const unreadBadge = item.querySelector('.absolute');
-                            if (unreadBadge) unreadBadge.remove();
-    
-                            users[userId].unread = 0;
-                            updateTabTitle();
+
+                // Обработчик прикрепления файла
+                if (attachBtn) {
+                    attachBtn.addEventListener('click', function() {
+                        fileInput.click();
+                    });
+                }
+
+                if (fileInput) {
+                    fileInput.addEventListener('change', function() {
+                        if (fileInput.files.length > 0) {
+                            filePreviewName.textContent = fileInput.files[0].name;
+                            filePreview.classList.remove('hidden');
                         }
-                    } else {
-                        item.classList.remove('bg-indigo-50');
-                    }
+                    });
+                }
+
+                // Отмена прикрепления файла
+                if (cancelFileBtn) {
+                    cancelFileBtn.addEventListener('click', function() {
+                        fileInput.value = '';
+                        filePreview.classList.add('hidden');
+                    });
+                }
+
+                // Обработчик удаления сообщения
+                document.querySelectorAll('.delete-message-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        if (confirm('Вы уверены, что хотите удалить это сообщение?')) {
+                            this.closest('form').submit();
+                        }
+                    });
                 });
-    
-                if (window.innerWidth < 768) {
-                    userListContainer.classList.add('hidden');
-                    chatContainer.classList.remove('hidden');
-                }
             }
-    
-            // Добавление сообщения в чат
-            function addMessageToChat(msg) {
-                const isCandidate = msg.sender === 'candidate';
-                const messageClass = isCandidate ? 'candidate-message' :
-                    msg.sender === 'hr' ? 'hr-message' : 'tutor-message';
-                const alignClass = isCandidate ? 'justify-end' : 'justify-start';
-    
-                let fileElement = '';
-                if (msg.file) {
-                    fileElement = `
-                    <div class="mt-1 md:mt-2">
-                        <a href="${msg.fileUrl}" download class="inline-flex items-center text-xs md:text-sm ${isCandidate ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500'}">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            ${msg.file}
-                        </a>
-                    </div>
-                `;
-                }
-    
-                let replyElement = '';
-                if (msg.replyTo !== null && msg.originalMessage) {
-                    replyElement = `
-                    <div class="reply-container bg-${isCandidate ? 'indigo-700' : 'gray-200'} text-${isCandidate ? 'white' : 'gray-800'} text-2xs md:text-xs p-1 md:p-2 rounded mb-1 md:mb-2 border-l-4 border-${isCandidate ? 'indigo-300' : 'gray-500'} cursor-pointer" 
-                         onclick="highlightAndScrollToMessage(${msg.replyTo})">
-                        <p class="font-medium">${msg.sender === 'candidate' ? 'Вы' : users[currentUserIdInput.value].name}:</p>
-                        <p>${msg.originalMessage}</p>
-                    </div>
-                `;
-                }
-    
-                const messageElement = `
-                <div class="flex ${alignClass} mb-2 md:mb-3" data-id="${msg.id}">
-                    <div class="message-bubble ${messageClass} p-2 md:p-3 max-w-xs md:max-w-md lg:max-w-lg">
-                        ${replyElement}
-                        <p class="text-xs md:text-sm">${msg.text}</p>
-                        ${fileElement}
-                        <div class="flex justify-between items-center mt-1 md:mt-2">
-                            <p class="text-2xs md:text-xs ${isCandidate ? 'text-gray-300' : 'text-gray-500'}">${msg.time}</p>
-                            <button class="reply-btn text-2xs md:text-xs ${isCandidate ? 'text-gray-300' : 'text-indigo-600'} hover:underline" data-id="${msg.id}" data-text="${msg.text}">Ответить</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-    
-                chatMessages.insertAdjacentHTML('beforeend', messageElement);
+
+            // Инициализация обработчиков при первой загрузке
+            initChatHandlers();
+
+            // Автопрокрутка чата вниз
+            if (chatMessages) {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-    
-            // Обработчик выбора пользователя
-            userList.addEventListener('click', function(e) {
-                const userItem = e.target.closest('.user-item');
-                if (userItem) {
-                    const userId = userItem.dataset.userId;
-                    loadChatHistory(userId);
+
+            // Инициализация мобильного вида
+            if (isMobile && window.location.pathname.split('/').length > 2) {
+                userListContainer.classList.add('hidden');
+                chatContainer.classList.remove('hidden');
+                chatContainer.classList.add('fixed', 'inset-0', 'z-10', 'bg-white');
+                
+                // Добавляем отступ снизу для формы ввода в мобильной версии
+                const formContainer = document.querySelector('#chat-container .border-t');
+                if (formContainer) {
+                    formContainer.style.paddingBottom = 'calc(env(safe-area-inset-bottom) + 12px)';
                 }
-            });
-    
-            // Обработчик поиска
-            userSearch.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase();
-                document.querySelectorAll('.user-item').forEach(item => {
-                    const name = item.querySelector('.text-sm.font-medium, .text-xs.font-medium')
-                        .textContent
-                        .toLowerCase();
-                    const role = item.querySelector(
-                            '.text-xs.text-gray-500, .text-2xs.text-gray-500').textContent
-                        .toLowerCase();
-                    const lastMessage = item.querySelectorAll(
-                            '.text-xs.text-gray-500, .text-2xs.text-gray-500')[1]
-                        .textContent.toLowerCase();
-    
-                    if (name.includes(searchTerm) || role.includes(searchTerm) || lastMessage
-                        .includes(searchTerm)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-    
-            // Обработчик кнопки "Ответить"
-            chatMessages.addEventListener('click', function(e) {
-                if (e.target.classList.contains('reply-btn')) {
-                    const messageId = e.target.dataset.id;
-                    const messageText = e.target.dataset.text;
-    
-                    replyToInput.value = messageId;
-                    replyContent.textContent = messageText;
-                    replyPreview.classList.remove('hidden');
-                    document.getElementById('message').focus();
-                }
-            });
-    
-            // Отмена ответа
-            cancelReplyBtn.addEventListener('click', function() {
-                replyToInput.value = '';
-                replyPreview.classList.add('hidden');
-            });
-    
-            // Обработчик прикрепления файла
-            attachBtn.addEventListener('click', function() {
-                fileInput.click();
-            });
-    
-            fileInput.addEventListener('change', function() {
-                if (fileInput.files.length > 0) {
-                    filePreviewName.textContent = fileInput.files[0].name;
-                    filePreview.classList.remove('hidden');
-                }
-            });
-    
-            // Отмена прикрепления файла
-            cancelFileBtn.addEventListener('click', function() {
-                fileInput.value = '';
-                filePreview.classList.add('hidden');
-            });
-    
-            // Обработчик отправки формы
-            chatForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const messageInput = document.getElementById('message');
-                const message = messageInput.value.trim();
-                const userId = currentUserIdInput.value;
-    
-                if (message || fileInput.files.length > 0) {
-                    const now = new Date();
-                    const timeString = formatTime(now);
-                    const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
-    
-                    let originalMessage = '';
-                    if (replyToInput.value) {
-                        const repliedMsg = chatMessages.querySelector(
-                            `[data-id="${replyToInput.value}"] .message-bubble`);
-                        if (repliedMsg) {
-                            originalMessage = repliedMsg.querySelector('p:not(.font-medium)').textContent;
-                        }
-                    }
-    
-                    const newMessage = {
-                        id: Date.now(),
-                        sender: 'candidate',
-                        text: message,
-                        time: timeString,
-                        file: fileName,
-                        fileUrl: '#',
-                        replyTo: replyToInput.value ? parseInt(replyToInput.value) : null,
-                        originalMessage: originalMessage
-                    };
-    
-                    if (!chatHistories[userId]) {
-                        chatHistories[userId] = [];
-                    }
-                    chatHistories[userId].push(newMessage);
-    
-                    addMessageToChat(newMessage);
-                    updateLastMessage(userId, message || 'Файл', 'candidate');
-    
-                    messageInput.value = '';
-                    fileInput.value = '';
-                    filePreview.classList.add('hidden');
-                    replyToInput.value = '';
-                    replyPreview.classList.add('hidden');
-                }
-            });
-    
-            // Обработчик кнопки "Назад" на мобильных
-            if (backToListBtn) {
-                backToListBtn.addEventListener('click', function() {
-                    userListContainer.classList.remove('hidden');
-                    chatContainer.classList.add('hidden');
-                });
             }
-    
-            // Обработчик изменения видимости страницы
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    updateTabTitle();
-                }
-            });
-    
-            // Имитация получения нового сообщения (для демонстрации)
-            function simulateNewMessage() {
-                setTimeout(() => {
-                    const userId = 1;
-                    const newMsg = {
-                        id: Date.now(),
-                        sender: 'hr',
-                        text: 'Ваше тестовое задание проверено, ждем вас на собеседование!',
-                        time: formatTime(new Date()),
-                        file: null,
-                        fileUrl: null
-                    };
-    
-                    if (!chatHistories[userId]) chatHistories[userId] = [];
-                    chatHistories[userId].push(newMsg);
-    
-                    // Если чат не открыт, увеличиваем счетчик
-                    if (currentUserIdInput.value != userId) {
-                        users[userId].unread++;
-                        updateTabTitle();
-                        showNewMessageNotification(userId, newMsg.text);
-    
-                        // Обновляем бейдж в списке пользователей
-                        const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
-                        if (userItem) {
-                            userItem.dataset.unread = users[userId].unread;
-                            let unreadBadge = userItem.querySelector('.absolute');
-                            if (!unreadBadge) {
-                                unreadBadge = document.createElement('div');
-                                unreadBadge.className = 'absolute right-2 md:right-4 top-3 md:top-4 bg-indigo-600 text-white text-2xs md:text-xs rounded-full h-4 w-4 md:h-5 md:w-5 flex items-center justify-center';
-                                userItem.appendChild(unreadBadge);
-                            }
-                            unreadBadge.textContent = users[userId].unread;
-                        }
-                    } else {
-                        // Если чат открыт, просто добавляем сообщение
-                        addMessageToChat(newMsg);
-                    }
-                }, 10000); // Через 10 секунд
-            }
-    
-            // Инициализация
-            if (!isMobile) {
-                loadChatHistory(1);
-            } else {
-                userListContainer.classList.remove('hidden');
-                chatContainer.classList.add('hidden');
-            }
-    
-            updateTabTitle();
-            simulateNewMessage(); // Для демонстрации - можно удалить в реальном приложении
-    
-            window.highlightAndScrollToMessage = highlightAndScrollToMessage;
         });
     </script>
 
     <style>
-        .chat-container {
-            height: calc(100vh - 250px);
+        .chat-messages {
+            height: calc(100% - 180px);
             overflow-y: auto;
             padding-right: 8px;
         }
 
-        @media (min-width: 768px) {
-            .chat-container {
-                height: calc(100vh - 320px);
+        @media (max-width: 767px) {
+            #chat-container.fixed {
+                height: 100vh;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .chat-messages {
+                flex-grow: 1;
+                height: auto;
+                padding-bottom: 0;
+                margin-bottom: 0;
+            }
+            
+            #chat-container.fixed .border-t {
+                padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+                background-color: #f9fafb;
+            }
+            
+            .mobile-header {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                border-bottom: 1px solid #e5e7eb;
+                background-color: #f9fafb;
+            }
+            
+            #back-to-list {
+                margin-right: 12px;
             }
         }
 
+        .message-highlight {
+            animation: highlight 2s ease-out;
+            background-color: rgba(59, 130, 246, 0.1);
+            border-radius: 0.5rem;
+        }
+
+        @keyframes highlight {
+            0% { background-color: rgba(59, 130, 246, 0.2); }
+            100% { background-color: transparent; }
+        }
+
         .message-bubble {
-            max-width: 80%;
-            word-break: break-word;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+        }
+
+        .message-bubble:hover {
+            transform: translateY(-2px);
         }
 
         .candidate-message {
@@ -703,129 +526,50 @@
             border-radius: 14px 14px 14px 0;
         }
 
-        .reply-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            transition: opacity 0.2s;
-        }
-
-        .reply-btn:hover {
-            opacity: 0.8;
-        }
-
         .reply-container {
             max-width: 100%;
             overflow: hidden;
-            transition: all 0.2s ease;
-        }
-
-        .reply-container:hover {
-            opacity: 0.9;
-            background-color: rgba(0, 0, 0, 0.05);
-            transform: translateX(3px);
-        }
-
-        .highlighted-message {
-            animation: highlightPulse 3s ease-out;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
             position: relative;
         }
 
-        @keyframes highlightPulse {
-            0% {
-                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.7);
-            }
-
-            70% {
-                box-shadow: 0 0 0 12px rgba(99, 102, 241, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-            }
+        .view-original-message {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            text-align: left;
+            display: block;
         }
 
-        #attach-btn:hover {
-            background-color: #f3f4f6;
-        }
-
-        .user-item {
-            transition: background-color 0.2s;
-        }
-
-        .user-item:hover {
-            background-color: #f9fafb;
-        }
-
-        .bg-indigo-50 {
-            background-color: #eef2ff;
+        .delete-message-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
         }
 
         /* Стили для скроллбара */
-        .chat-container::-webkit-scrollbar {
+        .chat-messages::-webkit-scrollbar {
             width: 6px;
         }
 
-        .chat-container::-webkit-scrollbar-track {
+        .chat-messages::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 4px;
         }
 
-        .chat-container::-webkit-scrollbar-thumb {
+        .chat-messages::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 4px;
         }
 
-        .chat-container::-webkit-scrollbar-thumb:hover {
+        .chat-messages::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
         }
 
-        /* Дополнительные классы для очень маленького текста */
-        .text-2xs {
-            font-size: 0.65rem;
-            line-height: 0.9rem;
-        }
-
-        /* Стили для превью файла */
-        #file-preview {
-            transition: all 0.2s ease;
-        }
-
-        #file-preview:hover {
-            background-color: #e5e7eb;
-        }
-
-        #cancel-file {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        #cancel-file:hover {
-            color: #dc2626;
-        }
-
-        /* Стили для превью ответа */
-        #reply-preview {
-            transition: all 0.2s ease;
-        }
-
-        #reply-preview:hover {
-            background-color: #e5e7eb;
-        }
-
-        #cancel-reply {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        #cancel-reply:hover {
-            color: #dc2626;
+        /* Плавная прокрутка для всего чата */
+        html {
+            scroll-behavior: smooth;
         }
     </style>
 @endsection
