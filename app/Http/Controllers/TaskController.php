@@ -40,10 +40,10 @@ class TaskController extends Controller
 
         $tasks = $query->paginate($perPage);
 
-        // Форматируем данные для отображения
         $formattedTasks = $tasks->map(function ($taskStatus) {
             return [
                 'id' => $taskStatus->user->id,
+                'task_status_id' => $taskStatus->id, // Добавлено
                 'name' => $taskStatus->user->name,
                 'avatar' => $taskStatus->user->avatar_url,
                 'task' => [
@@ -69,6 +69,18 @@ class TaskController extends Controller
         ]);
     }
 
+    public function getTaskStatus($taskStatusId)
+{
+    $taskStatus = TaskStatus::with(['user', 'task'])->findOrFail($taskStatusId);
+
+    return response()->json([
+        'user_id' => $taskStatus->user_id,
+        'task_id' => $taskStatus->task_id,
+        'status' => $taskStatus->status,
+        // Другие необходимые поля
+    ]);
+}
+
     // Получение информации о кандидате
     public function getCandidateInfo($id)
     {
@@ -85,35 +97,28 @@ class TaskController extends Controller
     }
 
     // Получение информации о задании
-    public function getTaskInfo($userId, $taskId)
+    public function getTaskInfo($taskStatusId)
     {
-        $taskStatus = TaskStatus::with('task')
-            ->where('user_id', $userId)
-            ->where('task_id', $taskId)
-            ->firstOrFail();
-
-        $task = $taskStatus->task;
+        $taskStatus = TaskStatus::with(['user', 'task'])
+            ->findOrFail($taskStatusId);
 
         return response()->json([
-            'title' => $task->title,
-            'difficulty' => $task->level,
-            'document' => $task->task
-                ? Storage::url($task->task)
+            'title' => $taskStatus->task->title,
+            'difficulty' => $taskStatus->task->level,
+            'document' => $taskStatus->task->task
+                ? Storage::url($taskStatus->task->task)
                 : null,
         ]);
     }
 
     // Обновление статуса задания
-    public function updateStatus($userId, $taskId, Request $request)
+    public function updateStatus($taskStatusId, Request $request)
     {
         $validated = $request->validate([
             'status' => 'required|string|in:' . implode(',', TaskStatusEnum::getAll()),
         ]);
 
-        $taskStatus = TaskStatus::where('user_id', $userId)
-            ->where('task_id', $taskId)
-            ->firstOrFail();
-
+        $taskStatus = TaskStatus::findOrFail($taskStatusId);
         $taskStatus->update([
             'status' => $validated['status'],
             'tutor_id' => auth()->id(),
@@ -123,14 +128,8 @@ class TaskController extends Controller
     }
 
     // Создание отчета по заданию
-    public function createReport($userId, $taskId, Request $request)
+    public function createReport($taskStatusId, Request $request)
     {
-        \Log::info('Report creation attempt', [
-            'user_id' => $userId,
-            'task_id' => $taskId,
-            'files' => $request->allFiles()
-        ]);
-
         $request->validate([
             'report' => [
                 'required',
@@ -150,14 +149,10 @@ class TaskController extends Controller
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = $file->storeAs('moonshine_reports', $fileName, 'public');
 
-            \Log::info('File stored successfully', ['path' => $filePath]);
-
-            $taskStatus = TaskStatus::where('user_id', $userId)
-            ->where('task_id', $taskId)
-            ->firstOrFail();
+            $taskStatus = TaskStatus::findOrFail($taskStatusId);
 
             Report::create([
-                'user_id' => $userId,
+                'user_id' => $taskStatus->user_id,
                 'task_id' => $taskStatus->id,
                 'tutor_id' => auth()->id(),
                 'report' => $filePath,
@@ -168,12 +163,7 @@ class TaskController extends Controller
                 'message' => 'Отчёт успешно создан',
                 'path' => Storage::url($filePath)
             ]);
-
         } catch (\Exception $e) {
-            \Log::error('Report creation failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Ошибка сервера: ' . $e->getMessage()

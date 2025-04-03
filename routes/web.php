@@ -84,9 +84,10 @@ Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
 Route::prefix('api/tasks')->group(function () {
     Route::get('/', [TaskController::class, 'getTasks']);
     Route::get('/candidate/{id}', [TaskController::class, 'getCandidateInfo']);
-    Route::get('/task/{userId}/{taskId}', [TaskController::class, 'getTaskInfo']);
-    Route::put('/status/{userId}/{taskId}', [TaskController::class, 'updateStatus']);
-    Route::post('/report/{userId}/{taskId}', [TaskController::class, 'createReport']);
+    Route::get('task-status/{id}', [TaskController::class, 'getTaskStatus']);
+    Route::get('/task/{taskStatusId}', [TaskController::class, 'getTaskInfo']); // Изменено
+    Route::put('/status/{taskStatusId}', [TaskController::class, 'updateStatus']); // Изменено
+    Route::post('/report/{taskStatusId}', [TaskController::class, 'createReport']); // Изменено
     Route::get('/statuses', [TaskController::class, 'getStatuses']);
 });
 

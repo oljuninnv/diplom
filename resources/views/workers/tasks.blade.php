@@ -190,41 +190,41 @@
             function renderTable(candidates) {
                 candidatesTable.innerHTML = candidates.length > 0 ?
                     candidates.map(candidate => `
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center cursor-pointer" onclick="showCandidateModal(${candidate.id})">
-                            <img class="h-10 w-10 rounded-full" src="${candidate.avatar}" alt="${candidate.name}">
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">${candidate.name}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-900 cursor-pointer" onclick="showTaskModal(${candidate.id}, ${candidate.task.id})">${candidate.task.title}</div>
-                        <div class="text-sm text-gray-500">${candidate.task.difficulty}</div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
-                        ${candidate.task.deadline || 'Не указан'}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        ${candidate.task.github ? 
-                            `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
-                                                                    ${candidate.task.github}
-                                                                </a>` 
-                            : ''
-                        }
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(candidate.task.status)}">
-                            ${candidate.task.status}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="showStatusModal(${candidate.id}, ${candidate.task.id})" class="text-blue-600 hover:text-blue-900 mr-3">Изменить статус</button>
-                        <button onclick="showReportModal(${candidate.id}, ${candidate.task.id})" class="text-indigo-600 hover:text-indigo-900">Создать отчёт</button>
-                    </td>
-                </tr>
-            `).join('') :
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center cursor-pointer" onclick="showCandidateModal(${candidate.id})">
+                                    <img class="h-10 w-10 rounded-full" src="${candidate.avatar}" alt="${candidate.name}">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">${candidate.name}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900 cursor-pointer" onclick="showTaskModal(${candidate.task_status_id})">${candidate.task.title}</div>
+                                <div class="text-sm text-gray-500">${candidate.task.difficulty}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
+                                ${candidate.task.deadline || 'Не указан'}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                ${candidate.task.github ? 
+                                    `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
+                                                ${candidate.task.github}
+                                            </a>` 
+                                    : ''
+                                }
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(candidate.task.status)}">
+                                    ${candidate.task.status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <button onclick="showStatusModal(${candidate.task_status_id})" class="text-blue-600 hover:text-blue-900 mr-3">Изменить статус</button>
+                                <button onclick="showReportModal(${candidate.task_status_id})" class="text-indigo-600 hover:text-indigo-900">Создать отчёт</button>
+                            </td>
+                        </tr>
+                    `).join('') :
                     `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Нет данных для отображения</td></tr>`;
             }
 
@@ -242,8 +242,8 @@
                     });
             };
 
-            window.showTaskModal = function(candidateId, taskId) {
-                fetch(`/api/tasks/task/${candidateId}/${taskId}`)
+            window.showTaskModal = function(taskStatusId) {
+                fetch(`/api/tasks/task/${taskStatusId}`)
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('modal-task-title').textContent = data.title;
@@ -258,52 +258,63 @@
                     });
             };
 
-            window.showStatusModal = function(candidateId, taskId) {
-                fetch(`/api/tasks/candidate/${candidateId}`)
+            window.showStatusModal = function(taskStatusId) {
+                // Сначала получаем данные о TaskStatus
+                fetch(`/api/tasks/task-status/${taskStatusId}`)
                     .then(response => response.json())
-                    .then(candidateData => {
-                        fetch('/api/tasks/statuses')
+                    .then(taskStatusData => {
+                        // Затем получаем данные о кандидате
+                        fetch(`/api/tasks/candidate/${taskStatusData.user_id}`)
                             .then(response => response.json())
-                            .then(statuses => {
-                                const statusContainer = document.getElementById('status-options');
-                                statusContainer.innerHTML = '';
+                            .then(candidateData => {
+                                fetch('/api/tasks/statuses')
+                                    .then(response => response.json())
+                                    .then(statuses => {
+                                        const statusContainer = document.getElementById(
+                                            'status-options');
+                                        statusContainer.innerHTML = '';
 
-                                for (const [value, label] of Object.entries(statuses)) {
-                                    const div = document.createElement('div');
-                                    div.className = 'flex items-center';
+                                        for (const [value, label] of Object.entries(statuses)) {
+                                            const div = document.createElement('div');
+                                            div.className = 'flex items-center';
 
-                                    const input = document.createElement('input');
-                                    input.type = 'radio';
-                                    input.id = `status-${value}`;
-                                    input.name = 'status';
-                                    input.value = value;
-                                    input.className =
-                                        'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300';
+                                            const input = document.createElement('input');
+                                            input.type = 'radio';
+                                            input.id = `status-${value}`;
+                                            input.name = 'status';
+                                            input.value = value;
+                                            input.className =
+                                                'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300';
+                                            // Отмечаем текущий статус
+                                            if (value === taskStatusData.status) {
+                                                input.checked = true;
+                                            }
 
-                                    const labelEl = document.createElement('label');
-                                    labelEl.htmlFor = `status-${value}`;
-                                    labelEl.className = 'ml-3 block text-sm font-medium text-gray-700';
-                                    labelEl.textContent = label;
+                                            const labelEl = document.createElement('label');
+                                            labelEl.htmlFor = `status-${value}`;
+                                            labelEl.className =
+                                                'ml-3 block text-sm font-medium text-gray-700';
+                                            labelEl.textContent = label;
 
-                                    div.appendChild(input);
-                                    div.appendChild(labelEl);
-                                    statusContainer.appendChild(div);
-                                }
+                                            div.appendChild(input);
+                                            div.appendChild(labelEl);
+                                            statusContainer.appendChild(div);
+                                        }
 
-                                document.getElementById('status-candidate-name').textContent =
-                                    `Кандидат: ${candidateData.name}`;
-                                document.getElementById('status-form').dataset.candidateId =
-                                    candidateId;
-                                document.getElementById('status-form').dataset.taskId = taskId;
-                                document.getElementById('status-modal').classList.remove('hidden');
+                                        document.getElementById('status-candidate-name')
+                                            .textContent = `Кандидат: ${candidateData.name}`;
+                                        document.getElementById('status-form').dataset
+                                            .taskStatusId = taskStatusId;
+                                        document.getElementById('status-modal').classList.remove(
+                                            'hidden');
+                                    });
                             });
                     });
             };
 
             window.submitStatusForm = function() {
                 const form = document.getElementById('status-form');
-                const candidateId = form.dataset.candidateId;
-                const taskId = form.dataset.taskId;
+                const taskStatusId = form.dataset.taskStatusId;
                 const status = form.querySelector('input[name="status"]:checked')?.value;
 
                 if (!status) {
@@ -311,7 +322,7 @@
                     return;
                 }
 
-                fetch(`/api/tasks/status/${candidateId}/${taskId}`, {
+                fetch(`/api/tasks/status/${taskStatusId}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -331,15 +342,21 @@
                     .catch(error => console.error('Error:', error));
             };
 
-            window.showReportModal = function(candidateId, taskId) {
-                fetch(`/api/tasks/candidate/${candidateId}`)
+            window.showReportModal = function(taskStatusId) {
+                // Сначала получаем данные о TaskStatus
+                fetch(`/api/tasks/task-status/${taskStatusId}`)
                     .then(response => response.json())
-                    .then(candidateData => {
-                        document.getElementById('report-candidate-name').textContent =
-                            `Кандидат: ${candidateData.name}`;
-                        document.getElementById('report-form').dataset.candidateId = candidateId;
-                        document.getElementById('report-form').dataset.taskId = taskId;
-                        document.getElementById('report-modal').classList.remove('hidden');
+                    .then(taskStatusData => {
+                        // Затем получаем данные о кандидате
+                        fetch(`/api/tasks/candidate/${taskStatusData.user_id}`)
+                            .then(response => response.json())
+                            .then(candidateData => {
+                                document.getElementById('report-candidate-name').textContent =
+                                    `Кандидат: ${candidateData.name}`;
+                                document.getElementById('report-form').dataset.taskStatusId =
+                                    taskStatusId;
+                                document.getElementById('report-modal').classList.remove('hidden');
+                            });
                     });
             };
 
@@ -347,8 +364,7 @@
                 event.preventDefault();
 
                 const form = document.getElementById('report-form');
-                const candidateId = form.dataset.candidateId;
-                const taskId = form.dataset.taskId;
+                const taskStatusId = form.dataset.taskStatusId;
                 const formData = new FormData(form);
 
                 // Добавляем CSRF-токен в FormData
@@ -368,18 +384,8 @@
                 submitBtn.innerHTML = '<span class="animate-spin">⏳</span> Отправка...';
 
                 try {
-                    console.log('Sending report:', {
-                        candidateId,
-                        taskId,
-                        file: fileInput.files[0]
-                    });
-
-                    const response = await fetch(`/api/tasks/report/${candidateId}/${taskId}`, {
+                    const response = await fetch(`/api/tasks/report/${taskStatusId}`, {
                         method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            // Не устанавливаем Content-Type, чтобы браузер сам установил с boundary
-                        },
                         body: formData
                     });
 
