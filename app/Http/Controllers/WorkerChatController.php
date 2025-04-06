@@ -120,39 +120,47 @@ class WorkerChatController extends Controller
         // Получаем всех кандидатов, связанных с текущим пользователем
         $query = TaskStatus::query();
 
-        if ($user->role->name === UserRoleEnum::SUPER_ADMIN->value) {
-            $query->where('tutor_id', $user->id);
-        } elseif ($user->role->name === UserRoleEnum::ADMIN->value) {
+        if (in_array($user->role->name, [UserRoleEnum::ADMIN->value, UserRoleEnum::SUPER_ADMIN->value])) {
+            // Для HR-менеджеров (ADMIN и SUPER_ADMIN) получаем их кандидатов
             $query->where('hr_manager_id', $user->id);
+        } elseif ($user->role->name === UserRoleEnum::TUTOR_WORKER->value) {
+            // Для тьюторов получаем их кандидатов
+            $query->where('tutor_id', $user->id);
         }
 
-        $candidates = $query->with(['user'])
+        $candidates = $query->with(['user', 'task'])
             ->get()
             ->map(function ($taskStatus) {
                 if ($taskStatus->user) {
                     $taskStatus->user->status = $taskStatus->status;
-                    $taskStatus->user->position = 'Кандидат';
+                    $taskStatus->user->position = $taskStatus->post ? $taskStatus->post->name : 'Кандидат';
+                    $taskStatus->user->task_status = $taskStatus->status;
                     return $taskStatus->user;
                 }
                 return null;
             })
             ->filter();
 
-        // Получаем всех HR-менеджеров (для тьюторов) или всех тьюторов (для HR)
+        // Получаем коллег (HR для тьюторов и тьюторов для HR)
         $colleagues = TaskStatus::query()
-            ->when($user->role->name === UserRoleEnum::SUPER_ADMIN->value, function ($q) {
-                return $q->whereNotNull('hr_manager_id');
-            })
-            ->when($user->role->name === UserRoleEnum::ADMIN->value, function ($q) {
-                return $q->whereNotNull('tutor_id');
-            })
-            ->with($user->role->name === UserRoleEnum::SUPER_ADMIN->value ? 'hr_manager' : 'tutor')
+            ->when(
+                in_array($user->role->name, [UserRoleEnum::ADMIN->value, UserRoleEnum::SUPER_ADMIN->value]),
+                function ($q) {
+                    // Для HR-менеджеров получаем тьюторов
+                    return $q->whereNotNull('tutor_id');
+                },
+                function ($q) {
+                    // Для тьюторов получаем HR-менеджеров
+                    return $q->whereNotNull('hr_manager_id');
+                }
+            )
+            ->with($user->role->name === UserRoleEnum::TUTOR_WORKER->value ? 'hr_manager' : 'tutor')
             ->get()
-            ->pluck($user->role->name === UserRoleEnum::SUPER_ADMIN->value ? 'hr_manager' : 'tutor')
+            ->pluck($user->role->name === UserRoleEnum::TUTOR_WORKER->value ? 'hr_manager' : 'tutor')
             ->unique()
             ->filter()
             ->map(function ($colleague) use ($user) {
-                $colleague->position = $user->role->name === UserRoleEnum::SUPER_ADMIN->value
+                $colleague->position = $user->role->name === UserRoleEnum::TUTOR_WORKER->value
                     ? 'HR-менеджер'
                     : 'Тьютор';
                 return $colleague;

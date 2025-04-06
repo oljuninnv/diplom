@@ -54,6 +54,25 @@
                                 ->where('sender_id', $interlocutor->id)
                                 ->whereNull('read_at')
                                 ->count();
+
+                            // Определяем, является ли собеседник кандидатом
+                            $isCandidate = $interlocutor->position === 'Кандидат';
+                            
+                            // Получаем статус задания только для кандидатов
+                            $statusHtml = '';
+                            if ($isCandidate && isset($interlocutor->task_status)) {
+                                $statusClass = match($interlocutor->task_status) {
+                                    \App\Enums\TaskStatusEnum::COMPLETED->value => 'bg-green-100 text-green-800',
+                                    \App\Enums\TaskStatusEnum::APPROVED->value => 'bg-blue-100 text-blue-800',
+                                    \App\Enums\TaskStatusEnum::UNDER_REVIEW->value => 'bg-yellow-100 text-yellow-800',
+                                    \App\Enums\TaskStatusEnum::IN_PROGRESS->value => 'bg-indigo-100 text-indigo-800',
+                                    \App\Enums\TaskStatusEnum::REVISION->value => 'bg-orange-100 text-orange-800',
+                                    \App\Enums\TaskStatusEnum::FAILED->value => 'bg-red-100 text-red-800',
+                                    default => 'bg-gray-100 text-gray-800',
+                                };
+
+                                $statusHtml = '<span class="ml-2 px-1 py-0.5 text-2xs rounded-full '.$statusClass.'">'.$interlocutor->task_status.'</span>';
+                            }
                         @endphp
                         <div class="user-item p-3 md:p-4 border-b border-gray-200 hover:bg-gray-100 cursor-pointer flex items-center relative {{ $currentInterlocutor && $currentInterlocutor->id == $interlocutor->id ? 'bg-indigo-50' : '' }}"
                             data-user-id="{{ $interlocutor->id }}" data-unread="{{ $unreadCount }}" data-name="{{ strtolower($interlocutor->name) }}" data-position="{{ strtolower($interlocutor->position) }}">
@@ -63,7 +82,10 @@
                             </div>
                             <div class="ml-2 md:ml-3 flex-1 min-w-0">
                                 <p class="text-xs md:text-sm font-medium text-gray-900">{{ $interlocutor->name }}</p>
-                                <p class="text-2xs md:text-xs text-gray-500 mt-1">{{ $interlocutor->position }}</p>
+                                <p class="text-2xs md:text-xs text-gray-500 mt-1">
+                                    {{ $interlocutor->position }}
+                                    {!! $statusHtml !!}
+                                </p>
                                 <div class="flex justify-between items-center mt-1">
                                     <p class="text-2xs md:text-xs text-gray-500 truncate">{{ $lastMessageText }}</p>
                                     <span class="text-2xs md:text-xs text-gray-400">{{ $lastMessageTime }}</span>
@@ -82,6 +104,27 @@
                 <!-- Правая часть с чатом -->
                 <div id="chat-container" class="hidden md:flex md:w-2/3 flex-col h-full relative">
                     @if($currentInterlocutor)
+                    @php
+                        // Определяем, является ли текущий собеседник кандидатом
+                        $isCurrentCandidate = $currentInterlocutor->position === 'Кандидат';
+                        
+                        // Получаем статус задания только для кандидатов
+                        $statusHtml = '';
+                        if ($isCurrentCandidate && isset($currentInterlocutor->task_status)) {
+                            $statusClass = match($currentInterlocutor->task_status) {
+                                \App\Enums\TaskStatusEnum::COMPLETED->value => 'bg-green-100 text-green-800',
+                                \App\Enums\TaskStatusEnum::APPROVED->value => 'bg-blue-100 text-blue-800',
+                                \App\Enums\TaskStatusEnum::UNDER_REVIEW->value => 'bg-yellow-100 text-yellow-800',
+                                \App\Enums\TaskStatusEnum::IN_PROGRESS->value => 'bg-indigo-100 text-indigo-800',
+                                \App\Enums\TaskStatusEnum::REVISION->value => 'bg-orange-100 text-orange-800',
+                                \App\Enums\TaskStatusEnum::FAILED->value => 'bg-red-100 text-red-800',
+                                default => 'bg-gray-100 text-gray-800',
+                            };
+
+                            $statusHtml = '<span class="ml-2 px-1 py-0.5 text-2xs rounded-full '.$statusClass.'">'.$currentInterlocutor->task_status.'</span>';
+                        }
+                    @endphp
+
                     <!-- Шапка чата для мобильной версии -->
                     <div class="md:hidden flex items-center p-3 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
                         <!-- Кнопка "Назад" -->
@@ -99,7 +142,10 @@
                             </div>
                             <div class="ml-2">
                                 <p class="text-sm font-medium text-gray-900" id="selected-user-name">{{ $currentInterlocutor->name }}</p>
-                                <p class="text-xs text-gray-500" id="selected-user-role">{{ $currentInterlocutor->position }}</p>
+                                <p class="text-xs text-gray-500" id="selected-user-role">
+                                    {{ $currentInterlocutor->position }}
+                                    {!! $statusHtml !!}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -113,7 +159,10 @@
                             </div>
                             <div class="ml-2 md:ml-3">
                                 <p class="text-xs md:text-sm font-medium text-gray-900" id="selected-user-name-desktop">{{ $currentInterlocutor->name }}</p>
-                                <p class="text-2xs md:text-xs text-gray-500" id="selected-user-role-desktop">{{ $currentInterlocutor->position }}</p>
+                                <p class="text-2xs md:text-xs text-gray-500" id="selected-user-role-desktop">
+                                    {{ $currentInterlocutor->position }}
+                                    {!! $statusHtml !!}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -147,7 +196,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
-                                        {{ $message->document }}
+                                        {{ $message->original_filename }}
                                     </a>
                                 </div>
                                 @endif
@@ -509,10 +558,10 @@
         }
 
         .user-message {
-        background-color: #6366f1; /* Синий цвет как у кандидата */
-        color: white;
-        border-radius: 14px 14px 0 14px;
-    }
+            background-color: #6366f1;
+            color: white;
+            border-radius: 14px 14px 0 14px;
+        }
 
         .reply-container {
             max-width: 100%;
