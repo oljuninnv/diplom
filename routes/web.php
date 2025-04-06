@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CandidateTaskController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\WorkerChatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,9 +77,11 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Чат сотрудников
-Route::get('/worker-chat', function () {
-    return view('workers.chat');
-})->name('worker-chat');
+Route::middleware(['auth'])->group(function() {
+    Route::get('/worker-chat/{interlocutor?}', [WorkerChatController::class, 'index'])->name('worker-chat');
+    Route::post('/worker-chat/send', [WorkerChatController::class, 'sendMessage'])->name('worker-chat.send');
+    Route::delete('/worker-chat/delete/{message}', [WorkerChatController::class, 'deleteMessage'])->name('worker-chat.delete');
+});
 
 // Список задач
 Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');

@@ -65,7 +65,7 @@
                                     <img src="{{ auth()->user()?->avatar ? asset('storage/' . auth()->user()->avatar) : asset('deafault-avatar.jpg') }}"
                                         alt="Аватар пользователя" class="rounded-full h-11 w-11 object-cover">
                                 </a>
-                                <a href="logout" class="text-m text-gray-700 hover:text-gray-900">
+                                <a href="/logout" class="text-m text-gray-700 hover:text-gray-900">
                                     Выйти
                                 </a>
                                 @elseguest
