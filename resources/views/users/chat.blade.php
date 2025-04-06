@@ -123,15 +123,15 @@
                         id="chat-messages">
                         @foreach($messages as $message)
                         <div class="flex {{ $message->sender_id == Auth::id() ? 'justify-end' : 'justify-start' }} mb-2 md:mb-3 group" data-id="{{ $message->id }}" id="message-{{ $message->id }}">
-                            <div class="message-bubble {{ $message->sender_id == Auth::id() ? 'candidate-message' : ($message->sender->position == 'HR-менеджер' ? 'hr-message' : 'tutor-message') }} p-2 md:p-3 max-w-xs md:max-w-md lg:max-w-lg relative transition-all duration-200">
+                            <div class="message-bubble user-message p-2 md:p-3 max-w-xs md:max-w-md lg:max-w-lg relative transition-all duration-200">
                                 @if($message->answer_message_id)
                                     @php
                                         $answeredMessage = $message->answeredMessage;
                                     @endphp
                                     @if($answeredMessage)
-                                    <div class="reply-container bg-{{ $message->sender_id == Auth::id() ? 'indigo-700' : 'gray-200' }} text-{{ $message->sender_id == Auth::id() ? 'white' : 'gray-800' }} text-2xs md:text-xs p-1 md:p-2 rounded mb-1 md:mb-2 border-l-4 border-{{ $message->sender_id == Auth::id() ? 'indigo-300' : 'gray-500' }}">
+                                    <div class="reply-container bg-indigo-700 text-white text-2xs md:text-xs p-1 md:p-2 rounded mb-1 md:mb-2 border-l-4 border-indigo-300">
                                         <p class="font-medium">{{ $answeredMessage->sender_id == Auth::id() ? 'Вы' : $answeredMessage->sender->name }}:</p>
-                                        <button class="view-original-message text-xs text-white hover:text-blue-700 mt-1" 
+                                        <button class="view-original-message text-xs text-white hover:text-blue-600 mt-1" 
                                             data-message-id="{{ $answeredMessage->id }}">
                                             {{ Str::limit($answeredMessage->message, 50)}}
                                         </button>
@@ -143,7 +143,7 @@
                                 
                                 @if($message->document)
                                 <div class="mt-1 md:mt-2">
-                                    <a href="{{ Storage::url($message->document) }}" download="{{ $message->original_filename }}" class="inline-flex items-center text-xs md:text-sm {{ $message->sender_id == Auth::id() ? 'text-indigo-200 hover:text-indigo-100' : 'text-indigo-600 hover:text-indigo-500' }}">
+                                    <a href="{{ Storage::url($message->document) }}" download="{{ $message->original_filename }}" class="inline-flex items-center text-xs md:text-sm text-indigo-200 hover:text-indigo-100">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-4 md:w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
@@ -153,9 +153,9 @@
                                 @endif
                                 
                                 <div class="flex justify-between items-center mt-1 md:mt-2">
-                                    <p class="text-2xs md:text-xs {{ $message->sender_id == Auth::id() ? 'text-gray-300' : 'text-gray-500' }}">{{ $message->created_at->format('H:i') }}</p>
+                                    <p class="text-2xs md:text-xs text-gray-300">{{ $message->created_at->format('H:i') }}</p>
                                     <div class="flex space-x-2">
-                                        <button class="reply-btn text-2xs md:text-xs {{ $message->sender_id == Auth::id() ? 'text-gray-300' : 'text-indigo-600' }} hover:underline" data-id="{{ $message->id }}" data-text="{{ $message->message }}">Ответить</button>
+                                        <button class="reply-btn text-2xs md:text-xs text-gray-300 hover:underline" data-id="{{ $message->id }}" data-text="{{ $message->message }}">Ответить</button>
                                         @if($message->sender_id == Auth::id())
                                         <form action="{{ route('chat.delete', $message->id) }}" method="POST" class="delete-message-form">
                                             @csrf
@@ -508,22 +508,10 @@
             transform: translateY(-2px);
         }
 
-        .candidate-message {
+        .user-message {
             background-color: #6366f1;
             color: white;
             border-radius: 14px 14px 0 14px;
-        }
-
-        .hr-message {
-            background-color: #e5e7eb;
-            color: #111827;
-            border-radius: 14px 14px 14px 0;
-        }
-
-        .tutor-message {
-            background-color: #e5e7eb;
-            color: #111827;
-            border-radius: 14px 14px 14px 0;
         }
 
         .reply-container {
