@@ -11,18 +11,20 @@ use Laravel\Sanctum\HasApiTokens;
 use MoonShine\Permissions\Traits\HasMoonShinePermissions;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use App\Enums\UserRoleEnum;
+use Illuminate\Database\Eloquent\Builder;
 
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable, HasFactory, HasMoonShinePermissions;
 
     protected $fillable = [
-		'name',
-		'avatar',
-		'email',
-		'phone',
-		'role_id',
-		'telegram_user_id',
+        'name',
+        'avatar',
+        'email',
+        'phone',
+        'role_id',
+        'telegram_user_id',
         'password',
         'date_of_auth'
     ];
@@ -36,11 +38,57 @@ class User extends Authenticatable
         'email_verified_at' => 'date',
     ];
 
+    /**
+     * Scope для получения кандидатов
+     */
+    public function scopeCandidates(Builder $query): Builder
+    {
+        return $query->where('role_id', Role::getIdByRole(UserRoleEnum::USER));
+    }
+
+    /**
+     * Scope для получения HR-менеджеров (админы и суперадмины)
+     */
+    public function scopeHrManagers(Builder $query): Builder
+    {
+        return $query->whereIn('role_id', [
+            Role::getIdByRole(UserRoleEnum::ADMIN),
+            Role::getIdByRole(UserRoleEnum::SUPER_ADMIN)
+        ]);
+    }
+
+    /**
+     * Scope для получения тьюторов
+     */
+    public function scopeTutors(Builder $query): Builder
+    {
+        return $query->where('role_id', Role::getIdByRole(UserRoleEnum::TUTOR_WORKER));
+    }
+
+    /**
+     * Проверка, является ли пользователь тьютором
+     */
+    public function isTutorWorker(): bool
+    {
+        return $this->role->name === UserRoleEnum::TUTOR_WORKER->value;
+    }
+
+    /**
+     * Проверка, является ли пользователь админом или суперадмином
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->role->name, [
+            UserRoleEnum::ADMIN->value, 
+            UserRoleEnum::SUPER_ADMIN->value
+        ]);
+    }
+
     public function getAvatarUrlAttribute()
     {
-        return $this->avatar 
-            ? Storage::url($this->avatar) 
-            : 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
+        return $this->avatar
+            ? Storage::url($this->avatar)
+            : 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 
     public function role(): BelongsTo

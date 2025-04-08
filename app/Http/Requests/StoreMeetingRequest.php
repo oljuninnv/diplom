@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use App\Models\Call;
 use Carbon\Carbon;
 
@@ -17,9 +16,9 @@ class StoreMeetingRequest extends FormRequest
     public function rules()
     {
         $user = auth()->user();
-        $isTutor = $user->role->name === \App\Enums\UserRoleEnum::TUTOR_WORKER->value;
+        $isTutor = $user->isTutorWorker();
         
-        $rules = [
+        return [
             'user_id' => 'required|exists:users,id',
             'date' => [
                 'required',
@@ -36,25 +35,20 @@ class StoreMeetingRequest extends FormRequest
             'type' => [
                 'required',
                 'in:primary,technical,final',
-                function ($attribute, $value, $fail) use ($isTutor, $user) {
+                function ($attribute, $value, $fail) use ($isTutor) {
                     if ($isTutor && $value !== 'technical') {
                         $fail('Тьютор может создавать только технические созвоны.');
                     }
                 }
             ],
+            'tutor_id' => $isTutor ? [] : 'required|exists:users,id',
         ];
-
-        if (!$isTutor) {
-            $rules['tutor_id'] = 'required|exists:users,id';
-        }
-
-        return $rules;
     }
 
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            if (!$validator->errors()->any()) {
+            if ($validator->errors()->isEmpty()) {
                 $this->validateMeetingTime($validator);
             }
         });
@@ -62,14 +56,14 @@ class StoreMeetingRequest extends FormRequest
 
     protected function validateMeetingTime($validator)
     {
-        $existingMeeting = Call::where('date', $this->date)
-            ->where('time', $this->time)
-            ->when($this->route('meeting'), function ($query) {
-                $query->where('id', '!=', $this->route('meeting')->id);
-            })
-            ->exists();
+        $query = Call::where('date', $this->date)
+            ->where('time', $this->time);
 
-        if ($existingMeeting) {
+        if ($this->route('meeting')) {
+            $query->where('id', '!=', $this->route('meeting')->id);
+        }
+
+        if ($query->exists()) {
             $validator->errors()->add('time', 'На это время уже назначен другой созвон.');
         }
     }
