@@ -22,20 +22,20 @@ class MeetingController extends Controller
             $query->where('hr_manager_id', $user->id);
         }
 
-        $query->where(function($q) {
+        $query->where(function ($q) {
             $q->whereDate('date', '>', now()->format('Y-m-d'))
-              ->orWhere(function($q) {
-                  $q->whereDate('date', now()->format('Y-m-d'))
-                    ->whereTime('time', '>=', now()->format('H:i:s'));
-              });
+                ->orWhere(function ($q) {
+                    $q->whereDate('date', now()->format('Y-m-d'))
+                        ->whereTime('time', '>=', now()->format('H:i:s'));
+                });
         });
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->whereHas('candidate', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('tutor', fn($q) => $q->where('name', 'like', "%{$search}%"))
-                  ->orWhereHas('hr_manager', fn($q) => $q->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('tutor', fn($q) => $q->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('hr_manager', fn($q) => $q->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -45,11 +45,14 @@ class MeetingController extends Controller
         $sortDirection = $request->sort === 'datetime_desc' ? 'desc' : 'asc';
         $query->orderBy('date', $sortDirection)->orderBy('time', $sortDirection);
 
+        $queryParams = $request->except('page');
+
         return view('workers.meeting', [
             'calls' => $query->paginate($request->perPage ?? 10)->appends($request->except('page')),
             'candidates' => User::candidates()->get(),
             'hrManagers' => User::hrManagers()->get(),
             'tutors' => User::tutors()->get(),
+            'currentParams' => $queryParams, // Передаем параметры в представление
         ]);
     }
 
@@ -83,22 +86,34 @@ class MeetingController extends Controller
         }
 
         Call::create($callData);
-        return redirect()->route('meetings.index')->with('success', 'Созвон успешно назначен');
+
+        $filterParams = $request->only(['perPage']);
+
+        return redirect()->route('meetings.index', $filterParams)->with('success', 'Созвон успешно назначен');
     }
 
     public function edit(Call $meeting)
     {
         return response()->json($meeting->only([
-            'id', 'candidate_id', 'date', 'time', 'meeting_link', 'type', 'tutor_id', 'hr_manager_id'
+            'id',
+            'candidate_id',
+            'date',
+            'time',
+            'meeting_link',
+            'type',
+            'tutor_id',
+            'hr_manager_id'
         ]));
     }
 
     public function update(StoreMeetingRequest $request, Call $meeting)
     {
-        if (Call::where('date', $request->date)
-            ->where('time', $request->time)
-            ->where('id', '!=', $meeting->id)
-            ->exists()) {
+        if (
+            Call::where('date', $request->date)
+                ->where('time', $request->time)
+                ->where('id', '!=', $meeting->id)
+                ->exists()
+        ) {
             return redirect()->back()->withInput()->withErrors(['time' => 'На это время уже назначен созвон']);
         }
 
@@ -115,21 +130,23 @@ class MeetingController extends Controller
             'hr_manager_id' => $user->isAdmin() ? $user->id : $request->hr_manager_id,
         ]);
 
-        return redirect()->route('meetings.index')->with('success', 'Созвон успешно обновлен');
+        $filterParams = $request->only(['perPage']);
+
+        return redirect()->route('meetings.index', $filterParams)->with('success', 'Созвон успешно обновлен');
     }
 
     public function destroy(Call $meeting)
     {
         $meeting->delete();
-        return redirect()->route('meetings.index')->with('success', 'Созвон успешно удален');
+        return redirect()->route('meetings.index', request()->except(['_token', 'page']))->with('success', 'Созвон успешно удален');
     }
 
     public function canUpdate(User $user, Call $call)
     {
-        return match($user->role->name) {
-            UserRoleEnum::TUTOR_WORKER->value => $call->type === 'technical' && 
-                ($call->tutor_id === $user->id || is_null($call->tutor_id)) && 
-                is_null($call->hr_manager_id),
+        return match ($user->role->name) {
+            UserRoleEnum::TUTOR_WORKER->value => $call->type === 'technical' &&
+            ($call->tutor_id === $user->id || is_null($call->tutor_id)) &&
+            is_null($call->hr_manager_id),
             UserRoleEnum::ADMIN->value, UserRoleEnum::SUPER_ADMIN->value => true,
             default => $call->hr_manager_id === $user->id,
         };
@@ -137,10 +154,10 @@ class MeetingController extends Controller
 
     public function canDelete(User $user, Call $call)
     {
-        return match($user->role->name) {
-            UserRoleEnum::TUTOR_WORKER->value => $call->type === 'technical' && 
-                $call->tutor_id === $user->id && 
-                is_null($call->hr_manager_id),
+        return match ($user->role->name) {
+            UserRoleEnum::TUTOR_WORKER->value => $call->type === 'technical' &&
+            $call->tutor_id === $user->id &&
+            is_null($call->hr_manager_id),
             UserRoleEnum::ADMIN->value, UserRoleEnum::SUPER_ADMIN->value => true,
             default => $call->hr_manager_id === $user->id,
         };
