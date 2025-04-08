@@ -9,6 +9,8 @@ use App\Http\Controllers\CandidateTaskController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WorkerChatController;
+use App\Http\Controllers\MeetingController;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,6 +98,6 @@ Route::prefix('api/tasks')->group(function () {
 });
 
 // Созвоны
-Route::get('/meeting', function () {
-    return view('workers.meeting');
-})->name('meeting');
+Route::resource('meetings', MeetingController::class);
+Route::get('/users/{user}', [MeetingController::class, 'getUserData']);
+Route::get('/meetings-all', [MeetingController::class, 'getAllCalls']); 

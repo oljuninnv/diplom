@@ -7,6 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- Добавьте эти строки в секцию head -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+    
+    <!-- Для иконок Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     @vite('resources/css/app.css')
 </head>
 
@@ -39,8 +46,8 @@
                                         class="{{ request()->is('tasks*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                         Задание
                                     </a>
-                                    <a href="/meeting"
-                                        class="{{ request()->is('meeting*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                    <a href="/meetings"
+                                        class="{{ request()->is('meetings*') ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700' }} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                         Созвон
                                     </a>
                                     <a href="/worker-chat"
@@ -111,8 +118,8 @@
                                 class="{{ request()->is('tasks') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700' }} block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                                 Задание
                             </a>
-                            <a href="/meeting"
-                                class="{{ request()->is('meeting') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700' }} block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
+                            <a href="/meetings"
+                                class="{{ request()->is('meetings') ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700' }} block pl-3 pr-4 py-2 border-l-4 text-base font-medium">
                                 Созвон
                             </a>
                             <a href="/worker-chat"
@@ -134,7 +141,7 @@
                         <div class="flex items-center px-4">
                             <!-- Аватар пользователя -->
                             <div class="flex-shrink-0 mr-3">
-                                <img src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('images/default-avatar.png') }}"
+                                <img src="{{ auth()->user()?->avatar ? asset('storage/' . auth()->user()->avatar) : asset('deafault-avatar.jpg') }}"
                                     alt="Аватар" class="h-10 w-10 rounded-full object-cover">
                             </div>
                             <!-- Имя пользователя -->

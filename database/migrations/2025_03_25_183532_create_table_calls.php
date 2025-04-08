@@ -31,6 +31,7 @@ return new class extends Migration
                   ->comment('Тьютор на созвоне (если требуется)');
             
             $table->foreignId('hr_manager_id')
+                 ->nullable()
                   ->constrained('users')
                   ->comment('HR-менеджер, организующий созвон');
             
