@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use MoonShine\Support\Enums\ToastType;
 use MoonShine\UI\Fields\Hidden;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
 use App\Models\Task;
 use App\Models\Post;
+use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
+use MoonShine\Support\AlpineJs;
+use MoonShine\Support\Enums\JsEvent;
 use App\Models\Department;
 use App\Models\Application;
 use MoonShine\UI\Components\FormBuilder;
@@ -19,6 +23,7 @@ use MoonShine\UI\Fields\File;
 use MoonShine\UI\Components\Layout\Div;
 use MoonShine\UI\Collections\Fields;
 use MoonShine\UI\Components\Modal;
+use MoonShine\UI\Fields\Url;
 use App\Enums\UserRoleEnum;
 use App\Models\User;
 use MoonShine\Laravel\Fields\Relationships\BelongsTo;
@@ -118,7 +123,10 @@ class ApplicationResource extends ModelResource
                         ->asyncMethod('approve')
                         ->submit('Назначить')
                 ),
-            ActionButton::make('Отклонить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)->method('decline'),
+            ActionButton::make('Отклонить')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
+                ->method('decline'),
             ActionButton::make('Назначить созвон')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
                 ->inModal(
                     'Назначить созвон',
@@ -128,6 +136,7 @@ class ApplicationResource extends ModelResource
                             ID::make('id')->setValue($application->id),
                             Date::make('Дата', 'date')->sortable()->required(),
                             Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
+                            URL::make('Ссылка на звонок', 'meeting_link')->required(),
                             Select::make('Тьютор', 'tutor')
                                 ->options(
                                     User::query()
@@ -239,7 +248,7 @@ class ApplicationResource extends ModelResource
     //                 ->reactive()
     //                 ->required()
     //                 ->searchable(),
-    //         ])->asyncMethod('assignCall')
+    //         ])->asyncMethod('test')
     //         ->submit('Назначить');
     // }
 
@@ -252,24 +261,38 @@ class ApplicationResource extends ModelResource
     //     ];
     // }
 
-    public function approve(MoonShineRequest $request)
+    // public function test(MoonShineRequest $request)
+    // {
+    //     \Log::info($request->input('id'));
+    // }
+
+    public function approve(MoonShineRequest $request): MoonShineJsonResponse
     {
         $reportAction = new ApplicationAction();
         $reportAction->approve($request->all());
-
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Заявка принята', ToastType::SUCCESS);
     }
 
-    public function decline(MoonShineRequest $request)
+    public function decline(MoonShineRequest $request): MoonShineJsonResponse
     {
         $id = (int) $request->get('resourceItem');
         $reportAction = new ApplicationAction();
         $reportAction->decline($id);
-
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Заявка отклонена', ToastType::SUCCESS);
     }
 
     public function assignCall(MoonShineRequest $request)
     {
-        \Log::info($request->all());
+        $id = (int) $request->get('id');
+        $reportAction = new ApplicationAction();
+        $reportAction->assignCall($id, $request->all());
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Созвон назначен', ToastType::SUCCESS);
     }
     public function formFields(): iterable
     {

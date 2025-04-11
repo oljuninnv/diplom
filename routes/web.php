@@ -27,77 +27,79 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Аутентификация
+Route::middleware(['guest'])->group(function () {
+    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('auth');
+    
+    Route::get('/auth/restore-password/{user}', [AuthController::class, 'showRestorePasswordForm'])
+        ->name('restore-password.form');
+    Route::post('/auth/restore-password/{user}', [AuthController::class, 'restorePassword'])
+        ->name('restore-password');
+    
+    Route::get('/auth/reset-password', [RestorePasswordController::class, 'showResetPasswordForm'])
+        ->name('reset-password.form');
+    Route::post('/auth/reset-password', [RestorePasswordController::class, 'reset_password'])
+        ->name('reset-password');
+    
+    Route::get('/auth/reset-password/confirm', [RestorePasswordController::class, 'showResetPasswordConfirmForm'])
+        ->name('auth.restore-password-confirm');
+    
+    Route::post('/auth/reset-password/update', [RestorePasswordController::class, 'resetPassword'])
+        ->name('password.update');
+    
+    Route::get('reset_password/confirm', [RestorePasswordController::class, 'showResetPasswordConfirmForm'])
+        ->name('resetPasswordConfirm_form');
+    Route::post('reset_password/confirm', [RestorePasswordController::class, 'resetPassword'])
+        ->name('reset_password_confirm');
+});
 
-// Вход в систему
-Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('login', [AuthController::class, 'login'])->name('auth');
+// Выход из системы (только для авторизованных)
+Route::middleware(['auth'])->group(function () {
+    Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+});
 
-Route::get('logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::get('/auth/restore-password/{user}', [AuthController::class, 'showRestorePasswordForm'])
-    ->name('restore-password.form');
-
-Route::post('/auth/restore-password/{user}', [AuthController::class, 'restorePassword'])
-    ->name('restore-password');
-
-Route::get('/auth/reset-password', [RestorePasswordController::class, 'showResetPasswordForm'])
-    ->name('reset-password.form');
-
-Route::post('/auth/reset-password', [RestorePasswordController::class, 'reset_password'])
-    ->name('reset-password');
-
-Route::get('/auth/reset-password/confirm', [RestorePasswordController::class, 'showResetPasswordConfirmForm'])
-    ->name('auth.restore-password-confirm');
-
-// Обработка нового пароля
-Route::post('/auth/reset-password/update', [RestorePasswordController::class, 'resetPassword'])
-    ->name('password.update');
-
-Route::get('reset_password/confirm', [RestorePasswordController::class, 'showResetPasswordConfirmForm'])->name('resetPasswordConfirm_form');
-Route::post('reset_password/confirm', [RestorePasswordController::class, 'resetPassword'])->name('reset_password_confirm');
-
-// Информационная страница
+// Информационная страница (доступна без авторизации)
 Route::get('/career', [CareerController::class, 'index'])->name('career');
 Route::post('/career', [CareerController::class, 'submitApplication'])->name('career.submit');
 
-// Страница профиля
-Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile');
-Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
-Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-
-// Задание
+// Защищенные маршруты (требуют авторизации)
 Route::middleware(['auth'])->group(function () {
+    // Профиль
+    Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    
+    // Задания
     Route::get('/task', [CandidateTaskController::class, 'show'])->name('task');
     Route::post('/task/submit', [CandidateTaskController::class, 'submit'])->name('task.submit');
-});
-
-// Чат кандидата
-Route::middleware(['auth'])->group(function () {
+    
+    // Чат кандидата
     Route::get('/chat/{interlocutor?}', [ChatController::class, 'index'])->name('chat');
     Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
     Route::delete('/chat/delete/{message}', [ChatController::class, 'deleteMessage'])->name('chat.delete');
-});
-
-// Чат сотрудников
-Route::middleware(['auth'])->group(function() {
+    
+    // Чат сотрудников
     Route::get('/worker-chat/{interlocutor?}', [WorkerChatController::class, 'index'])->name('worker-chat');
     Route::post('/worker-chat/send', [WorkerChatController::class, 'sendMessage'])->name('worker-chat.send');
     Route::delete('/worker-chat/delete/{message}', [WorkerChatController::class, 'deleteMessage'])->name('worker-chat.delete');
+    
+    // Список задач
+    Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
+    
+    // Созвоны
+    Route::resource('meetings', MeetingController::class);
+    Route::get('/users/{user}', [MeetingController::class, 'getUserData']);
+    Route::get('/meetings-all', [MeetingController::class, 'getAllCalls']);
 });
 
-// Список задач
-Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
-Route::prefix('api/tasks')->group(function () {
+// API задачи (требуют авторизации)
+Route::middleware(['auth'])->prefix('api/tasks')->group(function () {
     Route::get('/', [TaskController::class, 'getTasks']);
     Route::get('/candidate/{id}', [TaskController::class, 'getCandidateInfo']);
-    Route::get('task-status/{id}', [TaskController::class, 'getTaskStatus']);
-    Route::get('/task/{taskStatusId}', [TaskController::class, 'getTaskInfo']); // Изменено
-    Route::put('/status/{taskStatusId}', [TaskController::class, 'updateStatus']); // Изменено
-    Route::post('/report/{taskStatusId}', [TaskController::class, 'createReport']); // Изменено
+    Route::get('/task-status/{id}', [TaskController::class, 'getTaskStatus']);
+    Route::get('/task/{taskStatusId}', [TaskController::class, 'getTaskInfo']);
+    Route::put('/status/{taskStatusId}', [TaskController::class, 'updateStatus']);
+    Route::post('/report/{taskStatusId}', [TaskController::class, 'createReport']);
     Route::get('/statuses', [TaskController::class, 'getStatuses']);
 });
-
-// Созвоны
-Route::resource('meetings', MeetingController::class);
-Route::get('/users/{user}', [MeetingController::class, 'getUserData']);
-Route::get('/meetings-all', [MeetingController::class, 'getAllCalls']); 
