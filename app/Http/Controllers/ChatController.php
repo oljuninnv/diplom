@@ -110,29 +110,35 @@ class ChatController extends Controller
     }
 
     private function getInterlocutors()
-    {
-        $user = Auth::user();
-        $taskStatus = TaskStatus::where('user_id', $user->id)
-            ->with(['hr_manager', 'tutor'])
-            ->latest()
-            ->first();
+{
+    $user = Auth::user();
+    $taskStatus = TaskStatus::where('user_id', $user->id)
+        ->with(['hr_manager', 'tutor'])
+        ->latest()
+        ->first();
 
-        $interlocutors = [];
+    $interlocutors = collect();
 
-        if ($taskStatus) {
-            if ($taskStatus->hr_manager) {
-                $taskStatus->hr_manager->position = 'HR-менеджер';
-                $interlocutors[] = $taskStatus->hr_manager;
-            }
-
-            if ($taskStatus->tutor) {
-                $taskStatus->tutor->position = 'Тьютор';
-                $interlocutors[] = $taskStatus->tutor;
-            }
+    if ($taskStatus) {
+        // Добавляем HR-менеджера, если он есть и это не сам пользователь
+        if ($taskStatus->hr_manager && $taskStatus->hr_manager->id != $user->id) {
+            $taskStatus->hr_manager->position = 'HR-менеджер';
+            $interlocutors->push($taskStatus->hr_manager);
         }
 
-        return $interlocutors;
+        // Добавляем тьютора, если он есть, это не сам пользователь и это не тот же человек, что и HR
+        if ($taskStatus->tutor && $taskStatus->tutor->id != $user->id) {
+            // Проверяем, не является ли тьютор тем же человеком, что и HR (но с другой ролью)
+            if (!$taskStatus->hr_manager || $taskStatus->tutor->id != $taskStatus->hr_manager->id) {
+                $taskStatus->tutor->position = 'Тьютор';
+                $interlocutors->push($taskStatus->tutor);
+            }
+        }
     }
+
+    // Удаляем дубликаты по id и сбрасываем ключи
+    return $interlocutors->unique('id')->values()->all();
+}
 
     private function getMessages($userId, $interlocutorId)
     {
