@@ -6,9 +6,10 @@
         <div class="mb-8 text-center">
             <h1 class="text-3xl font-bold text-gray-900">Задание</h1>
             <p class="mt-2 text-lg text-gray-600">Выполните задание и отправьте ссылку на репозиторий</p>
+            <span class="text-lg">Статус выполнения задания: {{ $taskStatus->status }}</span>
         </div>
 
-        @if(session('success'))
+        @if (session('success'))
             <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
                 {{ session('success') }}
             </div>
@@ -20,16 +21,18 @@
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                     <div class="mb-4 md:mb-0">
                         <h2 class="text-xl font-semibold text-gray-800">{{ $taskStatus->task->title }}</h2>
-                        <p class="mt-1 text-gray-600">{{ $taskStatus->task->description ?? 'Описание задания и требования к выполнению' }}</p>
-                        
+
                         <!-- Добавленная строка с датой окончания -->
-                        @if($taskStatus->end_date)
-                        <div class="mt-2 flex items-center text-sm text-gray-500">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            Срок выполнения: <span class="font-medium ml-1">{{ $taskStatus->end_date->format('d.m.Y') }}</span>
-                        </div>
+                        @if ($taskStatus->end_date)
+                            <div class="mt-2 flex items-center text-sm text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Срок выполнения: <span
+                                    class="font-medium ml-1">{{ $taskStatus->end_date->format('d.m.Y') }}</span>
+                            </div>
                         @endif
                     </div>
                     <div class="mt-4 md:mt-0 md:ml-4">
@@ -51,38 +54,53 @@
         <!-- Форма для отправки решения -->
         <div class="bg-white shadow rounded-lg overflow-hidden" id="submit-form">
             <div class="p-6 sm:p-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4">Отправить решение</h2>
-        
-                @if(!$canEdit)
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                    @if($taskStatus->status === \App\Enums\TaskStatusEnum::REVISION->value)
+                        Отправить доработанное решение
+                    @elseif (!$canEdit)
+                        Отправить решение
+                    @else
+                        Решение отправлено
+                    @endif
+                </h2>
+
+                @if (!$canEdit)
                     <div class="mb-4 p-4 bg-blue-100 border border-blue-400 text-blue-700 rounded">
                         Решение отправлено на проверку. Вы не можете изменить ссылку на репозиторий.
                         Если же вы ошиблись с репоизторием или не закончили задание, то напишите вашему HR-менеджеру
                     </div>
                 @endif
-        
+
                 <form id="github-form" action="{{ route('task.submit') }}" method="POST">
                     @csrf
-        
+
                     <div class="mb-6">
-                        <label for="github-repo" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на GitHub репозиторий</label>
+                        <label for="github-repo" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на GitHub
+                            репозиторий</label>
                         <input type="url" id="github-repo" name="github_repo"
-                            class="github-input mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring focus:ring-indigo-500 focus:border-indigo-500 @if(!$canEdit) bg-gray-100 cursor-not-allowed @endif"
+                            class="github-input mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring focus:ring-indigo-500 focus:border-indigo-500 @if (!$canEdit || $taskStatus->status === 'доработка') bg-gray-100 cursor-not-allowed @endif"
                             placeholder="https://github.com/username/repository"
-                            pattern="^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$" 
+                            pattern="^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+$"
                             value="{{ old('github_repo', $taskStatus->github_repo ?? '') }}"
-                            @if(!$canEdit) readonly @endif
-                            required>
-                        <p id="github-error" class="mt-1 text-xs text-red-500 hidden">Введите корректную ссылку на GitHub репозиторий</p>
+                            @if (!$canEdit || $taskStatus->status === 'доработка')) readonly @endif required>
+                        <p id="github-error" class="mt-1 text-xs text-red-500 hidden">Введите корректную ссылку на GitHub
+                            репозиторий</p>
                         @error('github_repo')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
-        
+
                     <div class="flex justify-end">
                         <button type="submit"
-                            class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 @if(!$canEdit) bg-gray-400 cursor-not-allowed @endif"
-                            @if(!$canEdit) disabled @endif>
-                            @if($canEdit) Отправить @else Отправлено @endif
+                            class="w-full px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 @if (!$canEdit) bg-gray-400 cursor-not-allowed @endif"
+                            @if (!$canEdit && $taskStatus->status !== 'доработка') disabled @endif>
+                            @if ($canEdit && $taskStatus->status !== 'доработка')
+                                Отправить
+                            @elseif($taskStatus->status === 'доработка')
+                                Отправить доработанное решение
+                            @else
+                                Отправлено
+                            @endif
                         </button>
                     </div>
                 </form>

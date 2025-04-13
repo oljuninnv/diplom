@@ -32,7 +32,7 @@ class CandidateTaskController extends Controller
 
         $canEdit = !in_array($taskStatus->status, [
             TaskStatusEnum::UNDER_REVIEW->value,
-            TaskStatusEnum::APPROVED->value
+            TaskStatusEnum::APPROVED->value,
         ]);
 
         return view('users.task', [
