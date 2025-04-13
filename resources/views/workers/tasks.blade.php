@@ -189,43 +189,69 @@
             // Рендер таблицы
             function renderTable(candidates) {
                 candidatesTable.innerHTML = candidates.length > 0 ?
-                    candidates.map(candidate => `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center cursor-pointer" onclick="showCandidateModal(${candidate.id})">
-                                    <img class="h-10 w-10 rounded-full" src="${candidate.avatar}" alt="${candidate.name}">
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900">${candidate.name}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 cursor-pointer" onclick="showTaskModal(${candidate.task_status_id})">${candidate.task.title}</div>
-                                <div class="text-sm text-gray-500">${candidate.task.difficulty}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
-                                ${candidate.task.deadline || 'Не указан'}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                ${candidate.task.github ? 
-                                    `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
-                                                ${candidate.task.github}
-                                            </a>` 
-                                    : ''
-                                }
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(candidate.task.status)}">
-                                    ${candidate.task.status}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button onclick="showStatusModal(${candidate.task_status_id})" class="text-blue-600 hover:text-blue-900 mr-3">Изменить статус</button>
-                                <button onclick="showReportModal(${candidate.task_status_id})" class="text-indigo-600 hover:text-indigo-900">Создать отчёт</button>
-                            </td>
-                        </tr>
-                    `).join('') :
-                    `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Нет данных для отображения</td></tr>`;
+                    candidates.map(candidate => {
+                        const status = candidate.task.status.toLowerCase();
+                        const isFinalStatus = ['одобрено', 'провалено'].includes(status);
+                        const isInProgress = status === 'в процессе';
+                        const showChangeStatus = !isFinalStatus && !isInProgress;
+                        const showCreateReport = isFinalStatus;
+
+                        return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center cursor-pointer" onclick="showCandidateModal(${candidate.id})">
+                            <img class="h-10 w-10 rounded-full" src="${candidate.avatar}" alt="${candidate.name}">
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${candidate.name}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900 cursor-pointer" onclick="showTaskModal(${candidate.task_status_id})">${candidate.task.title}</div>
+                        <div class="text-sm text-gray-500">${candidate.task.difficulty}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
+                        ${candidate.task.deadline || 'Не указан'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${candidate.task.github ? 
+                            `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
+                                        ${candidate.task.github}
+                                    </a>` 
+                            : ''
+                        }
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(candidate.task.status)}">
+                            ${candidate.task.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex justify-center space-x-2">
+                            ${showChangeStatus ? 
+                                `<button onclick="showStatusModal(${candidate.task_status_id})" 
+                                         class="text-blue-600 hover:text-blue-900 mr-3">
+                                            Изменить статус
+                                        </button>` 
+                                : ''
+                            }
+                            ${showCreateReport ? 
+                                `<button onclick="showReportModal(${candidate.task_status_id})" 
+                                         class="text-indigo-600 hover:text-indigo-900">
+                                            Создать отчёт
+                                        </button>` 
+                                : ''
+                            }
+                        </div>
+                    </td>
+                </tr>
+            `;
+                    }).join('') :
+                    `<tr>
+            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                Нет данных для отображения
+            </td>
+        </tr>`;
             }
 
             // Функции для модальных окон
