@@ -160,13 +160,17 @@ class WorkerChatController extends Controller
             ->unique()
             ->filter()
             ->map(function ($colleague) use ($user) {
-                $colleague->position = $user->role->name === UserRoleEnum::TUTOR_WORKER->value
-                    ? 'HR-менеджер'
-                    : 'Тьютор';
-                return $colleague;
-            });
+                if ($colleague && $colleague->id != $user->id) { // Исключаем текущего пользователя
+                    $colleague->position = $user->role->name === UserRoleEnum::TUTOR_WORKER->value
+                        ? 'HR-менеджер'
+                        : 'Тьютор';
+                    return $colleague;
+                }
+                return null;
+            })
+            ->filter();
 
-        return $candidates->merge($colleagues)->unique('id');
+        return $candidates->merge($colleagues)->unique('id')->values();
     }
 
     private function getMessages($userId, $interlocutorId)
