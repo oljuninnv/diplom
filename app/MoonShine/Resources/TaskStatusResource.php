@@ -4,6 +4,14 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use MoonShine\Support\Enums\ToastType;
+use App\Actions\TaskStatusAction;
+use MoonShine\Laravel\MoonShineRequest;
+use MoonShine\Laravel\Http\Responses\MoonShineJsonResponse;
+use MoonShine\UI\Components\ActionButton;
+use MoonShine\Support\AlpineJs;
+use MoonShine\Support\Enums\JsEvent;
+use MoonShine\Support\ListOf;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Enums\TaskStatusEnum;
@@ -20,6 +28,11 @@ use MoonShine\UI\Fields\Date;
 use MoonShine\UI\Fields\Number;
 use MoonShine\UI\Fields\Select;
 use MoonShine\UI\Fields\DateRange;
+use MoonShine\UI\Components\FormBuilder;
+use MoonShine\UI\Fields\Hidden;
+use MoonShine\UI\Fields\Textarea;
+use MoonShine\UI\Fields\File;
+use MoonShine\UI\Fields\Url;
 
 #[Icon('table-cells')]
 /**
@@ -36,6 +49,162 @@ class TaskStatusResource extends ModelResource
     protected bool $detailInModal = true;
     protected bool $editInModal = true;
     protected bool $cursorPaginate = true;
+
+    protected function indexButtons(): ListOf
+    {
+        return parent::indexButtons()->add(
+            ActionButton::make('Отправить на доработку')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::UNDER_REVIEW->value)
+                ->inModal(
+                    'Отправить на доработку',
+                    fn(TaskStatus $taskStatus) => FormBuilder::make()
+                        ->name('revisionModal')
+                        ->fields([
+                            Hidden::make('id')->setValue($taskStatus->id),
+                            Textarea::make('Комментарий', 'comment'),
+                            File::make('Файл', 'file')
+                                ->disk(moonshineConfig()->getDisk())
+                                ->dir('moonshine_taskStatus')
+                                ->allowedExtensions(['pdf', 'doc', 'docx']),
+                        ])
+                        ->asyncMethod('revision')
+                        ->submit('Отправить')
+                ),
+            ActionButton::make('Одобрить задание')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::UNDER_REVIEW->value)
+                ->inModal(
+                    'Одобрить задание',
+                    fn(TaskStatus $taskStatus) => FormBuilder::make()
+                        ->name('revisionModal')
+                        ->fields([
+                            Hidden::make('id')->setValue($taskStatus->id),
+                            File::make('Отчёт', 'file')->required(),
+                        ])
+                        ->asyncMethod('approved')
+                        ->submit('Отправить')
+                ),
+            ActionButton::make('Задание провалено')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::UNDER_REVIEW->value)
+                ->inModal(
+                    'Задание провалено',
+                    fn(TaskStatus $taskStatus) => FormBuilder::make()
+                        ->name('revisionModal')
+                        ->fields([
+                            Hidden::make('id')->setValue($taskStatus->id),
+                            File::make('Отчёт', 'file')->required(),
+                        ])
+                        ->asyncMethod('failed')
+                        ->submit('Отправить')
+                ),
+            ActionButton::make('Назначить финальный созвон')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::APPROVED->value)
+                ->inModal(
+                    'Назначить финальный созвон',
+                    fn(TaskStatus $taskStatus) => FormBuilder::make()
+                        ->name('assignCallModal')
+                        ->fields([
+                            Hidden::make('id')->setValue($taskStatus->id),
+                            Date::make('Дата', 'date')->sortable()->required(),
+                            Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
+                            URL::make('Ссылка на звонок', 'meeting_link')->required(),
+                        ])
+                        ->asyncMethod('final_call')
+                        ->submit('Назначить')
+                ),
+            ActionButton::make('Назначить технический созвон')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::IN_PROGRESS->value || $model->status === TaskStatusEnum::UNDER_REVIEW->value)
+                ->inModal(
+                    'Назначить технический созвон',
+                    fn(TaskStatus $taskStatus) => FormBuilder::make()
+                        ->name('assignCallModal')
+                        ->fields([
+                            Hidden::make('id')->setValue($taskStatus->id),
+                            Date::make('Дата', 'date')->sortable()->required(),
+                            Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
+                            URL::make('Ссылка на звонок', 'meeting_link')->required(),
+                        ])
+                        ->asyncMethod('technical_call')
+                        ->submit('Назначить')
+                ),
+        );
+    }
+
+    public function revision(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $data = $request->all();
+
+        // Сохранение файла и получение пути
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('moonshine_taskStatus', moonshineConfig()->getDisk());
+            $data['file_path'] = $filePath;
+        }
+
+        $reportAction = new TaskStatusAction();
+        $reportAction->revision($data);
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Задание отправлено на доработку', ToastType::SUCCESS);
+    }
+
+    public function approved(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $data = $request->all();
+
+        // Сохранение файла и получение пути
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('moonshine_reports', moonshineConfig()->getDisk());
+            $data['file_path'] = $filePath;
+        }
+
+        \Log::info($data);
+
+        // Логика для обработки других данных
+        $reportAction = new TaskStatusAction();
+        $reportAction->approved($data);
+
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Задание было одобрено', ToastType::SUCCESS);
+    }
+
+    public function failed(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $data = $request->all();
+
+        if ($request->hasFile('file')) {
+            $filePath = $request->file('file')->store('moonshine_reports', moonshineConfig()->getDisk());
+            $data['file_path'] = $filePath;
+        }
+
+        $reportAction = new TaskStatusAction();
+        $reportAction->failed($data);
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Задание было провалено', ToastType::SUCCESS);
+    }
+
+    public function final_call(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $reportAction = new TaskStatusAction();
+        $reportAction->final_call($request->all());
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Финальный созвон был назначен', ToastType::SUCCESS);
+    }
+
+    public function technical_call(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $reportAction = new TaskStatusAction();
+        $reportAction->technical_call($request->all());
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Технический созвон был назначен', ToastType::SUCCESS);
+    }
 
     public function indexFields(): iterable
     {

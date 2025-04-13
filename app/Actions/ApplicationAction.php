@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\CallEnum;
 use App\Enums\TaskStatusEnum;
 use App\Models\Application;
 use App\Models\TaskStatus;
@@ -54,6 +55,11 @@ class ApplicationAction
                 new ApplicationApprovedMail($user, $tutor, $hrManager, $task)
             );
 
+            //Отправка письма тьютору
+            // Mail::to($tutor->email)->send(
+            //     new ApplicationApprovedMail($user, $tutor, $hrManager, $task)
+            // );
+
             // Отправка письма администратору
             Mail::send(
                 new UserAddedMail($user, $tutor, $hrManager, $task, $endDate)
@@ -95,6 +101,7 @@ class ApplicationAction
             \Log::info('Заявка найдена', ['application' => $application->toArray()]);
 
             $call = Call::create([
+                'type' => CallEnum::PRIMARY->value,
                 'meeting_link' => $array['meeting_link'],
                 'date' => $array['date'],
                 'time' => $array['time'],
