@@ -383,7 +383,7 @@
 
                     @if (auth()->user()->isAdmin())
                         <input type="hidden" name="hr_manager_id" value="{{ auth()->id() }}">
-                        @elseunless(auth()->user()->isTutorWorker())
+                    @elseif (!auth()->user()->isTutorWorker())
                         <div>
                             <label for="hr-manager-select"
                                 class="block text-sm font-medium text-gray-700 mb-1">HR-менеджер *</label>
@@ -396,14 +396,13 @@
                             </select>
                         </div>
                     @endif
-                </div>
 
-                <div class="mt-6 flex justify-end gap-3">
-                    <button type="button" onclick="closeModal('add-modal')"
-                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md">Отмена</button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">Сохранить</button>
-                </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" onclick="closeModal('add-modal')"
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md">Отмена</button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">Сохранить</button>
+                    </div>
             </form>
         </div>
     </div>
