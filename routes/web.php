@@ -71,30 +71,40 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     
     // Задания
-    Route::get('/task', [CandidateTaskController::class, 'show'])->name('task');
-    Route::post('/task/submit', [CandidateTaskController::class, 'submit'])->name('task.submit');
+    Route::middleware(['role:USER'])->group(function () {
+        Route::get('/task', [CandidateTaskController::class, 'show'])->name('task');
+        Route::post('/task/submit', [CandidateTaskController::class, 'submit'])->name('task.submit');
+    });
     
     // Чат кандидата
-    Route::get('/chat/{interlocutor?}', [ChatController::class, 'index'])->name('chat');
-    Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
-    Route::delete('/chat/delete/{message}', [ChatController::class, 'deleteMessage'])->name('chat.delete');
+    Route::middleware(['role:USER'])->group(function () {
+        Route::get('/chat/{interlocutor?}', [ChatController::class, 'index'])->name('chat');
+        Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
+        Route::delete('/chat/delete/{message}', [ChatController::class, 'deleteMessage'])->name('chat.delete');
+    });
     
     // Чат сотрудников
-    Route::get('/worker-chat/{interlocutor?}', [WorkerChatController::class, 'index'])->name('worker-chat');
-    Route::post('/worker-chat/send', [WorkerChatController::class, 'sendMessage'])->name('worker-chat.send');
-    Route::delete('/worker-chat/delete/{message}', [WorkerChatController::class, 'deleteMessage'])->name('worker-chat.delete');
+    Route::middleware(['role:TUTOR_WORKER,ADMIN,SUPER_ADMIN'])->group(function () {
+        Route::get('/worker-chat/{interlocutor?}', [WorkerChatController::class, 'index'])->name('worker-chat');
+        Route::post('/worker-chat/send', [WorkerChatController::class, 'sendMessage'])->name('worker-chat.send');
+        Route::delete('/worker-chat/delete/{message}', [WorkerChatController::class, 'deleteMessage'])->name('worker-chat.delete');
+    });
     
     // Список задач
-    Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
+    Route::middleware(['role:TUTOR_WORKER,ADMIN,SUPER_ADMIN'])->group(function () {
+        Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
+    });
     
     // Созвоны
-    Route::resource('meetings', MeetingController::class);
-    Route::get('/users/{user}', [MeetingController::class, 'getUserData']);
-    Route::get('/meetings-all', [MeetingController::class, 'getAllCalls']);
+    Route::middleware(['role:TUTOR_WORKER,ADMIN,SUPER_ADMIN'])->group(function () {
+        Route::resource('meetings', MeetingController::class);
+        Route::get('/users/{user}', [MeetingController::class, 'getUserData']);
+        Route::get('/meetings-all', [MeetingController::class, 'getAllCalls']);
+    });
 });
 
 // API задачи (требуют авторизации)
-Route::middleware(['auth'])->prefix('api/tasks')->group(function () {
+Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('api/tasks')->group(function () {
     Route::get('/', [TaskController::class, 'getTasks']);
     Route::get('/candidate/{id}', [TaskController::class, 'getCandidateInfo']);
     Route::get('/task-status/{id}', [TaskController::class, 'getTaskStatus']);
