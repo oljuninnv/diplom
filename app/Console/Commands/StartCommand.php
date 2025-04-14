@@ -26,7 +26,19 @@ class StartCommand extends Command
             ]);
 
             $text = trim($message->getText());
+            $from = $message->getFrom();
+            $telegramId = $from->getId();
+
+            // Проверяем, есть ли уже привязанный пользователь к этому Telegram аккаунту
+            $telegramUser = TelegramUser::where('telegram_id', $telegramId)->first();
             
+            if ($telegramUser) {
+                $user = User::where('telegram_user_id', $telegramUser->id)->first();
+                if ($user) {
+                    return $this->showLinkedAccountInfo($user, $message);
+                }
+            }
+
             if (preg_match('/^\/start link_(\d+)_([a-f0-9]+)$/i', $text, $matches)) {
                 $this->processAccountLinking((int)$matches[1], $matches[2], $message);
             } else {
@@ -44,6 +56,18 @@ class StartCommand extends Command
                 'parse_mode' => 'HTML'
             ]);
         }
+    }
+
+    protected function showLinkedAccountInfo(User $user, $message)
+    {
+        $this->replyWithMessage([
+            'text' => "🔒 <b>Ваш Telegram аккаунт уже привязан</b>\n\n"
+                    . "👤 Информация о привязанном профиле:\n"
+                    . "Имя: <b>{$user->name}</b>\n"
+                    . "Email: <b>{$user->email}</b>\n\n"
+                    . "Если вы хотите привязать другой аккаунт, сначала отвяжите текущий в настройках профиля на сайте.",
+            'parse_mode' => 'HTML'
+        ]);
     }
 
     protected function processAccountLinking(int $userId, string $hash, $message)
@@ -81,22 +105,26 @@ class StartCommand extends Command
         $from = $message->getFrom();
         $telegramId = $from->getId();
 
-        // Проверка на существующую привязку
-        $existingLink = User::where('telegram_user_id', $telegramId)
-                          ->where('id', '!=', $userId)
-                          ->first();
+        // Проверка на существующую привязку этого Telegram аккаунта
+        $telegramUser = TelegramUser::where('telegram_id', $telegramId)->first();
         
-        if ($existingLink) {
-            Log::warning('Telegram account already linked', [
-                'telegram_id' => $telegramId,
-                'existing_user' => $existingLink->id
-            ]);
-            
-            return $this->replyWithMessage([
-                'text' => "❌ Этот Telegram аккаунт уже привязан к другому пользователю.\n\n"
-                        . "Обратитесь к администратору для решения проблемы.",
-                'parse_mode' => 'HTML'
-            ]);
+        if ($telegramUser) {
+            $linkedUser = User::where('telegram_user_id', $telegramUser->id)->first();
+            if ($linkedUser) {
+                Log::warning('Telegram account already linked', [
+                    'telegram_id' => $telegramId,
+                    'existing_user' => $linkedUser->id,
+                    'new_user' => $userId
+                ]);
+                
+                return $this->replyWithMessage([
+                    'text' => "❌ Этот Telegram аккаунт уже привязан к пользователю:\n\n"
+                            . "👤 Имя: <b>{$linkedUser->name}</b>\n"
+                            . "📧 Email: <b>{$linkedUser->email}</b>\n\n"
+                            . "Для привязки к другому аккаунту сначала отвяжите текущий в настройках профиля на сайте.",
+                    'parse_mode' => 'HTML'
+                ]);
+            }
         }
 
         // Создание/обновление записи TelegramUser
