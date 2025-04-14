@@ -122,9 +122,6 @@
     <!-- Модальное окно смены статуса -->
     @include('candidates.modals.change-status')
 
-    <!-- Модальное окно создания отчета -->
-    @include('candidates.modals.create-report')
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // DOM элементы
@@ -191,10 +188,9 @@
                 candidatesTable.innerHTML = candidates.length > 0 ?
                     candidates.map(candidate => {
                         const status = candidate.task.status.toLowerCase();
-                        const isFinalStatus = ['одобрено', 'провалено'].includes(status);
-                        const isInProgress = status === 'в процессе';
+                        const isFinalStatus = ['одобрено', 'провалено', 'в процессе'].includes(status);
+                        const isInProgress = status === 'в процессе' || status === 'доработка';
                         const showChangeStatus = !isFinalStatus && !isInProgress;
-                        const showCreateReport = isFinalStatus;
 
                         return `
                 <tr class="hover:bg-gray-50">
@@ -216,8 +212,8 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         ${candidate.task.github ? 
                             `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
-                                        ${candidate.task.github}
-                                    </a>` 
+                                                        ${candidate.task.github}
+                                                    </a>` 
                             : ''
                         }
                     </td>
@@ -230,16 +226,9 @@
                         <div class="flex justify-center space-x-2">
                             ${showChangeStatus ? 
                                 `<button onclick="showStatusModal(${candidate.task_status_id})" 
-                                         class="text-blue-600 hover:text-blue-900 mr-3">
-                                            Изменить статус
-                                        </button>` 
-                                : ''
-                            }
-                            ${showCreateReport ? 
-                                `<button onclick="showReportModal(${candidate.task_status_id})" 
-                                         class="text-indigo-600 hover:text-indigo-900">
-                                            Создать отчёт
-                                        </button>` 
+                                                         class="text-blue-600 hover:text-blue-900 mr-3">
+                                                            Изменить статус
+                                                        </button>` 
                                 : ''
                             }
                         </div>
@@ -285,11 +274,9 @@
             };
 
             window.showStatusModal = function(taskStatusId) {
-                // Сначала получаем данные о TaskStatus
                 fetch(`/api/tasks/task-status/${taskStatusId}`)
                     .then(response => response.json())
                     .then(taskStatusData => {
-                        // Затем получаем данные о кандидате
                         fetch(`/api/tasks/candidate/${taskStatusData.user_id}`)
                             .then(response => response.json())
                             .then(candidateData => {
@@ -311,7 +298,6 @@
                                             input.value = value;
                                             input.className =
                                                 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300';
-                                            // Отмечаем текущий статус
                                             if (value === taskStatusData.status) {
                                                 input.checked = true;
                                             }
@@ -338,94 +324,35 @@
                     });
             };
 
-            window.submitStatusForm = function() {
-                const form = document.getElementById('status-form');
-                const taskStatusId = form.dataset.taskStatusId;
-                const status = form.querySelector('input[name="status"]:checked')?.value;
-
-                if (!status) {
-                    alert('Пожалуйста, выберите статус');
-                    return;
-                }
-
-                fetch(`/api/tasks/status/${taskStatusId}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        },
-                        body: JSON.stringify({
-                            status
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            document.getElementById('status-modal').classList.add('hidden');
-                            loadData(); // Обновляем таблицу
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            };
-
-            window.showReportModal = function(taskStatusId) {
-                // Сначала получаем данные о TaskStatus
-                fetch(`/api/tasks/task-status/${taskStatusId}`)
-                    .then(response => response.json())
-                    .then(taskStatusData => {
-                        // Затем получаем данные о кандидате
-                        fetch(`/api/tasks/candidate/${taskStatusData.user_id}`)
-                            .then(response => response.json())
-                            .then(candidateData => {
-                                document.getElementById('report-candidate-name').textContent =
-                                    `Кандидат: ${candidateData.name}`;
-                                document.getElementById('report-form').dataset.taskStatusId =
-                                    taskStatusId;
-                                document.getElementById('report-modal').classList.remove('hidden');
-                            });
-                    });
-            };
-
-            window.submitReportForm = async function(event) {
+            window.submitStatusForm = async function(event) {
                 event.preventDefault();
 
-                const form = document.getElementById('report-form');
+                const form = document.getElementById('status-form');
                 const taskStatusId = form.dataset.taskStatusId;
                 const formData = new FormData(form);
 
-                // Добавляем CSRF-токен в FormData
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-                if (csrfToken) {
-                    formData.append('_token', csrfToken);
-                }
-
-                const fileInput = form.querySelector('input[type="file"]');
-                if (!fileInput.files.length) {
-                    alert('Пожалуйста, выберите файл отчёта');
-                    return;
-                }
-
-                const submitBtn = form.querySelector('button[type="submit"]');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="animate-spin">⏳</span> Отправка...';
+                // Добавляем метод PUT в FormData
+                formData.append('_method', 'PUT');
 
                 try {
-                    const response = await fetch(`/api/tasks/report/${taskStatusId}`, {
-                        method: 'POST',
+                    const response = await fetch(`/api/tasks/status/${taskStatusId}`, {
+                        method: 'POST', // Оставляем POST, но имитируем PUT через _method
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content,
+                            'Accept': 'application/json'
+                        },
                         body: formData
                     });
 
                     if (!response.ok) {
                         const errorData = await response.json().catch(() => ({}));
-                        throw new Error(
-                            errorData.message ||
-                            `Ошибка сервера: ${response.status} ${response.statusText}`
-                        );
+                        throw new Error(errorData.message || 'Ошибка сервера');
                     }
 
                     const data = await response.json();
-                    alert(data.message || 'Отчёт успешно создан');
-                    document.getElementById('report-modal').classList.add('hidden');
+                    alert(data.message || 'Статус успешно обновлен');
+                    document.getElementById('status-modal').classList.add('hidden');
                     form.reset();
                     loadData();
 
@@ -437,7 +364,7 @@
                     );
                 } finally {
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Создать отчёт';
+                    submitBtn.textContent = 'Сохранить';
                 }
             };
 

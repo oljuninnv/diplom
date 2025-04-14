@@ -9,6 +9,8 @@ use App\Models\TaskStatus;
 use App\Enums\TaskStatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\TaskStatusMail;
+use Illuminate\Support\Facades\Mail;
 
 class TaskController extends Controller
 {
@@ -70,16 +72,16 @@ class TaskController extends Controller
     }
 
     public function getTaskStatus($taskStatusId)
-{
-    $taskStatus = TaskStatus::with(['user', 'task'])->findOrFail($taskStatusId);
+    {
+        $taskStatus = TaskStatus::with(['user', 'task'])->findOrFail($taskStatusId);
 
-    return response()->json([
-        'user_id' => $taskStatus->user_id,
-        'task_id' => $taskStatus->task_id,
-        'status' => $taskStatus->status,
-        // Другие необходимые поля
-    ]);
-}
+        return response()->json([
+            'user_id' => $taskStatus->user_id,
+            'task_id' => $taskStatus->task_id,
+            'status' => $taskStatus->status,
+            // Другие необходимые поля
+        ]);
+    }
 
     // Получение информации о кандидате
     public function getCandidateInfo($id)
@@ -116,59 +118,81 @@ class TaskController extends Controller
     {
         $validated = $request->validate([
             'status' => 'required|string|in:' . implode(',', TaskStatusEnum::getAll()),
+            'comment' => 'nullable|string|max:1000',
+            'report' => 'required|file|mimes:pdf,doc,docx|max:10240',
         ]);
 
         $taskStatus = TaskStatus::findOrFail($taskStatusId);
+        $user = User::findOrFail($taskStatus->user_id);
+
+        $filePath = null;
+        if ($request->hasFile('report') && $request->file('report')->isValid()) {
+            try {
+                $file = $request->file('report');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('moonshine_reports', $fileName, 'public');
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ошибка при загрузке файла: ' . $e->getMessage()
+                ], 500);
+            }
+        }
+
         $taskStatus->update([
             'status' => $validated['status'],
+            'comment' => $validated['comment'] ?? null,
             'tutor_id' => auth()->id(),
         ]);
 
-        return response()->json(['success' => true]);
-    }
-
-    // Создание отчета по заданию
-    public function createReport($taskStatusId, Request $request)
-    {
-        $request->validate([
-            'report' => [
-                'required',
-                'file',
-                'mimes:pdf,doc,docx,xls,xlsx',
-                'max:2048',
-                function ($attribute, $value, $fail) {
-                    if (!$value->isValid()) {
-                        $fail('Файл не был успешно загружен.');
-                    }
-                },
-            ],
-        ]);
-
-        try {
-            $file = $request->file('report');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('moonshine_reports', $fileName, 'public');
-
-            $taskStatus = TaskStatus::findOrFail($taskStatusId);
-
+        if (in_array($validated['status'], [TaskStatusEnum::APPROVED->value, TaskStatusEnum::FAILED->value,TaskStatusEnum::REVISION->value]) && $filePath) {
             Report::create([
-                'user_id' => $taskStatus->user_id,
+                'user_id' => $user->id,
                 'task_id' => $taskStatus->id,
                 'tutor_id' => auth()->id(),
                 'report' => $filePath,
             ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Отчёт успешно создан',
-                'path' => Storage::url($filePath)
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ошибка сервера: ' . $e->getMessage()
-            ], 500);
         }
+
+        try {
+            Mail::to($user->email)->send(
+                new TaskStatusMail(
+                    $user,
+                    $this->getStatusType($validated['status']),
+                    $taskStatus->id,
+                    $validated['comment'] ?? null,
+                    $filePath
+                )
+            );
+        } catch (\Exception $e) {
+            \Log::error('Ошибка отправки email: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $this->getStatusMessage($validated['status']),
+        ]);
+    }
+
+    // Вспомогательные методы для преобразования статусов
+    protected function getStatusType(string $status): string
+    {
+        return match ($status) {
+            TaskStatusEnum::REVISION->value => 'revision',
+            TaskStatusEnum::APPROVED->value => 'approved',
+            TaskStatusEnum::FAILED->value => 'failed',
+            default => 'status_changed'
+        };
+    }
+
+    protected function getStatusMessage(string $status): string
+    {
+        return match ($status) {
+            TaskStatusEnum::REVISION->value => 'Задание отправлено на доработку',
+            TaskStatusEnum::APPROVED->value => 'Задание одобрено',
+            TaskStatusEnum::FAILED->value => 'Задание провалено',
+            default => 'Статус задания изменен'
+        };
     }
 
     // Получение списка доступных статусов

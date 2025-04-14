@@ -63,10 +63,7 @@ class TaskStatusResource extends ModelResource
                         ->fields([
                             Hidden::make('id')->setValue($taskStatus->id),
                             Textarea::make('Комментарий', 'comment'),
-                            File::make('Файл', 'file')
-                                ->disk(moonshineConfig()->getDisk())
-                                ->dir('moonshine_taskStatus')
-                                ->allowedExtensions(['pdf', 'doc', 'docx']),
+                            File::make('Файл', 'file')->required()
                         ])
                         ->asyncMethod('revision')
                         ->submit('Отправить')
@@ -140,7 +137,7 @@ class TaskStatusResource extends ModelResource
 
         // Сохранение файла и получение пути
         if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('moonshine_taskStatus', moonshineConfig()->getDisk());
+            $filePath = $request->file('file')->store('moonshine_reports', moonshineConfig()->getDisk());
             $data['file_path'] = $filePath;
         }
 
@@ -160,8 +157,6 @@ class TaskStatusResource extends ModelResource
             $filePath = $request->file('file')->store('moonshine_reports', moonshineConfig()->getDisk());
             $data['file_path'] = $filePath;
         }
-
-        \Log::info($data);
 
         // Логика для обработки других данных
         $reportAction = new TaskStatusAction();

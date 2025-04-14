@@ -25,8 +25,6 @@ class ApplicationAction
     public function approve(array $update): string
     {
         try {
-            \Log::info($update);
-
             $application = Application::findOrFail($update['id']);
             $task = Task::findOrFail($update['task_id']);
             $user = User::findOrFail($application->user_id);
