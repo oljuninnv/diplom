@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WorkerChatController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\TelegramLinkController;
 
 /*
 |--------------------------------------------------------------------------
@@ -115,3 +116,12 @@ Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('api/
 });
 
 Route::post('/telegram-webhook', [MessageController::class, '__invoke']);
+
+Route::get('/telegram/link/{user_id}/{hash}', [TelegramLinkController::class, 'showLinkForm'])
+    ->name('telegram.link');
+    
+Route::get('/telegram/verify/{user_id}/{hash}', [TelegramLinkController::class, 'verifyLink'])
+    ->name('telegram.verify');
+
+Route::get('/telegram/skip/{user_id}/{hash}', [TelegramLinkController::class, 'skipLink'])
+    ->name('telegram.skip');

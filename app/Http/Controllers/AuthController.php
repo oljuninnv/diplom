@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\TelegramUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
@@ -28,26 +29,34 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $values = $request->all();
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        if (Auth::attempt(['email' => $values['email'], 'password' => $values['password']])) {
+        if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
-            // Проверяем наличие date_of_auth
             if (empty($user->date_of_auth)) {
-                Auth::logout(); // Выходим, так как нужно сменить пароль
+                Auth::logout();
                 return redirect()->route('restore-password.form', $user);
             }
 
-            // Обновляем дату аутентификации на текущую
-            $user->date_of_auth = now();
-            $user->save();
+            if (!$user->telegramUser) {
+                $hash = sha1($user->id . env('APP_KEY'));
+                return redirect()->route('telegram.link', [
+                    'user_id' => $user->id,
+                    'hash' => $hash
+                ]);
+            }
 
-            if ($user->role->name === UserRoleEnum::ADMIN->value) {
+            $user->update(['date_of_auth' => now()]);
+
+            if ($user->isAdmin()) {
                 Auth::guard('moonshine')->login($user);
             }
 
-            return redirect('/');
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([
