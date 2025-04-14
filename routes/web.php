@@ -10,7 +10,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\WorkerChatController;
 use App\Http\Controllers\MeetingController;
-use App\Models\User;
+use App\Http\Controllers\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,3 +113,5 @@ Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('api/
     Route::post('/report/{taskStatusId}', [TaskController::class, 'createReport']);
     Route::get('/statuses', [TaskController::class, 'getStatuses']);
 });
+
+Route::post('/telegram-webhook', [MessageController::class, '__invoke']);
