@@ -7,7 +7,6 @@ use App\Models\User;
 use App\Models\TelegramUser;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Objects\Update;
-use Telegram\Bot\Objects\Message;
 
 class StartCommand extends Command
 {
