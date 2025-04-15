@@ -49,6 +49,7 @@ class UserResource extends ModelResource
     protected bool $detailInModal = true;
 
     protected bool $editInModal = true;
+    protected bool $simplePaginate = true;
 
     protected bool $cursorPaginate = true;
 

@@ -26,8 +26,8 @@ class TelegramUserResource extends ModelResource
     protected string $column = 'username';
 
     protected string $title = 'Telegramm-аккаунты';
-
     protected bool $simplePaginate = true;
+    protected bool $cursorPaginate = true;
 
     protected bool $columnSelection = true;
 

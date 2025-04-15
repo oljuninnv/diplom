@@ -48,6 +48,7 @@ class MoonShineUserResource extends ModelResource
     protected array $with = ['role','telegramUser'];
 
     protected bool $simplePaginate = true;
+    protected bool $cursorPaginate = true;
 
     protected bool $columnSelection = true;
 

@@ -34,6 +34,8 @@ class PostResource extends ModelResource
 
     protected bool $editInModal = true;
 
+    protected bool $simplePaginate = true;
+
     protected bool $cursorPaginate = true;
 
     protected bool $columnSelection = true;

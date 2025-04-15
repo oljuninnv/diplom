@@ -48,6 +48,7 @@ class TaskStatusResource extends ModelResource
     protected bool $createInModal = true;
     protected bool $detailInModal = true;
     protected bool $editInModal = true;
+    protected bool $simplePaginate = true;
     protected bool $cursorPaginate = true;
 
     protected function indexButtons(): ListOf
