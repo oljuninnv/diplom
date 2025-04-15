@@ -15,6 +15,34 @@ class ProfileController extends Controller
         return view('users.user-information');
     }
 
+    public function unlinkTelegram(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user->telegramUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Telegram аккаунт не привязан'
+            ], 400);
+        }
+
+        try {
+            $telegramUser = $user->telegramUser;
+            $user->update(['telegram_user_id' => null]);
+            $telegramUser->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Telegram аккаунт успешно отвязан'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Ошибка отвязки Telegram: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Произошла ошибка при отвязке Telegram'
+            ], 500);
+        }
+    }
+
     public function updateProfile(Request $request)
     {
         $user = Auth::user();

@@ -60,7 +60,7 @@
                                 <input type="tel" id="phone" name="phone" value="{{ auth()->user()->phone }}"
                                     class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="+7 (XXX) XXX-XX-XX">
-                                <p class="mt-1 text-xs text-gray-500">Используется для восстановления доступа</p>
+                                <p class="mt-1 text-xs text-gray-500">Используется для связи с вами</p>
                                 <p id="phone-error" class="mt-1 text-xs text-red-500 hidden">Введите корректный номер
                                     телефона (например, +7 (XXX) XXX-XX-XX)</p>
                             </div>
@@ -90,29 +90,39 @@
                             </div>
 
                             <!-- Нередактируемое поле - Telegram -->
+                            <!-- Нередактируемое поле - Telegram -->
                             <div class="mb-6">
-                                <label for="telegram" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на Telegram</label>
+                                <label for="telegram" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на
+                                    Telegram</label>
                                 <div class="relative">
                                     @if (auth()->user()->telegramUser?->username)
-                                        <div class="flex items-center bg-gray-100 border border-gray-300 rounded-md shadow-sm">
-                                            <a href="https://t.me/{{ auth()->user()->telegramUser->username }}" target="_blank"
+                                        <div
+                                            class="flex items-center bg-gray-100 border border-gray-300 rounded-md shadow-sm">
+                                            <a href="https://t.me/{{ auth()->user()->telegramUser->username }}"
+                                                target="_blank"
                                                 class="flex-1 py-2 px-3 text-gray-600 hover:underline cursor-pointer">
                                                 @<?= auth()->user()->telegramUser?->username ?>
                                             </a>
                                             <div class="px-3 flex items-center">
                                                 <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.14-.26.26-.534.26l.213-3.053 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.87 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+                                                    <path
+                                                        d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.14-.26.26-.534.26l.213-3.053 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.87 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z" />
                                                 </svg>
                                             </div>
                                         </div>
-                                        <p class="mt-1 text-xs text-gray-500">Для изменения свяжитесь с поддержкой</p>
+                                        <div class="mt-2">
+                                            <button id="unlink-telegram-btn"
+                                                class="text-xs text-red-600 hover:text-red-800 underline focus:outline-none">
+                                                Отвязать Telegram аккаунт
+                                            </button>
+                                        </div>
                                     @else
-                                        {{-- Если Telegram не привязан --}}
                                         <div class="bg-gray-100 border border-gray-300 rounded-md p-4 text-center">
-                                            <a href="https://t.me/Atwinta_Helper_bot?start=link_{{ auth()->id() }}_{{ sha1(auth()->id() . env('APP_KEY')) }}" 
-                                               class="telegram-btn inline-flex items-center justify-center w-full bg-[#0088cc] hover:bg-[#0077b3] text-white font-medium py-2 px-4 rounded-md transition-colors">
+                                            <a href="https://t.me/Atwinta_Helper_bot?start=link_{{ auth()->id() }}_{{ sha1(auth()->id() . env('APP_KEY')) }}"
+                                                class="telegram-btn inline-flex items-center justify-center w-full bg-[#0088cc] hover:bg-[#0077b3] text-white font-medium py-2 px-4 rounded-md transition-colors">
                                                 <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+                                                    <path
+                                                        d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z" />
                                                 </svg>
                                                 Привязать Telegram
                                             </a>
@@ -243,6 +253,36 @@
         const emailError = document.getElementById('email-error');
         const phoneError = document.getElementById('phone-error');
         const submitButton = document.querySelector('button[type="submit"]');
+
+        // Обработка отвязки Telegram
+        document.getElementById('unlink-telegram-btn')?.addEventListener('click', async function() {
+            if (!confirm('Вы уверены, что хотите отвязать Telegram аккаунт?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route('profile.telegram.unlink') }}', {
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Ошибка сервера');
+                }
+
+                alert('Telegram аккаунт успешно отвязан');
+                window.location.reload();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка: ' + error.message);
+            }
+        });
 
         // Функция валидации email
         function validateEmail() {

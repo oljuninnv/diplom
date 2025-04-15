@@ -32,23 +32,23 @@ Route::get('/', function () {
 Route::middleware(['guest'])->group(function () {
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('login', [AuthController::class, 'login'])->name('auth');
-    
+
     Route::get('/auth/restore-password/{user}', [AuthController::class, 'showRestorePasswordForm'])
         ->name('restore-password.form');
     Route::post('/auth/restore-password/{user}', [AuthController::class, 'restorePassword'])
         ->name('restore-password');
-    
+
     Route::get('/auth/reset-password', [RestorePasswordController::class, 'showResetPasswordForm'])
         ->name('reset-password.form');
     Route::post('/auth/reset-password', [RestorePasswordController::class, 'reset_password'])
         ->name('reset-password');
-    
+
     Route::get('/auth/reset-password/confirm', [RestorePasswordController::class, 'showResetPasswordConfirmForm'])
         ->name('auth.restore-password-confirm');
-    
+
     Route::post('/auth/reset-password/update', [RestorePasswordController::class, 'resetPassword'])
         ->name('password.update');
-    
+
     Route::get('reset_password/confirm', [RestorePasswordController::class, 'showResetPasswordConfirmForm'])
         ->name('resetPasswordConfirm_form');
     Route::post('reset_password/confirm', [RestorePasswordController::class, 'resetPassword'])
@@ -68,6 +68,7 @@ Route::post('/career', [CareerController::class, 'submitApplication'])->name('ca
 Route::middleware(['auth'])->group(function () {
     // Профиль
     Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile');
+    Route::put('/profile/telegram/unlink', [ProfileController::class, 'unlinkTelegram'])->name('profile.telegram.unlink');
     Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     
@@ -76,26 +77,26 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/task', [CandidateTaskController::class, 'show'])->name('task');
         Route::post('/task/submit', [CandidateTaskController::class, 'submit'])->name('task.submit');
     });
-    
+
     // Чат кандидата
     Route::middleware(['role:USER'])->group(function () {
         Route::get('/chat/{interlocutor?}', [ChatController::class, 'index'])->name('chat');
         Route::post('/chat/send', [ChatController::class, 'sendMessage'])->name('chat.send');
         Route::delete('/chat/delete/{message}', [ChatController::class, 'deleteMessage'])->name('chat.delete');
     });
-    
+
     // Чат сотрудников
     Route::middleware(['role:TUTOR_WORKER,ADMIN,SUPER_ADMIN'])->group(function () {
         Route::get('/worker-chat/{interlocutor?}', [WorkerChatController::class, 'index'])->name('worker-chat');
         Route::post('/worker-chat/send', [WorkerChatController::class, 'sendMessage'])->name('worker-chat.send');
         Route::delete('/worker-chat/delete/{message}', [WorkerChatController::class, 'deleteMessage'])->name('worker-chat.delete');
     });
-    
+
     // Список задач
     Route::middleware(['role:TUTOR_WORKER,ADMIN,SUPER_ADMIN'])->group(function () {
         Route::get('/tasks', [TaskController::class, 'index'])->name('tasks');
     });
-    
+
     // Созвоны
     Route::middleware(['role:TUTOR_WORKER,ADMIN,SUPER_ADMIN'])->group(function () {
         Route::resource('meetings', MeetingController::class);
@@ -119,7 +120,7 @@ Route::post('/telegram-webhook', [MessageController::class, '__invoke']);
 
 Route::get('/telegram/link/{user_id}/{hash}', [TelegramLinkController::class, 'showLinkForm'])
     ->name('telegram.link');
-    
+
 Route::get('/telegram/verify/{user_id}/{hash}', [TelegramLinkController::class, 'verifyLink'])
     ->name('telegram.verify');
 
