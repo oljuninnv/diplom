@@ -206,7 +206,7 @@
                                     <div class="flex space-x-2">
                                         <button class="reply-btn text-2xs md:text-xs text-gray-300 hover:underline" data-id="{{ $message->id }}" data-text="{{ $message->message }}">Ответить</button>
                                         @if($message->sender_id == Auth::id())
-                                        <form action="{{ route('chat.delete', $message->id) }}" method="POST" class="delete-message-form">
+                                        <form action="{{ route('worker-chat.delete', $message->id) }}" method="POST" class="delete-message-form">
                                             @csrf
                                             @method('DELETE')
                                             <button type="button" class="text-2xs md:text-xs text-red-500 hover:text-red-700 delete-message-btn">Удалить</button>

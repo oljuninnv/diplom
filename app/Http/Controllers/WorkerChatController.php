@@ -96,21 +96,26 @@ class WorkerChatController extends Controller
     }
 
     public function deleteMessage($messageId)
-    {
-        $message = Message::findOrFail($messageId);
+{
+    \Log::info('Delete message attempt', [
+        'user_id' => Auth::id(),
+        'message_id' => $messageId
+    ]);
 
-        if ($message->sender_id != Auth::id()) {
-            abort(403, 'Вы можете удалять только свои сообщения');
-        }
+    $message = Message::findOrFail($messageId);
 
-        if ($message->document) {
-            Storage::disk('public')->delete($message->document);
-        }
-
-        $message->delete();
-
-        return back()->with('success', 'Сообщение удалено');
+    if ($message->sender_id != Auth::id()) {
+        abort(403, 'Вы можете удалять только свои сообщения');
     }
+
+    if ($message->document) {
+        Storage::disk('public')->delete($message->document);
+    }
+
+    $message->delete();
+
+    return back()->with('success', 'Сообщение удалено');
+}
 
     private function getInterlocutors()
     {
