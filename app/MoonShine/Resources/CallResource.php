@@ -33,21 +33,21 @@ class CallResource extends ModelResource
     protected bool $editInModal = true;
 
 
-	protected array $with = ['candidate', 'tutor', 'hr_manager'];
+    protected array $with = ['candidate', 'tutor', 'hr_manager'];
 
     public function indexFields(): iterable
     {
         return [
-			ID::make('id'),
-			Select::make('Тип', 'type')
-            ->required()
-            ->searchable()
-            ->options(CallEnum::getAll())
-            ->sortable(),
-			Text::make('Ссылка на видео-конференцию', 'meeting_link')->required(),
-			Date::make('Дата', 'date')->sortable()->required(),
-			Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
-			BelongsTo::make('Кандидат', 'candidate', resource: UserResource::class)
+            ID::make('id'),
+            Select::make('Тип', 'type')
+                ->required()
+                ->searchable()
+                ->options(CallEnum::getAll())
+                ->sortable(),
+            Text::make('Ссылка на видео-конференцию', 'meeting_link')->required(),
+            Date::make('Дата', 'date')->sortable()->required(),
+            Text::make('Время', 'time')->placeholder('HH:mm')->sortable()->required(),
+            BelongsTo::make('Кандидат', 'candidate', resource: UserResource::class)
                 ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::USER->value)))
                 ->required()
                 ->sortable()
@@ -85,26 +85,41 @@ class CallResource extends ModelResource
     {
         return [
             Select::make('Тип', 'type')
-                    ->options(CallEnum::getAll())
-                    ->nullable(),
-                    
-                BelongsTo::make('Кандидат', 'candidate', resource: UserResource::class)
-                    ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::USER->value)))
-                    ->searchable()
-                    ->nullable(),
-                    
-                BelongsTo::make('Тьютор', 'tutor', resource: UserResource::class)
-                    ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::TUTOR_WORKER->value)))
-                    ->searchable()
-                    ->nullable(),
-                    
-                BelongsTo::make('HR-менеджер', 'hr_manager', resource: UserResource::class)
-                    ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::ADMIN->value)))
-                    ->searchable()
-                    ->nullable(),
-                    
-                DateRange::make('Дата', 'date')
-                    ->nullable(),
+                ->options(CallEnum::getAll())
+                ->nullable(),
+
+            Select::make('Кандидат', 'candidate_id')
+                ->options(
+                    User::query()
+                        ->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::USER->value))
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
+                ->searchable()
+                ->nullable(),
+
+            Select::make('Тьютор', 'tutor_id')
+                ->options(
+                    User::query()
+                        ->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::TUTOR_WORKER->value))
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
+                ->searchable()
+                ->nullable(),
+
+            Select::make('HR-менеджер', 'hr_manager_id')
+                ->options(
+                    User::query()
+                        ->whereHas('role', fn($q) => $q->whereIn('name', [UserRoleEnum::ADMIN->value,UserRoleEnum::SUPER_ADMIN->value]))
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
+                ->searchable()
+                ->nullable(),
+
+            DateRange::make('Дата', 'date')
+                ->nullable(),
         ];
     }
 
@@ -114,7 +129,7 @@ class CallResource extends ModelResource
             'type' => [
                 'required',
                 'string',
-                'in:'.implode(',', CallEnum::getAll())
+                'in:' . implode(',', CallEnum::getAll())
             ],
             'meeting_link' => [
                 'required',
@@ -173,7 +188,7 @@ class CallResource extends ModelResource
             ],
         ];
     }
-    
+
     public function search(): array
     {
         return ['candidate.name', 'tutor.name', 'hr_manager.name'];

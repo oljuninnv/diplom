@@ -42,15 +42,17 @@ class ReportResource extends ModelResource
     {
         return [
             ID::make('id')->sortable(),
-            BelongsTo::make('Тьютор', 'tutor', resource: UserResource::class)
-                ->valuesQuery(fn(Builder $q) => $q->whereIn('role_id', Role::where('name', UserRoleEnum::TUTOR_WORKER)->pluck('id')))
+            BelongsTo::make('Создатель', 'tutor', resource: UserResource::class)
+                ->valuesQuery(fn(Builder $q) => $q->whereIn('role_id', Role::where('name', [UserRoleEnum::TUTOR_WORKER,
+                UserRoleEnum::ADMIN,
+                UserRoleEnum::SUPER_ADMIN])->pluck('id')))
                 ->sortable()
                 ->searchable(),
             BelongsTo::make('Кандидат', 'candidate', resource: UserResource::class)
                 ->valuesQuery(fn(Builder $q) => $q->whereIn('role_id', Role::where('name', UserRoleEnum::USER)->pluck('id')))
                 ->sortable()
                 ->searchable(),
-                Select::make('Задание', 'task_id')
+            Select::make('Задание', 'task_id')
                 ->options(
                     TaskStatus::with(['user', 'task'])
                         ->get()
@@ -80,7 +82,7 @@ class ReportResource extends ModelResource
     {
         return [
             Box::make([
-                BelongsTo::make('Тьютор', 'tutor', resource: UserResource::class)
+                BelongsTo::make('Создатель', 'tutor', resource: UserResource::class)
                     ->valuesQuery(fn(Builder $q) => $q->whereIn('role_id', Role::where('name', UserRoleEnum::TUTOR_WORKER)->pluck('id')))
                     ->required()
                     ->searchable()
@@ -127,15 +129,29 @@ class ReportResource extends ModelResource
     public function filters(): iterable
     {
         return [
-            BelongsTo::make('Тьютор', 'tutor', resource: UserResource::class)
-                ->valuesQuery(fn(Builder $q) => $q->whereIn('role_id', Role::where('name', UserRoleEnum::TUTOR_WORKER)->pluck('id')))
-                ->searchable()
-                ->nullable(),
+            Select::make('Создатель', 'tutor_id')
+            ->options(
+                User::query()
+                    ->whereIn('role_id', Role::whereIn('name', [
+                        UserRoleEnum::TUTOR_WORKER,
+                        UserRoleEnum::ADMIN,
+                        UserRoleEnum::SUPER_ADMIN
+                    ])->pluck('id'))
+                    ->pluck('name', 'id')
+                    ->toArray()
+            )
+            ->searchable()
+            ->nullable(),
 
-            BelongsTo::make('Кандидат', 'candidate', resource: UserResource::class)
-                ->valuesQuery(fn(Builder $q) => $q->whereIn('role_id', Role::where('name', UserRoleEnum::USER)->pluck('id')))
-                ->searchable()
-                ->nullable(),
+        Select::make('Кандидат', 'user_id')
+            ->options(
+                User::query()
+                    ->whereIn('role_id', Role::where('name', UserRoleEnum::USER)->pluck('id'))
+                    ->pluck('name', 'id')
+                    ->toArray()
+            )
+            ->searchable()
+            ->nullable(),
 
             DateRange::make('Дата создания', 'created_at')
                 ->nullable(),
@@ -150,12 +166,16 @@ class ReportResource extends ModelResource
                 'integer',
                 'exists:users,id',
                 function ($attribute, $value, $fail) {
-                    $isTutor = Role::where('name', UserRoleEnum::TUTOR_WORKER)
+                    $isTutor = Role::whereIn('name', [
+                        UserRoleEnum::TUTOR_WORKER,
+                        UserRoleEnum::ADMIN,
+                        UserRoleEnum::SUPER_ADMIN
+                    ])
                         ->whereHas('users', fn($q) => $q->where('id', $value))
                         ->exists();
 
                     if (!$isTutor) {
-                        $fail('Выбранный пользователь не является тьютором');
+                        $fail('Выбранный пользователь не имеет право доступа к отчётам');
                     }
                 }
             ],

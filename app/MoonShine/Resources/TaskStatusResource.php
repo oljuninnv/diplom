@@ -300,26 +300,56 @@ class TaskStatusResource extends ModelResource
     public function filters(): iterable
     {
         return [
-            BelongsTo::make('Кандидат', 'user', resource: UserResource::class)
-                ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::USER->value)))
+            Select::make('Кандидат', 'user_id')
+                ->options(
+                    User::query()
+                        ->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::USER->value))
+                        ->get()
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
                 ->searchable()
                 ->nullable(),
-            BelongsTo::make('Тьютор', 'tutor', resource: UserResource::class)
-                ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::TUTOR_WORKER->value)))
+
+            Select::make('Тьютор', 'tutor_id')
+                ->options(
+                    User::query()
+                        ->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::TUTOR_WORKER->value))
+                        ->get()
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
                 ->searchable()
                 ->nullable(),
-            BelongsTo::make('HR-менеджер', 'hr_manager', resource: UserResource::class)
-                ->valuesQuery(fn($q) => $q->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::ADMIN->value)))
+
+            Select::make('HR-менеджер', 'hr_manager_id')
+                ->options(
+                    User::query()
+                        ->whereHas('role', fn($q) => $q->whereIn('name', [UserRoleEnum::ADMIN->value,UserRoleEnum::SUPER_ADMIN->value]))
+                        ->get()
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
                 ->searchable()
                 ->nullable(),
-            BelongsTo::make('Задание', 'task', resource: TaskResource::class)
+
+            Select::make('Задание', 'task_id')
+                ->options(
+                    Task::query()
+                        ->get()
+                        ->pluck('title', 'id')
+                        ->toArray()
+                )
                 ->searchable()
                 ->nullable(),
+
             Select::make('Статус', 'status')
                 ->options(TaskStatusEnum::getAll())
                 ->nullable(),
+
             DateRange::make('Дата окончания', 'end_date')
                 ->nullable(),
+
             DateRange::make('Дата создания', 'created_at')
                 ->nullable(),
         ];

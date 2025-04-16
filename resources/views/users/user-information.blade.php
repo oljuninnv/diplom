@@ -90,7 +90,6 @@
                             </div>
 
                             <!-- Нередактируемое поле - Telegram -->
-                            <!-- Нередактируемое поле - Telegram -->
                             <div class="mb-6">
                                 <label for="telegram" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на
                                     Telegram</label>

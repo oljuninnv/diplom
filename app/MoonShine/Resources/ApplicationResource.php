@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\MoonShine\Resources;
 
+use App\Models\Role;
+use App\Models\Vacancy;
 use MoonShine\Support\Enums\ToastType;
 use MoonShine\UI\Fields\Hidden;
 use MoonShine\Contracts\Core\DependencyInjection\FieldsContract;
@@ -329,20 +331,43 @@ class ApplicationResource extends ModelResource
     public function filters(): iterable
     {
         return [
-            BelongsTo::make('Пользователь', 'user', resource: UserResource::class)
-                ->nullable()
-                ->searchable(),
+            Select::make('Пользователь', 'user_id')
+                ->options(
+                    User::query()
+                        ->whereIn('role_id', Role::where('name', UserRoleEnum::USER)->pluck('id'))
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
+                ->searchable()
+                ->nullable(),
             Select::make('Статус', 'status')
                 ->options(ApplicationStatusEnum::getAll())
                 ->default('ожидание')
                 ->nullable(),
-            BelongsTo::make('Отдел', 'department', resource: DepartmentResource::class)
-                ->nullable()
-                ->searchable(),
+            Select::make('Отдел', 'department_id')
+                ->options(
+                    Department::query()
+                        ->get()
+                        ->pluck('name', 'id')
+                        ->toArray()
+                )
+                ->searchable()
+                ->nullable(),
 
-            BelongsTo::make('Вакансия', 'vacancy', resource: VacancyResource::class)
-                ->nullable()
-                ->searchable(),
+                Select::make('Вакансия', 'vacancy_id')
+                ->options(
+                    Vacancy::query()
+                        ->with('post')
+                        ->get()
+                        ->mapWithKeys(function ($vacancy) {
+                            return [
+                                $vacancy->id => $vacancy->post->name 
+                            ];
+                        })
+                        ->toArray()
+                )
+                ->searchable()
+                ->nullable(),
 
             DateRange::make('Дата создания', 'created_at')
                 ->nullable(),
