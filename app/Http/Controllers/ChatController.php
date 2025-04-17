@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Telegram\Bot\Api;
+use App\Models\TelegramUser;
+use Telegram\Bot\FileUpload\InputFile;
 
 class ChatController extends Controller
 {
@@ -57,7 +60,7 @@ class ChatController extends Controller
             'receiver_id' => 'required|integer|exists:users,id',
             'message' => 'required_without:attachment|string|max:1000',
             'attachment' => 'nullable|file|max:10240',
-            'answer_message_id' => 'nullable|integer|exists:messages,id' // Изменено с reply_to
+            'answer_message_id' => 'nullable|integer|exists:messages,id'
         ]);
 
         if (!$request->message && !$request->hasFile('attachment')) {
@@ -69,8 +72,11 @@ class ChatController extends Controller
                 'sender_id' => Auth::id(),
                 'receiver_id' => $request->receiver_id,
                 'message' => $request->message,
-                'answer_message_id' => $request->answer_message_id // Изменено с reply_to
+                'answer_message_id' => $request->answer_message_id
             ];
+
+            $filePath = null;
+            $originalName = null;
 
             if ($request->hasFile('attachment')) {
                 $file = $request->file('attachment');
@@ -84,11 +90,94 @@ class ChatController extends Controller
                 $messageData['original_filename'] = $originalName;
             }
 
-            Message::create($messageData);
+            $message = Message::create($messageData);
+
+            // Отправка уведомления в Telegram
+            $this->sendTelegramNotification($request->receiver_id, $message, $filePath, $originalName);
 
             return back()->with('success', 'Сообщение отправлено');
         } catch (\Exception $e) {
             return back()->with('error', 'Ошибка при отправке сообщения: ' . $e->getMessage());
+        }
+    }
+
+    protected function sendTelegramNotification($receiverId, $message, $filePath = null, $originalFilename = null)
+    {
+        try {
+            $receiver = User::with('telegramUser')->find($receiverId);
+
+            // Проверяем, есть ли у получателя привязанный аккаунт Telegram
+            if (!$receiver || !$receiver->telegram_user_id || !$receiver->telegramUser) {
+                return;
+            }
+
+            $sender = User::find($message->sender_id);
+            $siteUrl = env('WEBHOOK_URL', 'https://your-default-site.com');
+
+            $text = "🔔 У вас новое сообщение в чате!\n\n";
+            $text .= "👤 От: {$sender->name}\n";
+            $text .= "📝 Текст: {$message->message}\n\n";
+            $text .= "🔗 Перейти в чат: {$siteUrl}";
+
+            $telegram = new Api(config('telegram.bot_token'));
+
+            // Если есть вложение
+            if ($filePath) {
+                $fullPath = storage_path('app/public/' . $filePath);
+
+                try {
+                    $inputFile = InputFile::create($fullPath, $originalFilename);
+
+                    $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                    $imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+                    $documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt'];
+
+                    if (in_array($extension, $imageExtensions)) {
+                        $telegram->sendPhoto([
+                            'chat_id' => $receiver->telegramUser->telegram_id,
+                            'photo' => $inputFile,
+                            'caption' => $text,
+                            'parse_mode' => 'HTML'
+                        ]);
+                    } elseif (in_array($extension, $documentExtensions)) {
+                        $telegram->sendDocument([
+                            'chat_id' => $receiver->telegramUser->telegram_id,
+                            'document' => $inputFile,
+                            'caption' => $text,
+                            'parse_mode' => 'HTML'
+                        ]);
+                    } else {
+                        // Для других типов файлов просто отправляем ссылку
+                        $fileUrl = asset('storage/' . $filePath);
+                        $text .= "\n\n📁 Вложение: {$fileUrl}";
+                        $telegram->sendMessage([
+                            'chat_id' => $receiver->telegramUser->telegram_id,
+                            'text' => $text,
+                            'parse_mode' => 'HTML'
+                        ]);
+                    }
+                } catch (\Exception $fileException) {
+                    \Log::error("Ошибка отправки файла в Telegram: " . $fileException->getMessage());
+                    // Если не удалось отправить файл, отправляем просто текст с ссылкой на файл
+                    $fileUrl = asset('storage/' . $filePath);
+                    $text .= "\n\n📁 Вложение: {$fileUrl}";
+                    $telegram->sendMessage([
+                        'chat_id' => $receiver->telegramUser->telegram_id,
+                        'text' => $text,
+                        'parse_mode' => 'HTML'
+                    ]);
+                }
+            } else {
+                // Отправка только текстового сообщения
+                $telegram->sendMessage([
+                    'chat_id' => $receiver->telegramUser->telegram_id,
+                    'text' => $text,
+                    'parse_mode' => 'HTML'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error("Ошибка отправки уведомления в Telegram: " . $e->getMessage());
         }
     }
 
@@ -110,35 +199,35 @@ class ChatController extends Controller
     }
 
     private function getInterlocutors()
-{
-    $user = Auth::user();
-    $taskStatus = TaskStatus::where('user_id', $user->id)
-        ->with(['hr_manager', 'tutor'])
-        ->latest()
-        ->first();
+    {
+        $user = Auth::user();
+        $taskStatus = TaskStatus::where('user_id', $user->id)
+            ->with(['hr_manager', 'tutor'])
+            ->latest()
+            ->first();
 
-    $interlocutors = collect();
+        $interlocutors = collect();
 
-    if ($taskStatus) {
-        // Добавляем HR-менеджера, если он есть и это не сам пользователь
-        if ($taskStatus->hr_manager && $taskStatus->hr_manager->id != $user->id) {
-            $taskStatus->hr_manager->position = 'HR-менеджер';
-            $interlocutors->push($taskStatus->hr_manager);
-        }
+        if ($taskStatus) {
+            // Добавляем HR-менеджера, если он есть и это не сам пользователь
+            if ($taskStatus->hr_manager && $taskStatus->hr_manager->id != $user->id) {
+                $taskStatus->hr_manager->position = 'HR-менеджер';
+                $interlocutors->push($taskStatus->hr_manager);
+            }
 
-        // Добавляем тьютора, если он есть, это не сам пользователь и это не тот же человек, что и HR
-        if ($taskStatus->tutor && $taskStatus->tutor->id != $user->id) {
-            // Проверяем, не является ли тьютор тем же человеком, что и HR (но с другой ролью)
-            if (!$taskStatus->hr_manager || $taskStatus->tutor->id != $taskStatus->hr_manager->id) {
-                $taskStatus->tutor->position = 'Тьютор';
-                $interlocutors->push($taskStatus->tutor);
+            // Добавляем тьютора, если он есть, это не сам пользователь и это не тот же человек, что и HR
+            if ($taskStatus->tutor && $taskStatus->tutor->id != $user->id) {
+                // Проверяем, не является ли тьютор тем же человеком, что и HR (но с другой ролью)
+                if (!$taskStatus->hr_manager || $taskStatus->tutor->id != $taskStatus->hr_manager->id) {
+                    $taskStatus->tutor->position = 'Тьютор';
+                    $interlocutors->push($taskStatus->tutor);
+                }
             }
         }
-    }
 
-    // Удаляем дубликаты по id и сбрасываем ключи
-    return $interlocutors->unique('id')->values()->all();
-}
+        // Удаляем дубликаты по id и сбрасываем ключи
+        return $interlocutors->unique('id')->values()->all();
+    }
 
     private function getMessages($userId, $interlocutorId)
     {

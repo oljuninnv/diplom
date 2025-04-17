@@ -9,6 +9,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Telegram\Bot\Api;
+use App\Models\TelegramUser;
+use Telegram\Bot\FileUpload\InputFile;
 
 class WorkerChatController extends Controller
 {
@@ -60,7 +63,7 @@ class WorkerChatController extends Controller
             'receiver_id' => 'required|integer|exists:users,id',
             'message' => 'required_without:attachment|string|max:1000',
             'attachment' => 'nullable|file|max:10240',
-            'answer_message_id' => 'nullable|integer|exists:messages,id' // Изменено с reply_to
+            'answer_message_id' => 'nullable|integer|exists:messages,id'
         ]);
 
         if (!$request->message && !$request->hasFile('attachment')) {
@@ -72,8 +75,11 @@ class WorkerChatController extends Controller
                 'sender_id' => Auth::id(),
                 'receiver_id' => $request->receiver_id,
                 'message' => $request->message,
-                'answer_message_id' => $request->answer_message_id // Изменено с reply_to
+                'answer_message_id' => $request->answer_message_id
             ];
+
+            $filePath = null;
+            $originalName = null;
 
             if ($request->hasFile('attachment')) {
                 $file = $request->file('attachment');
@@ -87,7 +93,21 @@ class WorkerChatController extends Controller
                 $messageData['original_filename'] = $originalName;
             }
 
-            Message::create($messageData);
+            $message = Message::create($messageData);
+
+            // Отправка уведомления в Telegram
+            $receiver = User::find($request->receiver_id);
+            if ($receiver && $receiver->telegram_user_id) {
+                $telegramUser = TelegramUser::find($receiver->telegram_user_id);
+                if ($telegramUser) {
+                    $this->sendTelegramNotification(
+                        $telegramUser->telegram_id,
+                        $message,
+                        $filePath,
+                        $originalName
+                    );
+                }
+            }
 
             return back()->with('success', 'Сообщение отправлено');
         } catch (\Exception $e) {
@@ -95,27 +115,82 @@ class WorkerChatController extends Controller
         }
     }
 
+    protected function sendTelegramNotification($telegramId, $message, $filePath = null, $originalFilename = null)
+    {
+        try {
+            $sender = User::find($message->sender_id);
+            $siteUrl = env('WEBHOOK_URL', 'https://your-default-site.com');
+
+            $text = "🔔 У вас новое сообщение от {$sender->name}!\n\n";
+            $text .= "💬 Текст: {$message->message}\n\n";
+            $text .= "📎 Ссылка на чат: {$siteUrl}";
+
+            $telegram = new Api(config('telegram.bot_token'));
+
+            // Если есть вложение
+            if ($filePath) {
+                $fullPath = storage_path('app/public/' . $filePath);
+                $inputFile = InputFile::create($fullPath, $originalFilename);
+
+                $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+                $documentExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+
+                if (in_array($extension, $imageExtensions)) {
+                    $telegram->sendPhoto([
+                        'chat_id' => $telegramId,
+                        'photo' => $inputFile,
+                        'caption' => $text
+                    ]);
+                } elseif (in_array($extension, $documentExtensions)) {
+                    $telegram->sendDocument([
+                        'chat_id' => $telegramId,
+                        'document' => $inputFile,
+                        'caption' => $text
+                    ]);
+                } else {
+                    // Для других типов файлов просто отправляем ссылку
+                    $fileUrl = asset('storage/' . $filePath);
+                    $text .= "\n\n📁 Файл: {$fileUrl}";
+                    $telegram->sendMessage([
+                        'chat_id' => $telegramId,
+                        'text' => $text
+                    ]);
+                }
+            } else {
+                $telegram->sendMessage([
+                    'chat_id' => $telegramId,
+                    'text' => $text,
+                    'parse_mode' => 'HTML'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            \Log::error("Ошибка отправки уведомления в Telegram: " . $e->getMessage());
+        }
+    }
+
     public function deleteMessage($messageId)
-{
-    \Log::info('Delete message attempt', [
-        'user_id' => Auth::id(),
-        'message_id' => $messageId
-    ]);
+    {
+        \Log::info('Delete message attempt', [
+            'user_id' => Auth::id(),
+            'message_id' => $messageId
+        ]);
 
-    $message = Message::findOrFail($messageId);
+        $message = Message::findOrFail($messageId);
 
-    if ($message->sender_id != Auth::id()) {
-        abort(403, 'Вы можете удалять только свои сообщения');
+        if ($message->sender_id != Auth::id()) {
+            abort(403, 'Вы можете удалять только свои сообщения');
+        }
+
+        if ($message->document) {
+            Storage::disk('public')->delete($message->document);
+        }
+
+        $message->delete();
+
+        return back()->with('success', 'Сообщение удалено');
     }
-
-    if ($message->document) {
-        Storage::disk('public')->delete($message->document);
-    }
-
-    $message->delete();
-
-    return back()->with('success', 'Сообщение удалено');
-}
 
     private function getInterlocutors()
     {
