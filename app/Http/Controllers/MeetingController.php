@@ -4,13 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Call;
 use App\Models\User;
-use App\Models\Role;
 use App\Enums\UserRoleEnum;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreMeetingRequest;
+use App\Mail\CallNotificationMail;
+use Illuminate\Support\Facades\Mail;
+use Telegram\Bot\Api;
+use Illuminate\Support\Facades\Log;
 
 class MeetingController extends Controller
 {
+    protected $telegram;
+
+    public function __construct()
+    {
+        $this->telegram = new Api(config('telegram.bot_token'));
+    }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -52,7 +62,7 @@ class MeetingController extends Controller
             'candidates' => User::candidates()->get(),
             'hrManagers' => User::hrManagers()->get(),
             'tutors' => User::tutors()->get(),
-            'currentParams' => $queryParams, // Передаем параметры в представление
+            'currentParams' => $queryParams,
         ]);
     }
 
@@ -85,11 +95,18 @@ class MeetingController extends Controller
             $callData['tutor_id'] = $data['tutor_id'];
         }
 
-        Call::create($callData);
+        $call = Call::create($callData);
 
-        $filterParams = $request->only(['perPage']);
+        // Получаем всех участников
+        $candidate = User::with('telegramUser')->find($call->candidate_id);
+        $tutor = User::with('telegramUser')->find($call->tutor_id);
+        $hrManager = User::with('telegramUser')->find($call->hr_manager_id);
 
-        return redirect()->route('meetings.index', $filterParams)->with('success', 'Созвон успешно назначен');
+        // Отправка уведомлений
+        $this->sendNotifications($candidate, $tutor, $hrManager, $call, 'scheduled');
+
+        return redirect()->route('meetings.index', $request->only(['perPage']))
+            ->with('success', 'Созвон успешно назначен. Уведомления отправлены.');
     }
 
     public function edit(Call $meeting)
@@ -108,12 +125,10 @@ class MeetingController extends Controller
 
     public function update(StoreMeetingRequest $request, Call $meeting)
     {
-        if (
-            Call::where('date', $request->date)
-                ->where('time', $request->time)
-                ->where('id', '!=', $meeting->id)
-                ->exists()
-        ) {
+        if (Call::where('date', $request->date)
+            ->where('time', $request->time)
+            ->where('id', '!=', $meeting->id)
+            ->exists()) {
             return redirect()->back()->withInput()->withErrors(['time' => 'На это время уже назначен созвон']);
         }
 
@@ -130,15 +145,141 @@ class MeetingController extends Controller
             'hr_manager_id' => $user->isAdmin() ? $user->id : $request->hr_manager_id,
         ]);
 
-        $filterParams = $request->only(['perPage']);
+        // Получаем всех участников
+        $candidate = User::with('telegramUser')->find($meeting->candidate_id);
+        $tutor = User::with('telegramUser')->find($meeting->tutor_id);
+        $hrManager = User::with('telegramUser')->find($meeting->hr_manager_id);
 
-        return redirect()->route('meetings.index', $filterParams)->with('success', 'Созвон успешно обновлен');
+        // Отправка уведомлений
+        $this->sendNotifications($candidate, $tutor, $hrManager, $meeting, 'updated');
+
+        return redirect()->route('meetings.index', $request->only(['perPage']))
+            ->with('success', 'Созвон успешно обновлен. Уведомления отправлены.');
     }
 
     public function destroy(Call $meeting)
     {
+        // Получаем всех участников перед удалением
+        $candidate = User::with('telegramUser')->find($meeting->candidate_id);
+        $tutor = User::with('telegramUser')->find($meeting->tutor_id);
+        $hrManager = User::with('telegramUser')->find($meeting->hr_manager_id);
+
+        // Отправка уведомлений об отмене
+        $this->sendNotifications($candidate, $tutor, $hrManager, $meeting, 'cancelled');
+
         $meeting->delete();
-        return redirect()->route('meetings.index', request()->except(['_token', 'page']))->with('success', 'Созвон успешно удален');
+
+        return redirect()->route('meetings.index', request()->except(['_token', 'page']))
+            ->with('success', 'Созвон успешно отменен. Уведомления отправлены.');
+    }
+
+    /**
+     * Отправка уведомлений всем участникам
+     */
+    protected function sendNotifications(?User $candidate, ?User $tutor, ?User $hrManager, Call $call, string $action)
+    {
+        try {
+            $callType = $this->getCallTypeName($call->type);
+
+            // Отправка кандидату
+            if ($candidate) {
+                $this->sendEmailNotification($candidate, $tutor, $hrManager, $call, $action, $callType);
+                $this->sendTelegramNotification($candidate, $call, $callType, $action);
+            }
+
+            // Отправка тьютору
+            if ($tutor) {
+                $this->sendTelegramNotification($tutor, $call, $callType, $action);
+            }
+
+            // Отправка HR-менеджеру
+            if ($hrManager) {
+                $this->sendTelegramNotification($hrManager, $call, $callType, $action);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Ошибка отправки уведомлений: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Отправка email уведомления кандидату
+     */
+    protected function sendEmailNotification(User $user, User $tutor, User $hrManager, Call $call, string $action, string $callType)
+    {
+        try {
+            $emailData = [
+                'user' => $user,
+                'tutor' => $tutor,
+                'hrManager' => $hrManager,
+                'call' => $call,
+                'action' => $action,
+                'call_type' => $callType,
+                'credentials' => [
+                    'email' => $user->email,
+                    'password' => 'password',
+                    'login_url' => config('app.url')
+                ]
+            ];
+
+            Mail::to($user->email)->send(new CallNotificationMail($emailData));
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка отправки email пользователю {$user->id}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Отправка Telegram уведомления
+     */
+    protected function sendTelegramNotification(User $user, Call $call, string $callType, string $action)
+    {
+        if (!$user->telegramUser) {
+            return;
+        }
+
+        try {
+            $actionTexts = [
+                'scheduled' => 'назначен',
+                'updated' => 'изменен',
+                'cancelled' => 'отменен'
+            ];
+
+            $text = "📅 <b>Созвон {$actionTexts[$action]}</b>\n\n";
+            $text .= "🔹 <b>Тип:</b> {$callType}\n";
+            $text .= "📅 <b>Дата:</b> {$call->date}\n";
+            $text .= "🕒 <b>Время:</b> {$call->time}\n";
+            
+            if ($action !== 'cancelled') {
+                $text .= "🔗 <b>Ссылка:</b> {$call->meeting_link}\n\n";
+                
+                
+            } else {
+                $text .= "\nДля уточнения деталей свяжитесь с организатором.";
+            }
+
+            $this->telegram->sendMessage([
+                'chat_id' => $user->telegramUser->telegram_id,
+                'text' => $text,
+                'parse_mode' => 'HTML'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка отправки Telegram уведомления пользователю {$user->id}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Получение названия типа созвона
+     */
+    protected function getCallTypeName(string $type): string
+    {
+        return match ($type) {
+            'primary' => 'Первичный созвон',
+            'technical' => 'Технический созвон',
+            'final' => 'Финальный созвон',
+            default => 'Созвон'
+        };
     }
 
     public function canUpdate(User $user, Call $call)

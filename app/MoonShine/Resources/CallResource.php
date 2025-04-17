@@ -193,6 +193,4 @@ class CallResource extends ModelResource
     {
         return ['candidate.name', 'tutor.name', 'hr_manager.name'];
     }
-
-
 }
