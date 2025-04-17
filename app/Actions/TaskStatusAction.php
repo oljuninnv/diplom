@@ -12,6 +12,9 @@ use App\Mail\CallMail;
 use App\Mail\TaskStatusMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Telegram\Bot\Api;
+use Telegram\Bot\FileUpload\InputFile;
+use Illuminate\Support\Facades\Log;
 
 class TaskStatusAction
 {
@@ -20,9 +23,11 @@ class TaskStatusAction
         $task = TaskStatus::findOrFail($params['id']);
         $task->update(['status' => TaskStatusEnum::REVISION->value]);
 
-        $user = User::findOrFail($task->user_id);
+        $user = User::with('telegramUser')->findOrFail($task->user_id);
 
-        Mail::to($user->email)->send(
+        // Отправка email с обработкой ошибок
+        $this->sendEmailNotification(
+            $user->email,
             new TaskStatusMail(
                 $user,
                 'revision',
@@ -30,6 +35,15 @@ class TaskStatusAction
                 $params['comment'] ?? null,
                 $params['file_path'] ?? null
             )
+        );
+
+        // Отправка в Telegram
+        $this->sendTelegramTaskStatusNotification(
+            $user,
+            $task,
+            TaskStatusEnum::REVISION->value,
+            $params['comment'] ?? null,
+            $params['file_path'] ?? null
         );
 
         return 'Задание отправлено на доработку';
@@ -40,7 +54,7 @@ class TaskStatusAction
         $task = TaskStatus::findOrFail($params['id']);
         $task->update(['status' => TaskStatusEnum::APPROVED->value]);
 
-        $user = User::findOrFail($task->user_id);
+        $user = User::with('telegramUser')->findOrFail($task->user_id);
 
         Report::create([
             'tutor_id' => auth()->id(),
@@ -49,7 +63,9 @@ class TaskStatusAction
             'report' => $params['file_path']
         ]);
 
-        Mail::to($user->email)->send(
+        // Отправка email с обработкой ошибок
+        $this->sendEmailNotification(
+            $user->email,
             new TaskStatusMail(
                 $user,
                 'approved',
@@ -57,6 +73,15 @@ class TaskStatusAction
                 null,
                 $params['file_path'] ?? null
             )
+        );
+
+        // Отправка в Telegram
+        $this->sendTelegramTaskStatusNotification(
+            $user,
+            $task,
+            TaskStatusEnum::APPROVED->value,
+            null,
+            $params['file_path'] ?? null
         );
 
         return 'Задание одобрено';
@@ -67,7 +92,7 @@ class TaskStatusAction
         $task = TaskStatus::findOrFail($params['id']);
         $task->update(['status' => TaskStatusEnum::FAILED->value]);
 
-        $user = User::findOrFail($task->user_id);
+        $user = User::with('telegramUser')->findOrFail($task->user_id);
 
         Report::create([
             'tutor_id' => auth()->id(),
@@ -76,7 +101,9 @@ class TaskStatusAction
             'report' => $params['file_path']
         ]);
 
-        Mail::to($user->email)->send(
+        // Отправка email с обработкой ошибок
+        $this->sendEmailNotification(
+            $user->email,
             new TaskStatusMail(
                 $user,
                 'failed',
@@ -84,6 +111,15 @@ class TaskStatusAction
                 $params['comment'] ?? null,
                 $params['file_path'] ?? null
             )
+        );
+
+        // Отправка в Telegram
+        $this->sendTelegramTaskStatusNotification(
+            $user,
+            $task,
+            TaskStatusEnum::FAILED->value,
+            $params['comment'] ?? null,
+            $params['file_path'] ?? null
         );
 
         return 'Задание провалено';
@@ -95,7 +131,7 @@ class TaskStatusAction
             $taskStatus = TaskStatus::findOrFail($params['id']);
 
             $call = Call::create([
-                'type' => CallEnum::FINAL ->value,
+                'type' => CallEnum::FINAL->value,
                 'meeting_link' => $params['meeting_link'],
                 'date' => $params['date'],
                 'time' => $params['time'],
@@ -103,16 +139,10 @@ class TaskStatusAction
                 'tutor_id' => $taskStatus['tutor_id'],
                 'hr_manager_id' => $taskStatus['hr_manager_id']
             ]);
-            \Log::info('Созвон создан', ['call' => $call->toArray()]);
 
-            $tutor = User::findOrFail($taskStatus['tutor_id']);
-            $hrManager = User::findOrFail($taskStatus['hr_manager_id']);
-            $candidate = User::findOrFail($taskStatus['user_id']);
-            \Log::info('Пользователи найдены', [
-                'tutor' => $tutor->toArray(),
-                'hr_manager' => $hrManager->toArray(),
-                'candidate' => $candidate->toArray()
-            ]);
+            $tutor = User::with('telegramUser')->findOrFail($taskStatus['tutor_id']);
+            $hrManager = User::with('telegramUser')->findOrFail($taskStatus['hr_manager_id']);
+            $candidate = User::with('telegramUser')->findOrFail($taskStatus['user_id']);
 
             $emailData = [
                 'candidateName' => $candidate->name,
@@ -124,28 +154,22 @@ class TaskStatusAction
                 'companyName' => 'ATWINTA'
             ];
 
-            // Отправка письма кандидату
-            if ($candidate->email) {
-                Mail::to($candidate->email)->send(new CallMail($emailData));
-                \Log::info('Письмо отправлено кандидату', ['email' => $candidate->email]);
-            }
+            // Отправка уведомлений кандидату
+            $this->sendEmailNotification($candidate->email, new CallMail($emailData));
+            $this->sendTelegramCallNotification($candidate, $call, 'final');
 
-            // Отправка письма тьютору
-            if ($tutor->email) {
-                Mail::to($tutor->email)->send(new CallMail($emailData));
-                \Log::info('Письмо отправлено тьютору', ['email' => $tutor->email]);
-            }
+            // Отправка уведомлений тьютору
+            $this->sendEmailNotification($tutor->email, new CallMail($emailData));
+            $this->sendTelegramCallNotification($tutor, $call, 'final');
 
-            // // Отправка письма HR-менеджеру
-            if ($hrManager->email) {
-                Mail::to($hrManager->email)->send(new CallMail($emailData));
-                \Log::info('Письмо отправлено HR-менеджеру', ['email' => $hrManager->email]);
-            }
+            // Отправка уведомлений HR-менеджеру
+            $this->sendEmailNotification($hrManager->email, new CallMail($emailData));
+            $this->sendTelegramCallNotification($hrManager, $call, 'final');
 
             return 'Финальный созвон назначен.';
 
         } catch (\Exception $e) {
-            \Log::error('Ошибка при назначении созвона', [
+            Log::error('Ошибка при назначении созвона', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -167,16 +191,10 @@ class TaskStatusAction
                 'tutor_id' => $taskStatus['tutor_id'],
                 'hr_manager_id' => $taskStatus['hr_manager_id']
             ]);
-            \Log::info('Созвон создан', ['call' => $call->toArray()]);
 
-            $tutor = User::findOrFail($taskStatus['tutor_id']);
-            $hrManager = User::findOrFail($taskStatus['hr_manager_id']);
-            $candidate = User::findOrFail($taskStatus['user_id']);
-            \Log::info('Пользователи найдены', [
-                'tutor' => $tutor->toArray(),
-                'hr_manager' => $hrManager->toArray(),
-                'candidate' => $candidate->toArray()
-            ]);
+            $tutor = User::with('telegramUser')->findOrFail($taskStatus['tutor_id']);
+            $hrManager = User::with('telegramUser')->findOrFail($taskStatus['hr_manager_id']);
+            $candidate = User::with('telegramUser')->findOrFail($taskStatus['user_id']);
 
             $emailData = [
                 'candidateName' => $candidate->name,
@@ -188,32 +206,134 @@ class TaskStatusAction
                 'companyName' => 'ATWINTA'
             ];
 
-            // Отправка письма кандидату
-            if ($candidate->email) {
-                Mail::to($candidate->email)->send(new CallMail($emailData));
-                \Log::info('Письмо отправлено кандидату', ['email' => $candidate->email]);
-            }
+            // Отправка уведомлений кандидату
+            $this->sendEmailNotification($candidate->email, new CallMail($emailData));
+            $this->sendTelegramCallNotification($candidate, $call, 'technical');
 
-            // Отправка письма тьютору
-            if ($tutor->email) {
-                Mail::to($tutor->email)->send(new CallMail($emailData));
-                \Log::info('Письмо отправлено тьютору', ['email' => $tutor->email]);
-            }
+            // Отправка уведомлений тьютору
+            $this->sendEmailNotification($tutor->email, new CallMail($emailData));
+            $this->sendTelegramCallNotification($tutor, $call, 'technical');
 
-            // // Отправка письма HR-менеджеру
-            if ($hrManager->email) {
-                Mail::to($hrManager->email)->send(new CallMail($emailData));
-                \Log::info('Письмо отправлено HR-менеджеру', ['email' => $hrManager->email]);
-            }
+            // Отправка уведомлений HR-менеджеру
+            $this->sendEmailNotification($hrManager->email, new CallMail($emailData));
+            $this->sendTelegramCallNotification($hrManager, $call, 'technical');
 
-            return 'Техничский созвон назначен.';
+            return 'Технический созвон назначен.';
 
         } catch (\Exception $e) {
-            \Log::error('Ошибка при назначении созвона', [
+            Log::error('Ошибка при назначении созвона', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             throw $e;
+        }
+    }
+
+    /**
+     * Отправка email с обработкой ошибок
+     */
+    protected function sendEmailNotification($email, $mailable)
+    {
+        if (empty($email)) {
+            Log::warning('Попытка отправки email без указания адреса');
+            return;
+        }
+
+        try {
+            Mail::to($email)->send($mailable);
+            Log::info("Email отправлен на {$email}");
+        } catch (\Exception $e) {
+            Log::error("Ошибка отправки email на {$email}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Отправка уведомления в Telegram о изменении статуса задания
+     */
+    protected function sendTelegramTaskStatusNotification($user, $task, $status, $comment = null, $filePath = null)
+    {
+        if (!$user->telegram_user_id || !$user->telegramUser) {
+            return;
+        }
+
+        try {
+            $telegram = new Api(config('telegram.bot_token'));
+            $siteUrl = env('WEBHOOK_URL', 'https://your-default-site.com');
+
+            $statusMessages = [
+                TaskStatusEnum::REVISION->value => '🔄 Задание отправлено на доработку',
+                TaskStatusEnum::APPROVED->value => '✅ Задание одобрено',
+                TaskStatusEnum::FAILED->value => '❌ Задание не принято',
+            ];
+
+            $text = "📢 <b>Статус задания изменен</b>\n\n";
+            $text .= "📌 <b>Задание:</b> {$task->task->title}\n";
+            $text .= "📝 <b>Статус:</b> {$statusMessages[$status]}\n";
+            
+            if ($comment) {
+                $text .= "💬 <b>Комментарий:</b>\n{$comment}\n";
+            }
+            
+            $text .= "\n🔗 <a href='{$siteUrl}'>Перейти на сайт</a>";
+
+            if ($filePath) {
+                $fullPath = storage_path('app/public/' . $filePath);
+                $inputFile = InputFile::create($fullPath);
+
+                $telegram->sendDocument([
+                    'chat_id' => $user->telegramUser->telegram_id,
+                    'document' => $inputFile,
+                    'caption' => $text,
+                    'parse_mode' => 'HTML'
+                ]);
+            } else {
+                $telegram->sendMessage([
+                    'chat_id' => $user->telegramUser->telegram_id,
+                    'text' => $text,
+                    'parse_mode' => 'HTML'
+                ]);
+            }
+
+            Log::info("Telegram уведомление отправлено пользователю {$user->id}");
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка отправки Telegram уведомления пользователю {$user->id}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Отправка уведомления в Telegram о созвоне
+     */
+    protected function sendTelegramCallNotification($user, $call, $callType)
+    {
+        if (!$user->telegram_user_id || !$user->telegramUser) {
+            return;
+        }
+
+        try {
+            $telegram = new Api(config('telegram.bot_token'));
+
+            $callTypes = [
+                'final' => '🎯 Финальный созвон',
+                'technical' => '🛠 Технический созвон'
+            ];
+
+            $text = "📅 <b>{$callTypes[$callType]} назначен</b>\n\n";
+            $text .= "📅 <b>Дата:</b> {$call->date}\n";
+            $text .= "⏰ <b>Время:</b> {$call->time}\n";
+            $text .= "🔗 <b>Ссылка:</b> {$call->meeting_link}\n\n";
+            $text .= "Не забудьте присоединиться вовремя!";
+
+            $telegram->sendMessage([
+                'chat_id' => $user->telegramUser->telegram_id,
+                'text' => $text,
+                'parse_mode' => 'HTML'
+            ]);
+
+            Log::info("Telegram уведомление о созвоне отправлено пользователю {$user->id}");
+
+        } catch (\Exception $e) {
+            Log::error("Ошибка отправки Telegram уведомления о созвоне пользователю {$user->id}: " . $e->getMessage());
         }
     }
 }
