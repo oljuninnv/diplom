@@ -300,17 +300,6 @@ class TaskStatusResource extends ModelResource
     public function filters(): iterable
     {
         return [
-            Select::make('Кандидат', 'user_id')
-                ->options(
-                    User::query()
-                        ->whereHas('role', fn($q) => $q->where('name', UserRoleEnum::USER->value))
-                        ->get()
-                        ->pluck('name', 'id')
-                        ->toArray()
-                )
-                ->searchable()
-                ->nullable(),
-
             Select::make('Тьютор', 'tutor_id')
                 ->options(
                     User::query()
@@ -347,10 +336,7 @@ class TaskStatusResource extends ModelResource
                 ->options(TaskStatusEnum::getAll())
                 ->nullable(),
 
-            DateRange::make('Дата окончания', 'end_date')
-                ->nullable(),
-
-            DateRange::make('Дата создания', 'created_at')
+            DateRange::make('Дедлайн', 'end_date')
                 ->nullable(),
         ];
     }
