@@ -281,15 +281,6 @@ class ApplicationResource extends ModelResource
     public function filters(): iterable
     {
         return [
-            Select::make('Пользователь', 'user_id')
-                ->options(
-                    User::query()
-                        ->whereIn('role_id', Role::where('name', UserRoleEnum::USER)->pluck('id'))
-                        ->pluck('name', 'id')
-                        ->toArray()
-                )
-                ->searchable()
-                ->nullable(),
             Select::make('Статус', 'status')
                 ->options(ApplicationStatusEnum::getAll())
                 ->default('ожидание')
