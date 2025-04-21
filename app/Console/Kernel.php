@@ -19,8 +19,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('calls:send-reminders')
              ->everyMinute()
-             ->withoutOverlapping()
-             ->appendOutputTo(storage_path('logs/call-reminders.log'));
+             ->withoutOverlapping();
         $schedule->command('tasks:send-failed-notifications')->daily();
     }
 }
