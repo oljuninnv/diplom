@@ -37,8 +37,19 @@ class ApplicationAction
             $application = Application::findOrFail($update['id']);
             $task = Task::findOrFail($update['task_id']);
             $user = User::with('telegramUser')->findOrFail($application->user_id);
+            if (!$user instanceof User) {
+                throw new \RuntimeException('User not found');
+            }
+
             $tutor = User::with('telegramUser')->findOrFail($update['tutor']);
+            if (!$tutor instanceof User) {
+                throw new \RuntimeException('Tutor not found');
+            }
+
             $hrManager = User::with('telegramUser')->findOrFail($update['hr-manager']);
+            if (!$hrManager instanceof User) {
+                throw new \RuntimeException('HR Manager not found');
+            }
 
             $endDate = null;
             if ($task->deadline) {
@@ -61,7 +72,7 @@ class ApplicationAction
             Mail::to($user->email)->send(
                 new ApplicationApprovedMail($user, $tutor, $hrManager, $task)
             );
-            
+
             Mail::send(
                 new UserAddedMail($user, $tutor, $hrManager, $task, $endDate)
             );
@@ -84,7 +95,7 @@ class ApplicationAction
     {
         try {
             $siteUrl = env('WEBHOOK_URL', 'https://your-default-site.com');
-            
+
             // Уведомление кандидату
             if ($user->telegramUser) {
                 $text = "🎉 Ваша заявка одобрена!\n\n";
@@ -98,7 +109,7 @@ class ApplicationAction
                 $text .= "Пожалуйста, беспокойте тьютора и HR-менеджера только в крайнем случае, если у вас возникли действительно серьезные трудности при выполнении задания.\n\n";
                 $text .= "Частота и характер ваших обращений будут учитываться при оценке выполнения тестового задания.\n\n";
                 $text .= "🔗 <a href='{$siteUrl}'>Перейти на сайт</a>";
-                
+
                 $this->telegram->sendMessage([
                     'chat_id' => $user->telegramUser->telegram_id,
                     'text' => $text,
@@ -113,7 +124,7 @@ class ApplicationAction
                 $text .= "📌 Задание: {$task->title}\n";
                 $text .= "📅 Срок выполнения: {$taskStatus->end_date}\n\n";
                 $text .= "🔗 <a href='{$siteUrl}'>Перейти к списку студентов</a>";
-                
+
                 $this->telegram->sendMessage([
                     'chat_id' => $tutor->telegramUser->telegram_id,
                     'text' => $text,
@@ -129,7 +140,7 @@ class ApplicationAction
                 $text .= "📌 Задание: {$task->title}\n";
                 $text .= "📅 Срок: {$taskStatus->end_date}\n\n";
                 $text .= "🔗 <a href='{$siteUrl}/hr/applications'>Перейти к заявкам</a>";
-                
+
                 $this->telegram->sendMessage([
                     'chat_id' => $hrManager->telegramUser->telegram_id,
                     'text' => $text,
@@ -154,6 +165,10 @@ class ApplicationAction
             ]);
 
             $user = User::with('telegramUser')->findOrFail($application->user_id);
+            if (!$user instanceof User) {
+                throw new \RuntimeException('User not found');
+            }
+
 
             // Отправка email
             Mail::to($user->email)->send(
@@ -164,7 +179,7 @@ class ApplicationAction
             if ($user->telegramUser) {
                 $text = "😔 К сожалению, ваша заявка была отклонена.\n\n";
                 $text .= "Вы можете подать новую заявку или связаться с HR для уточнения деталей.";
-                
+
                 $this->telegram->sendMessage([
                     'chat_id' => $user->telegramUser->telegram_id,
                     'text' => $text,
@@ -202,7 +217,7 @@ class ApplicationAction
             $tutor = User::with('telegramUser')->findOrFail($array['tutor']);
             $hrManager = User::with('telegramUser')->findOrFail($array['hr-manager']);
             $candidate = $application->user()->with('telegramUser')->first();
-            
+
             Log::info('Пользователи найдены', [
                 'tutor' => $tutor->toArray(),
                 'hr_manager' => $hrManager->toArray(),
