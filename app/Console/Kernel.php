@@ -10,18 +10,17 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      */
-    protected function schedule(Schedule $schedule): void
+    protected $commands = [
+        \App\Console\Commands\SendCallReminders::class,
+        \App\Console\Commands\SendTaskFailedNotifications::class,
+    ];
+    
+    protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
-    }
-
-    /**
-     * Register the commands for the application.
-     */
-    protected function commands(): void
-    {
-        $this->load(__DIR__.'/Commands');
-
-        require base_path('routes/console.php');
+        $schedule->command('calls:send-reminders')
+             ->everyMinute()
+             ->withoutOverlapping()
+             ->appendOutputTo(storage_path('logs/call-reminders.log'));
+        $schedule->command('tasks:send-failed-notifications')->daily();
     }
 }
