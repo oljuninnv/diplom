@@ -7,7 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Laravel\Passport\HasApiTokens;
 use MoonShine\Permissions\Traits\HasMoonShinePermissions;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -23,8 +23,6 @@ class User extends Authenticatable
         'avatar',
         'email',
         'phone',
-        'role_id',
-        'telegram_user_id',
         'password',
         'date_of_auth'
     ];
@@ -32,6 +30,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verified_at',
+        'telegram_user_id',
+        'role_id',
     ];
 
     protected $casts = [

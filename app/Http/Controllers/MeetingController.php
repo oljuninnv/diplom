@@ -125,10 +125,12 @@ class MeetingController extends Controller
 
     public function update(StoreMeetingRequest $request, Call $meeting)
     {
-        if (Call::where('date', $request->date)
-            ->where('time', $request->time)
-            ->where('id', '!=', $meeting->id)
-            ->exists()) {
+        if (
+            Call::where('date', $request->date)
+                ->where('time', $request->time)
+                ->where('id', '!=', $meeting->id)
+                ->exists()
+        ) {
             return redirect()->back()->withInput()->withErrors(['time' => 'На это время уже назначен созвон']);
         }
 
@@ -205,13 +207,13 @@ class MeetingController extends Controller
     /**
      * Отправка email уведомления кандидату
      */
-    protected function sendEmailNotification(User $user, User $tutor, User $hrManager, Call $call, string $action, string $callType)
+    protected function sendEmailNotification(User $user, ?User $tutor, ?User $hrManager, Call $call, string $action, string $callType)
     {
         try {
             $emailData = [
                 'user' => $user,
-                'tutor' => $tutor,
-                'hrManager' => $hrManager,
+                'tutor' => $tutor ?? new User(['name' => 'Не указан']),
+                'hrManager' => $hrManager ?? new User(['name' => 'Не указан']),
                 'call' => $call,
                 'action' => $action,
                 'call_type' => $callType,
@@ -249,11 +251,11 @@ class MeetingController extends Controller
             $text .= "🔹 <b>Тип:</b> {$callType}\n";
             $text .= "📅 <b>Дата:</b> {$call->date}\n";
             $text .= "🕒 <b>Время:</b> {$call->time}\n";
-            
+
             if ($action !== 'cancelled') {
                 $text .= "🔗 <b>Ссылка:</b> {$call->meeting_link}\n\n";
-                
-                
+
+
             } else {
                 $text .= "\nДля уточнения деталей свяжитесь с организатором.";
             }

@@ -96,15 +96,14 @@
                     <p><strong>Тип созвона:</strong> {{ $data['call_type'] }}</p>
                     <p><strong>Дата:</strong> {{ $data['call']->date }}</p>
                     <p><strong>Время:</strong> {{ $data['call']->time }}</p>
-                    <p><strong>Ссылка для подключения:</strong> <a href="{{ $data['call']->meeting_link }}"
-                            class="btn">Присоединиться</a></p>
+                    <p><strong>Ссылка для подключения:</strong> <a href="{{ $data['call']->meeting_link }}">Присоединиться</a></p>
                 </div>
             @elseif($data['action'] === 'updated')
                 <p class="info">В запланированный созвон внесены изменения:</p>
                 <p><strong>Тип созвона:</strong> {{ $data['call_type'] }}</p>
                 <p><strong>Новая дата:</strong> {{ $data['call']->date }}</p>
                 <p><strong>Новое время:</strong> {{ $data['call']->time }}</p>
-                <p><strong>Ссылка:</strong> <a href="{{ $data['call']->meeting_link }}" class="btn">Присоединиться</a>
+                <p><strong>Ссылка:</strong> <a href="{{ $data['call']->meeting_link }}">Присоединиться</a>
                 </p>
             @else
                 <p class="warning">Запланированный созвон был отменен:</p>
