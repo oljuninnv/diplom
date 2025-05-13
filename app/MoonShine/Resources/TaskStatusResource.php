@@ -229,8 +229,6 @@ class TaskStatusResource extends ModelResource
                 ->sortable(),
             Date::make('Дата окончания', 'end_date')
                 ->sortable(),
-            Number::make('Количество запросов с помощью', 'number_of_requests')
-                ->sortable(),
             Text::make('Дата создания', 'created_at')
                 ->sortable(),
         ];
@@ -281,10 +279,6 @@ class TaskStatusResource extends ModelResource
                 Select::make('Статус', 'status')
                     ->options(TaskStatusEnum::getAll())
                     ->default(TaskStatusEnum::IN_PROGRESS)
-                    ->required(),
-                Number::make('Количество запросов с помощью', 'number_of_requests')
-                    ->default(0)
-                    ->min(0)
                     ->required(),
             ])
         ];
@@ -392,7 +386,6 @@ class TaskStatusResource extends ModelResource
             ],
             'status' => ['required', 'string', 'in:' . implode(',', TaskStatusEnum::getAll())],
             'end_date' => ['required', 'date', 'after_or_equal:today'],
-            'number_of_requests' => ['required', 'integer', 'min:0', 'max:100'],
         ];
     }
 

@@ -15,8 +15,7 @@ class TaskStatus extends Model
 		'task_id',
 		'github_repo',
 		'status',
-		'end_date',
-		'number_of_requests',
+		'end_date'
     ];
 
     protected $casts = [

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('github_repo')->nullable();
             $table->enum('status', ['в процессе', 'на проверке', 'одобрено', 'доработка', 'выполнено', 'провалено']);
             $table->date('end_date')->nullable();
-            $table->integer('number_of_requests')->default(0);
             $table->timestamps();
         });
     }
