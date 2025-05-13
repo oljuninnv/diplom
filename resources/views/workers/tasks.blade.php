@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-2xl font-bold mb-6">Кандидаты на тестовое задание</h1>
+        <h1 class="text-2xl font-bold mb-6">Выполняемые задания</h1>
 
         <!-- Фильтры и поиск -->
         <div class="mb-6 bg-white rounded-lg shadow p-4">
