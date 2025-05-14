@@ -90,6 +90,7 @@ class StoreMeetingRequest extends FormRequest
     public function messages()
     {
         return [
+            'user_id.required' => 'Пользователь должен быть выбран',
             'time.required' => 'Поле время обязательно для заполнения.',
             'date.after_or_equal' => 'Дата созвона не может быть в прошлом.',
             'tutor_id.required' => 'Поле тьютор обязательно для заполнения.',

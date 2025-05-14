@@ -69,6 +69,7 @@ class MeetingController extends Controller
 
     public function store(StoreMeetingRequest $request)
     {
+        \Log::info($request->all());
         $user = auth()->user();
         $data = $request->validated();
 
@@ -122,6 +123,7 @@ class MeetingController extends Controller
 
     public function update(UpdateMeetingRequest $request, Call $meeting)
     {
+        \Log::info($request->all());
         $user = auth()->user();
         $data = $request->validated();
 

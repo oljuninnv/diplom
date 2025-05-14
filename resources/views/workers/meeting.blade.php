@@ -11,7 +11,7 @@
                     <!-- Фильтр по типу -->
                     <div>
                         <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Тип созвона</label>
-                        <select id="type" name="type" onchange="this.form.submit()"
+                        <select id="type" name="type"
                             class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="">Все типы</option>
                             <option value="primary" @selected(request('type') == 'primary')>Первичный</option>
@@ -23,7 +23,7 @@
                     <!-- Сортировка -->
                     <div>
                         <label for="sort" class="block text-sm font-medium text-gray-700 mb-1">Сортировка</label>
-                        <select id="sort" name="sort" onchange="this.form.submit()"
+                        <select id="sort" name="sort"
                             class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="datetime_asc" @selected(request('sort') == 'datetime_asc')>Дата и время (по возрастанию)</option>
                             <option value="datetime_desc" @selected(request('sort') == 'datetime_desc')>Дата и время (по убыванию)</option>
@@ -33,7 +33,7 @@
                     <!-- Элементов на странице -->
                     <div>
                         <label for="perPage" class="block text-sm font-medium text-gray-700 mb-1">На странице</label>
-                        <select id="perPage" name="perPage" onchange="this.form.submit()"
+                        <select id="perPage" name="perPage"
                             class="w-full py-2 px-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             <option value="2" @selected(request('perPage') == 2)>2</option>
                             <option value="10" @selected(request('perPage', 10) == 10)>10</option>
@@ -224,7 +224,6 @@
                                 unset($queryParams['page']);
                             @endphp
 
-                            {{-- Кнопка "Назад" --}}
                             <a href="{{ $calls->previousPageUrl() ? $calls->previousPageUrl() . '&' . http_build_query($queryParams) : '#' }}"
                                 class="px-3 py-1 border rounded {{ $calls->onFirstPage() ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50' }}">
                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -232,7 +231,6 @@
                                 </svg>
                             </a>
 
-                            {{-- Номера страниц --}}
                             @foreach ($calls->getUrlRange(max(1, $calls->currentPage() - 2), min($calls->lastPage(), $calls->currentPage() + 2)) as $page => $url)
                                 @php
                                     $queryParams['page'] = $page;
@@ -243,7 +241,6 @@
                                 </a>
                             @endforeach
 
-                            {{-- Кнопка "Вперед" --}}
                             <a href="{{ $calls->nextPageUrl() ? $calls->nextPageUrl() . '&' . http_build_query($queryParams) : '#' }}"
                                 class="px-3 py-1 border rounded {{ $calls->hasMorePages() ? 'bg-white text-gray-700 hover:bg-gray-50' : 'bg-gray-100 text-gray-400 cursor-not-allowed' }}">
                                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -320,19 +317,32 @@
             <form id="call-form" action="{{ route('meetings.store') }}" method="POST">
                 @csrf
                 <input type="hidden" id="call-id" name="id">
-
                 <input type="hidden" name="perPage" value="{{ request('perPage', 10) }}">
 
                 <div class="space-y-4">
+                    <!-- Кандидат -->
                     <div>
-                        <label for="user-select" class="block text-sm font-medium text-gray-700 mb-1">Кандидат *</label>
-                        <select id="user-select" name="user_id" required
-                            class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Выберите кандидата</option>
-                            @foreach ($candidates as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endforeach
-                        </select>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Кандидат *</label>
+                        <div class="relative">
+                            <input type="text" id="candidate-search" placeholder="Поиск кандидата..."
+                                class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <input type="hidden" id="user_id" name="user_id" required>
+                            <div id="candidate-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                                @foreach ($candidates as $user)
+                                    <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center candidate-option" 
+                                        data-id="{{ $user->id }}" 
+                                        data-name="{{ $user->name }}"
+                                        data-avatar="{{ $user->avatar_url }}">
+                                        <img src="{{ $user->avatar_url }}" class="w-8 h-8 rounded-full mr-2">
+                                        <span>{{ $user->name }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div id="selected-candidate" class="mt-2 flex items-center hidden">
+                                <img id="selected-candidate-avatar" src="" class="w-8 h-8 rounded-full mr-2">
+                                <span id="selected-candidate-name"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -349,8 +359,7 @@
                     </div>
 
                     <div>
-                        <label for="call-link" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на конференцию
-                            *</label>
+                        <label for="call-link" class="block text-sm font-medium text-gray-700 mb-1">Ссылка на конференцию *</label>
                         <input type="url" id="call-link" name="link" required
                             class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="https://meet.example.com/room123">
@@ -371,31 +380,58 @@
                     </div>
 
                     @unless (auth()->user()->isTutorWorker())
+                        <!-- Тьютор -->
                         <div>
-                            <label for="tutor-select" class="block text-sm font-medium text-gray-700 mb-1">Тьютор {{ auth()->user()->isAdmin() ? '' : '*' }}</label>
-                            <select id="tutor-select" name="tutor_id" {{ auth()->user()->isAdmin() ? '' : 'required' }}
-                                class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Выберите тьютора</option>
-                                @foreach ($tutors as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Тьютор {{ auth()->user()->isAdmin() ? '' : '*' }}</label>
+                            <div class="relative">
+                                <input type="text" id="tutor-search" placeholder="Поиск тьютора..."
+                                    class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="hidden" id="tutor_id" name="tutor_id" {{ auth()->user()->isAdmin() ? '' : 'required' }}>
+                                <div id="tutor-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                                    @foreach ($tutors as $user)
+                                        <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center tutor-option" 
+                                            data-id="{{ $user->id }}" 
+                                            data-name="{{ $user->name }}"
+                                            data-avatar="{{ $user->avatar_url }}">
+                                            <img src="{{ $user->avatar_url }}" class="w-8 h-8 rounded-full mr-2">
+                                            <span>{{ $user->name }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div id="selected-tutor" class="mt-2 flex items-center hidden">
+                                    <img id="selected-tutor-avatar" src="" class="w-8 h-8 rounded-full mr-2">
+                                    <span id="selected-tutor-name"></span>
+                                </div>
+                            </div>
                         </div>
                     @endunless
 
                     @if (auth()->user()->isAdmin())
                         <input type="hidden" name="hr_manager_id" value="{{ auth()->id() }}">
                     @elseif (!auth()->user()->isTutorWorker())
+                        <!-- HR-менеджер -->
                         <div>
-                            <label for="hr-manager-select"
-                                class="block text-sm font-medium text-gray-700 mb-1">HR-менеджер *</label>
-                            <select id="hr-manager-select" name="hr_manager_id" required
-                                class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Выберите HR-менеджера</option>
-                                @foreach ($hrManagers as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">HR-менеджер *</label>
+                            <div class="relative">
+                                <input type="text" id="hr-manager-search" placeholder="Поиск HR-менеджера..."
+                                    class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="hidden" id="hr_manager_id" name="hr_manager_id" required>
+                                <div id="hr-manager-dropdown" class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg hidden max-h-60 overflow-auto">
+                                    @foreach ($hrManagers as $user)
+                                        <div class="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center hr-manager-option" 
+                                            data-id="{{ $user->id }}" 
+                                            data-name="{{ $user->name }}"
+                                            data-avatar="{{ $user->avatar_url }}">
+                                            <img src="{{ $user->avatar_url }}" class="w-8 h-8 rounded-full mr-2">
+                                            <span>{{ $user->name }}</span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div id="selected-hr-manager" class="mt-2 flex items-center hidden">
+                                    <img id="selected-hr-manager-avatar" src="" class="w-8 h-8 rounded-full mr-2">
+                                    <span id="selected-hr-manager-name"></span>
+                                </div>
+                            </div>
                         </div>
                     @endif
 
@@ -405,12 +441,14 @@
                         <button type="submit"
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">Сохранить</button>
                     </div>
+                </div>
             </form>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация flatpickr
             flatpickr("#date", {
                 dateFormat: "Y-m-d",
                 allowInput: true,
@@ -432,21 +470,69 @@
                 minuteIncrement: 15
             });
 
-            document.getElementById('perPage').addEventListener('change', function() {
-                document.getElementById('filter-form').submit();
-            });
+            // Инициализация выпадающих списков с поиском
+            initSearchDropdown('candidate', 'user_id');
+            initSearchDropdown('tutor', 'tutor_id');
+            initSearchDropdown('hr-manager', 'hr_manager_id');
 
-            document.getElementById('date').addEventListener('change', function() {
-                document.getElementById('filter-form').submit();
-            });
+            function initSearchDropdown(type, inputName) {
+                const searchInput = document.getElementById(`${type}-search`);
+                const dropdown = document.getElementById(`${type}-dropdown`);
+                const hiddenInput = document.getElementById(inputName);
+                const selectedDiv = document.getElementById(`selected-${type}`);
+                const selectedName = document.getElementById(`selected-${type}-name`);
+                const selectedAvatar = document.getElementById(`selected-${type}-avatar`);
 
-            let searchTimeout;
-            document.getElementById('search').addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    document.getElementById('filter-form').submit();
-                }, 500);
-            });
+                if (!searchInput || !hiddenInput) return;
+
+                searchInput.addEventListener('focus', function() {
+                    dropdown.classList.remove('hidden');
+                    filterOptions(type);
+                });
+
+                searchInput.addEventListener('input', function() {
+                    filterOptions(type);
+                });
+
+                searchInput.addEventListener('blur', function() {
+                    setTimeout(() => {
+                        dropdown.classList.add('hidden');
+                    }, 200);
+                });
+
+                document.querySelectorAll(`.${type}-option`).forEach(option => {
+                    option.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                    });
+
+                    option.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        const name = this.getAttribute('data-name');
+                        const avatar = this.getAttribute('data-avatar');
+
+                        hiddenInput.value = id;
+                        searchInput.value = name;
+                        if (selectedName) selectedName.textContent = name;
+                        if (selectedAvatar) selectedAvatar.src = avatar;
+                        if (selectedDiv) selectedDiv.classList.remove('hidden');
+                        dropdown.classList.add('hidden');
+                    });
+                });
+            }
+
+            function filterOptions(type) {
+                const searchTerm = document.getElementById(`${type}-search`).value.toLowerCase();
+                const options = document.querySelectorAll(`.${type}-option`);
+
+                options.forEach(option => {
+                    const name = option.getAttribute('data-name').toLowerCase();
+                    if (name.includes(searchTerm)) {
+                        option.style.display = 'flex';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+            }
         });
 
         window.showUserModal = function(userId) {
@@ -462,18 +548,15 @@
                     document.getElementById('modal-user-phone').textContent = user.phone || 'Не указан';
                     document.getElementById('modal-user-email').textContent = user.email || 'Не указан';
 
-                    const telegramText = user.telegram_user?.username ? `@${user.telegram_user.username}` :
-                        'Не указан';
+                    const telegramText = user.telegram_user?.username ? `@${user.telegram_user.username}` : 'Не указан';
                     document.getElementById('modal-user-telegram').textContent = telegramText;
 
                     const workerInfo = document.getElementById('worker-info');
                     if (user.worker) {
                         workerInfo.classList.remove('hidden');
-                        document.getElementById('modal-worker-department').textContent = user.worker.department ||
-                            'Не указан';
+                        document.getElementById('modal-worker-department').textContent = user.worker.department || 'Не указан';
                         document.getElementById('modal-worker-post').textContent = user.worker.post || 'Не указан';
-                        document.getElementById('modal-worker-hire-date').textContent = user.worker.hire_date ||
-                            'Не указана';
+                        document.getElementById('modal-worker-hire-date').textContent = user.worker.hire_date || 'Не указана';
                     } else {
                         workerInfo.classList.add('hidden');
                     }
@@ -496,30 +579,49 @@
                 .then(call => {
                     document.getElementById('modal-title').textContent = 'Редактировать созвон';
                     document.getElementById('call-id').value = call.id;
-                    document.getElementById('user-select').value = call.candidate_id;
+                    
+                    // Заполняем данные кандидата
+                    const candidateOption = document.querySelector(`.candidate-option[data-id="${call.candidate_id}"]`);
+                    if (candidateOption) {
+                        document.getElementById('user_id').value = call.candidate_id;
+                        document.getElementById('candidate-search').value = candidateOption.getAttribute('data-name');
+                        document.getElementById('selected-candidate-name').textContent = candidateOption.getAttribute('data-name');
+                        document.getElementById('selected-candidate-avatar').src = candidateOption.getAttribute('data-avatar');
+                        document.getElementById('selected-candidate').classList.remove('hidden');
+                    }
+
                     document.getElementById('call-date').value = call.date;
                     document.getElementById('call-time').value = call.time;
                     document.getElementById('call-link').value = call.meeting_link;
                     document.getElementById('call-type').value = call.type;
 
-                    @unless (auth()->user()->isTutorWorker())
-                        if (document.getElementById('tutor-select')) {
-                            document.getElementById('tutor-select').value = call.tutor_id || '';
+                    // Заполняем данные тьютора
+                    if (call.tutor_id) {
+                        const tutorOption = document.querySelector(`.tutor-option[data-id="${call.tutor_id}"]`);
+                        if (tutorOption) {
+                            document.getElementById('tutor_id').value = call.tutor_id;
+                            document.getElementById('tutor-search').value = tutorOption.getAttribute('data-name');
+                            document.getElementById('selected-tutor-name').textContent = tutorOption.getAttribute('data-name');
+                            document.getElementById('selected-tutor-avatar').src = tutorOption.getAttribute('data-avatar');
+                            document.getElementById('selected-tutor').classList.remove('hidden');
                         }
-                    @endunless
+                    }
 
-                    @unless (auth()->user()->isAdmin())
-                        if (document.getElementById('hr-manager-select')) {
-                            document.getElementById('hr-manager-select').value = call.hr_manager_id;
+                    // Заполняем данные HR-менеджера
+                    if (call.hr_manager_id) {
+                        const hrManagerOption = document.querySelector(`.hr-manager-option[data-id="${call.hr_manager_id}"]`);
+                        if (hrManagerOption) {
+                            document.getElementById('hr_manager_id').value = call.hr_manager_id;
+                            document.getElementById('hr-manager-search').value = hrManagerOption.getAttribute('data-name');
+                            document.getElementById('selected-hr-manager-name').textContent = hrManagerOption.getAttribute('data-name');
+                            document.getElementById('selected-hr-manager-avatar').src = hrManagerOption.getAttribute('data-avatar');
+                            document.getElementById('selected-hr-manager').classList.remove('hidden');
                         }
-                    @endunless
+                    }
 
-                    const urlParams = new URLSearchParams(window.location.search);
-                    document.querySelector('input[name="perPage"]').value = urlParams.get('perPage') || '10';
-
+                    // Обновляем action формы
                     const form = document.getElementById('call-form');
                     form.action = `/meetings/${callId}`;
-
                     form.querySelector('input[name="_method"]')?.remove();
 
                     const methodInput = document.createElement('input');
@@ -549,6 +651,10 @@
                 document.getElementById('call-form').reset();
                 document.getElementById('call-id').value = '';
                 document.getElementById('modal-title').textContent = 'Назначить созвон';
+                document.getElementById('selected-candidate').classList.add('hidden');
+                document.getElementById('selected-tutor').classList.add('hidden');
+                document.getElementById('selected-hr-manager').classList.add('hidden');
+                
                 const form = document.getElementById('call-form');
                 form.action = "{{ route('meetings.store') }}";
                 form.querySelector('input[name="_method"]')?.remove();
