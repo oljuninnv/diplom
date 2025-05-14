@@ -244,8 +244,8 @@ class ApplicationAction
             Log::info('Заявка найдена', ['application' => $application->toArray()]);
 
             $candidateId = $application['user_id'];
-            $proposedDate = $array['date'];
-            $proposedTime = $array['time'];
+            $proposedDate = now()->format('Y-m-d');
+            $proposedTime = now()->format('H:i:s');
 
             // Проверяем есть ли у кандидата будущие созвоны
             $futureCalls = Call::where('candidate_id', $candidateId)
