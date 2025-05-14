@@ -243,30 +243,38 @@ class ApplicationAction
             $application = Application::findOrFail($id);
             Log::info('Заявка найдена', ['application' => $application->toArray()]);
 
-            $call = Call::create([
+            $callData = [
                 'type' => CallEnum::PRIMARY->value,
                 'meeting_link' => $array['meeting_link'],
                 'date' => $array['date'],
                 'time' => $array['time'],
                 'candidate_id' => $application['user_id'],
-                'tutor_id' => $array['tutor'],
-                'hr_manager_id' => $array['hr-manager']
-            ]);
+                'hr_manager_id' => $array['hr-manager'],
+                'tutor_id' => $array['tutor'] ?? null // Делаем tutor_id необязательным
+            ];
+
+            $call = Call::create($callData);
             Log::info('Созвон создан', ['call' => $call->toArray()]);
 
-            $tutor = User::with('telegramUser')->findOrFail($array['tutor']);
             $hrManager = User::with('telegramUser')->findOrFail($array['hr-manager']);
             $candidate = $application->user()->with('telegramUser')->first();
 
-            Log::info('Пользователи найдены', [
-                'tutor' => $tutor->toArray(),
-                'hr_manager' => $hrManager->toArray(),
-                'candidate' => $candidate->toArray()
-            ]);
+            $users = [
+                'hr_manager' => $hrManager,
+                'candidate' => $candidate
+            ];
+
+            // Добавляем тьютора только если он указан
+            if (!empty($array['tutor'])) {
+                $tutor = User::with('telegramUser')->findOrFail($array['tutor']);
+                $users['tutor'] = $tutor;
+            }
+
+            Log::info('Пользователи найдены', array_map(fn($user) => $user->toArray(), $users));
 
             $emailData = [
                 'candidateName' => $candidate->name,
-                'tutorName' => $tutor->name,
+                'tutorName' => $users['tutor']->name ?? null, // Учитываем отсутствие тьютора
                 'hrManagerName' => $hrManager->name,
                 'date' => $call->date,
                 'time' => $call->time,
@@ -274,8 +282,14 @@ class ApplicationAction
                 'companyName' => 'ATWINTA'
             ];
 
-            // Отправка email и Telegram уведомлений
-            $this->sendCallNotifications($candidate, $tutor, $hrManager, $call, 'primary');
+            // Отправка уведомлений
+            $this->sendCallNotifications(
+                $candidate,
+                $users['tutor'] ?? null, // Передаем null если тьютора нет
+                $hrManager,
+                $call,
+                'primary'
+            );
 
             return 'Созвон назначен. Уведомления отправлены.';
 
@@ -313,8 +327,8 @@ class ApplicationAction
             ]);
         }
 
-        // Тьютору
-        if ($tutor->telegramUser) {
+        // Тьютору (если есть)
+        if ($tutor && $tutor->telegramUser) {
             $this->telegram->sendMessage([
                 'chat_id' => $tutor->telegramUser->telegram_id,
                 'text' => $text,
@@ -334,7 +348,7 @@ class ApplicationAction
         // Отправка email
         $emailData = [
             'candidateName' => $candidate->name,
-            'tutorName' => $tutor->name,
+            'tutorName' => $tutor->name ?? null, // Учитываем отсутствие тьютора
             'hrManagerName' => $hrManager->name,
             'date' => $call->date,
             'time' => $call->time,
@@ -345,11 +359,12 @@ class ApplicationAction
         if ($candidate->email) {
             Mail::to($candidate->email)->send(new CallMail($emailData));
         }
-        if ($tutor->email) {
+        if ($tutor && $tutor->email) {
             Mail::to($tutor->email)->send(new CallMail($emailData));
         }
         if ($hrManager->email) {
             Mail::to($hrManager->email)->send(new CallMail($emailData));
+            // Mail::send(new CallMail($emailData));
         }
     }
 }
