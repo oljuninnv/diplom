@@ -173,7 +173,7 @@
                     status: statusFilter.value
                 });
 
-                fetch(`/api/tasks?${params}`)
+                fetch(`/tasks/get_tasks?${params}`)
                     .then(response => response.json())
                     .then(data => {
                         totalItems = data.total;
@@ -245,7 +245,7 @@
 
             // Функции для модальных окон
             window.showCandidateModal = function(candidateId) {
-                fetch(`/api/tasks/candidate/${candidateId}`)
+                fetch(`/tasks/candidate/${candidateId}`)
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('modal-candidate-name').textContent = data.name;
@@ -258,7 +258,7 @@
             };
 
             window.showTaskModal = function(taskStatusId) {
-                fetch(`/api/tasks/task/${taskStatusId}`)
+                fetch(`/tasks/task/${taskStatusId}`)
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('modal-task-title').textContent = data.title;
@@ -274,13 +274,13 @@
             };
 
             window.showStatusModal = function(taskStatusId) {
-                fetch(`/api/tasks/task-status/${taskStatusId}`)
+                fetch(`/tasks/task-status/${taskStatusId}`)
                     .then(response => response.json())
                     .then(taskStatusData => {
-                        fetch(`/api/tasks/candidate/${taskStatusData.user_id}`)
+                        fetch(`/tasks/candidate/${taskStatusData.user_id}`)
                             .then(response => response.json())
                             .then(candidateData => {
-                                fetch('/api/tasks/statuses')
+                                fetch('/tasks/statuses')
                                     .then(response => response.json())
                                     .then(statuses => {
                                         const statusContainer = document.getElementById(
@@ -335,7 +335,7 @@
                 formData.append('_method', 'PUT');
 
                 try {
-                    const response = await fetch(`/api/tasks/status/${taskStatusId}`, {
+                    const response = await fetch(`/tasks/status/${taskStatusId}`, {
                         method: 'POST', // Оставляем POST, но имитируем PUT через _method
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')

@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TaskController;
+use App\Http\Controllers\API\TaskApiController;
 use App\Http\Controllers\API\AuthController;
 
 /*
@@ -28,12 +28,12 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('tasks')->group(function () {
-    Route::get('/', [TaskController::class, 'getTasks']);
-    Route::get('/candidate/{id}', [TaskController::class, 'getCandidateInfo']);
-    Route::get('/task-status/{id}', [TaskController::class, 'getTaskStatus']);
-    Route::get('/task/{taskStatusId}', [TaskController::class, 'getTaskInfo']);
-    Route::put('/status/{taskStatusId}', [TaskController::class, 'updateStatus']);
-    Route::post('/report/{taskStatusId}', [TaskController::class, 'createReport']);
-    Route::get('/statuses', [TaskController::class, 'getStatuses']);
+Route::middleware(['auth:api'])->prefix('tasks')->group(function () {
+    Route::get('/', [TaskApiController::class, 'getTasks']);
+    Route::get('/candidate/{id}', [TaskApiController::class, 'getCandidateInfo']);
+    Route::get('/task-status/{id}', [TaskApiController::class, 'getTaskStatus']);
+    Route::get('/task/{taskStatusId}', [TaskApiController::class, 'getTaskInfo']);
+    Route::put('/status/{taskStatusId}', [TaskApiController::class, 'updateStatus']);
+    Route::post('/report/{taskStatusId}', [TaskApiController::class, 'createReport']);
+    Route::get('/statuses', [TaskApiController::class, 'getStatuses']);
 });

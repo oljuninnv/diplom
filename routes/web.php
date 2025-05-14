@@ -106,8 +106,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // API задачи (требуют авторизации)
-Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('api/tasks')->group(function () {
-    Route::get('/', [TaskController::class, 'getTasks']);
+Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('tasks')->group(function () {
+    Route::get('/get_tasks', [TaskController::class, 'getTasks']);
     Route::get('/candidate/{id}', [TaskController::class, 'getCandidateInfo']);
     Route::get('/task-status/{id}', [TaskController::class, 'getTaskStatus']);
     Route::get('/task/{taskStatusId}', [TaskController::class, 'getTaskInfo']);
