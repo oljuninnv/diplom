@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Enums\UserRoleEnum;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreMeetingRequest;
+use App\Http\Requests\UpdateMeetingRequest;
 use App\Mail\CallNotificationMail;
 use Illuminate\Support\Facades\Mail;
 use Telegram\Bot\Api;
@@ -68,10 +69,6 @@ class MeetingController extends Controller
 
     public function store(StoreMeetingRequest $request)
     {
-        if (Call::where('date', $request->date)->where('time', $request->time)->exists()) {
-            return redirect()->back()->withInput()->withErrors(['time' => 'На это время уже назначен созвон']);
-        }
-
         $user = auth()->user();
         $data = $request->validated();
 
@@ -89,7 +86,7 @@ class MeetingController extends Controller
             $callData['hr_manager_id'] = null;
         } elseif ($user->isAdmin()) {
             $callData['hr_manager_id'] = $user->id;
-            $callData['tutor_id'] = $data['tutor_id'];
+            $callData['tutor_id'] = $data['tutor_id'] ?? null;
         } else {
             $callData['hr_manager_id'] = $request->hr_manager_id;
             $callData['tutor_id'] = $data['tutor_id'];
@@ -99,8 +96,8 @@ class MeetingController extends Controller
 
         // Получаем всех участников
         $candidate = User::with('telegramUser')->find($call->candidate_id);
-        $tutor = User::with('telegramUser')->find($call->tutor_id);
-        $hrManager = User::with('telegramUser')->find($call->hr_manager_id);
+        $tutor = $call->tutor_id ? User::with('telegramUser')->find($call->tutor_id) : null;
+        $hrManager = $call->hr_manager_id ? User::with('telegramUser')->find($call->hr_manager_id) : null;
 
         // Отправка уведомлений
         $this->sendNotifications($candidate, $tutor, $hrManager, $call, 'scheduled');
@@ -123,34 +120,27 @@ class MeetingController extends Controller
         ]));
     }
 
-    public function update(StoreMeetingRequest $request, Call $meeting)
+    public function update(UpdateMeetingRequest $request, Call $meeting)
     {
-        if (
-            Call::where('date', $request->date)
-                ->where('time', $request->time)
-                ->where('id', '!=', $meeting->id)
-                ->exists()
-        ) {
-            return redirect()->back()->withInput()->withErrors(['time' => 'На это время уже назначен созвон']);
-        }
-
         $user = auth()->user();
         $data = $request->validated();
 
-        $meeting->update([
+        $updateData = [
             'candidate_id' => $data['user_id'],
             'date' => $data['date'],
             'time' => $data['time'],
             'meeting_link' => $data['link'],
             'type' => $data['type'],
-            'tutor_id' => $user->isTutorWorker() ? $user->id : $data['tutor_id'],
+            'tutor_id' => $user->isTutorWorker() ? $user->id : ($data['tutor_id'] ?? null),
             'hr_manager_id' => $user->isAdmin() ? $user->id : $request->hr_manager_id,
-        ]);
+        ];
+
+        $meeting->update($updateData);
 
         // Получаем всех участников
         $candidate = User::with('telegramUser')->find($meeting->candidate_id);
-        $tutor = User::with('telegramUser')->find($meeting->tutor_id);
-        $hrManager = User::with('telegramUser')->find($meeting->hr_manager_id);
+        $tutor = $meeting->tutor_id ? User::with('telegramUser')->find($meeting->tutor_id) : null;
+        $hrManager = $meeting->hr_manager_id ? User::with('telegramUser')->find($meeting->hr_manager_id) : null;
 
         // Отправка уведомлений
         $this->sendNotifications($candidate, $tutor, $hrManager, $meeting, 'updated');
@@ -163,8 +153,8 @@ class MeetingController extends Controller
     {
         // Получаем всех участников перед удалением
         $candidate = User::with('telegramUser')->find($meeting->candidate_id);
-        $tutor = User::with('telegramUser')->find($meeting->tutor_id);
-        $hrManager = User::with('telegramUser')->find($meeting->hr_manager_id);
+        $tutor = $meeting->tutor_id ? User::with('telegramUser')->find($meeting->tutor_id) : null;
+        $hrManager = $meeting->hr_manager_id ? User::with('telegramUser')->find($meeting->hr_manager_id) : null;
 
         // Отправка уведомлений об отмене
         $this->sendNotifications($candidate, $tutor, $hrManager, $meeting, 'cancelled');
@@ -175,9 +165,6 @@ class MeetingController extends Controller
             ->with('success', 'Созвон успешно отменен. Уведомления отправлены.');
     }
 
-    /**
-     * Отправка уведомлений всем участникам
-     */
     protected function sendNotifications(?User $candidate, ?User $tutor, ?User $hrManager, Call $call, string $action)
     {
         try {
@@ -204,9 +191,6 @@ class MeetingController extends Controller
         }
     }
 
-    /**
-     * Отправка email уведомления кандидату
-     */
     protected function sendEmailNotification(User $user, ?User $tutor, ?User $hrManager, Call $call, string $action, string $callType)
     {
         try {
@@ -231,9 +215,6 @@ class MeetingController extends Controller
         }
     }
 
-    /**
-     * Отправка Telegram уведомления
-     */
     protected function sendTelegramNotification(User $user, Call $call, string $callType, string $action)
     {
         if (!$user->telegramUser) {
@@ -254,8 +235,6 @@ class MeetingController extends Controller
 
             if ($action !== 'cancelled') {
                 $text .= "🔗 <b>Ссылка:</b> {$call->meeting_link}\n\n";
-
-
             } else {
                 $text .= "\nДля уточнения деталей свяжитесь с организатором.";
             }
@@ -271,9 +250,6 @@ class MeetingController extends Controller
         }
     }
 
-    /**
-     * Получение названия типа созвона
-     */
     protected function getCallTypeName(string $type): string
     {
         return match ($type) {

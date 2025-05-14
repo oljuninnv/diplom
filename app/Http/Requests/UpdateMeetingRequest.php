@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Call;
 use Carbon\Carbon;
 
-class StoreMeetingRequest extends FormRequest
+class UpdateMeetingRequest extends FormRequest
 {
     public function authorize()
     {
@@ -20,25 +20,7 @@ class StoreMeetingRequest extends FormRequest
         $isAdmin = $user->isAdmin();
         
         return [
-            'user_id' => [
-                'required',
-                'exists:users,id',
-                function ($attribute, $value, $fail) {
-                    $hasFutureCall = Call::where('candidate_id', $value)
-                        ->where(function($query) {
-                            $query->whereDate('date', '>', now()->format('Y-m-d'))
-                                ->orWhere(function($q) {
-                                    $q->whereDate('date', now()->format('Y-m-d'))
-                                        ->whereTime('time', '>', now()->format('H:i:s'));
-                                });
-                        })
-                        ->exists();
-                    
-                    if ($hasFutureCall) {
-                        $fail('У этого кандидата уже есть запланированный созвон.');
-                    }
-                }
-            ],
+            'user_id' => 'required|exists:users,id',
             'date' => [
                 'required',
                 'date',

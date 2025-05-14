@@ -101,7 +101,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:TUTOR_WORKER,ADMIN,SUPER_ADMIN'])->group(function () {
         Route::resource('meetings', MeetingController::class);
         Route::get('/users/{user}', [MeetingController::class, 'getUserData']);
-        Route::get('/meetings-all', [MeetingController::class, 'getAllCalls']);
     });
 });
 

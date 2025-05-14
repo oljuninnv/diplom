@@ -220,9 +220,7 @@
 
                         <div class="flex space-x-1">
                             @php
-                                // Получаем все текущие параметры запроса
                                 $queryParams = request()->query();
-                                // Удаляем page из параметров для предыдущей/следующей страницы
                                 unset($queryParams['page']);
                             @endphp
 
@@ -374,8 +372,8 @@
 
                     @unless (auth()->user()->isTutorWorker())
                         <div>
-                            <label for="tutor-select" class="block text-sm font-medium text-gray-700 mb-1">Тьютор *</label>
-                            <select id="tutor-select" name="tutor_id" required
+                            <label for="tutor-select" class="block text-sm font-medium text-gray-700 mb-1">Тьютор {{ auth()->user()->isAdmin() ? '' : '*' }}</label>
+                            <select id="tutor-select" name="tutor_id" {{ auth()->user()->isAdmin() ? '' : 'required' }}
                                 class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Выберите тьютора</option>
                                 @foreach ($tutors as $user)
@@ -496,10 +494,7 @@
                     return response.json();
                 })
                 .then(call => {
-                    // Устанавливаем заголовок модального окна
                     document.getElementById('modal-title').textContent = 'Редактировать созвон';
-
-                    // Заполняем поля формы данными созвона
                     document.getElementById('call-id').value = call.id;
                     document.getElementById('user-select').value = call.candidate_id;
                     document.getElementById('call-date').value = call.date;
@@ -507,10 +502,9 @@
                     document.getElementById('call-link').value = call.meeting_link;
                     document.getElementById('call-type').value = call.type;
 
-                    // Заполняем поля для тьютора и HR-менеджера (если они есть)
                     @unless (auth()->user()->isTutorWorker())
                         if (document.getElementById('tutor-select')) {
-                            document.getElementById('tutor-select').value = call.tutor_id;
+                            document.getElementById('tutor-select').value = call.tutor_id || '';
                         }
                     @endunless
 
@@ -520,27 +514,20 @@
                         }
                     @endunless
 
-                    // Получаем текущие параметры URL
                     const urlParams = new URLSearchParams(window.location.search);
-
-                    // Заполняем скрытые поля параметрами фильтрации
                     document.querySelector('input[name="perPage"]').value = urlParams.get('perPage') || '10';
 
-                    // Обновляем action формы и метод
                     const form = document.getElementById('call-form');
                     form.action = `/meetings/${callId}`;
 
-                    // Удаляем старый метод, если есть
                     form.querySelector('input[name="_method"]')?.remove();
 
-                    // Добавляем метод PUT
                     const methodInput = document.createElement('input');
                     methodInput.type = 'hidden';
                     methodInput.name = '_method';
                     methodInput.value = 'PUT';
                     form.appendChild(methodInput);
 
-                    // Показываем модальное окно
                     document.getElementById('add-modal').classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
                 })
