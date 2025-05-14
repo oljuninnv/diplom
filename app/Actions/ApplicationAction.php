@@ -12,6 +12,7 @@ use App\Enums\ApplicationStatusEnum;
 use App\Models\Call;
 use App\Mail\ApplicationApprovedMail;
 use App\Mail\ApplicationRejectedMail;
+use App\Mail\ApplicationUnderConsideration;
 use App\Mail\UserAddedMail;
 use App\Mail\CallMail;
 use Illuminate\Support\Facades\Mail;
@@ -192,6 +193,45 @@ class ApplicationAction
         } catch (\Exception $e) {
             Log::error("Error declining application: " . $e->getMessage());
             return 'Произошла ошибка при отклонении заявки.';
+        }
+    }
+
+    public function underConsideration(int $id)
+    {
+        try {
+            $application = Application::findOrFail($id);
+            $application->update([
+                'status' => ApplicationStatusEnum::UnderConsideration->value
+            ]);
+
+            $user = User::with('telegramUser')->findOrFail($application->user_id);
+            if (!$user instanceof User) {
+                throw new \RuntimeException('User not found');
+            }
+
+
+            // Отправка email
+            Mail::to($user->email)->send(
+                new ApplicationUnderConsideration($user)
+            );
+
+            // Отправка Telegram уведомления
+            if ($user->telegramUser) {
+                $text = "😊 Поздравляем, ваша заявка была взята на рассмотрение.\n\n";
+                $text .= "Ожидайте, когда с вами свяжется наш hr-менеджер для назначения первичного собеседования.";
+
+                $this->telegram->sendMessage([
+                    'chat_id' => $user->telegramUser->telegram_id,
+                    'text' => $text,
+                    'parse_mode' => 'HTML'
+                ]);
+            }
+
+            return 'Заявка принята на рассмотрение. Уведомления отправлены.';
+
+        } catch (\Exception $e) {
+            Log::error("Error declining application: " . $e->getMessage());
+            return 'Произошла ошибка при взятии на рассмотрении заявки заявки.';
         }
     }
 

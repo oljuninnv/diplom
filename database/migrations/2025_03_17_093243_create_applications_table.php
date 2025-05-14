@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->string('resume');
 
-            $table->enum('status', ['ожидание', 'одобрено', 'отклонено'])->default('ожидание');
+            $table->enum('status', ['ожидание','на рассмотрении','одобрено', 'отклонено'])->default('ожидание');
               
             $table->foreignId('department_id')
                 ->nullable()

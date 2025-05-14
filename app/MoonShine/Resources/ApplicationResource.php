@@ -85,16 +85,20 @@ class ApplicationResource extends ModelResource
     protected function indexButtons(): ListOf
     {
         return parent::indexButtons()->add(
-            ActionButton::make('Одобрить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
+            ActionButton::make('Одобрить')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::UnderConsideration->value)
                 ->inModal(
                     'Одобрить заявку',
                     fn(Application $application) => $this->form($application->id)
                 ),
-            ActionButton::make('Отклонить')
+            ActionButton::make('Взять на рассмотрение')
                 ->showInDropdown()
                 ->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
+                ->method('underConsideration'),
+            ActionButton::make('Отклонить')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value || $model->status === ApplicationStatusEnum::UnderConsideration->value)
                 ->method('decline'),
-            ActionButton::make('Назначить созвон')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::PENDING->value)
+            ActionButton::make('Назначить созвон')->showInDropdown()->canSee(fn($model) => $model->status === ApplicationStatusEnum::UnderConsideration->value)
                 ->inModal(
                     'Назначить созвон',
                     fn(Application $application) => FormBuilder::make()
@@ -113,7 +117,7 @@ class ApplicationResource extends ModelResource
                                         ->pluck('name', 'id')
                                         ->toArray()
                                 )
-                                ->required()
+                                ->nullable()
                                 ->sortable()
                                 ->searchable(),
                             Select::make('HR-мэнеджер', 'hr-manager')
@@ -235,6 +239,16 @@ class ApplicationResource extends ModelResource
         return MoonShineJsonResponse::make()
             ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
             ->toast('Заявка отклонена', ToastType::SUCCESS);
+    }
+
+    public function underConsideration(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $id = (int) $request->get('resourceItem');
+        $reportAction = new ApplicationAction();
+        $reportAction->underConsideration($id);
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Заявка взята на рассмотрение', ToastType::SUCCESS);
     }
 
     public function assignCall(MoonShineRequest $request)
