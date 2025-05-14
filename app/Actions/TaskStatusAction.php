@@ -129,20 +129,36 @@ class TaskStatusAction
     {
         try {
             $taskStatus = TaskStatus::findOrFail($params['id']);
+            $candidateId = $taskStatus['user_id'];
+
+            // Проверяем есть ли у кандидата активные созвоны
+            $existingCall = Call::where('candidate_id', $candidateId)
+                ->where(function ($query) use ($params) {
+                    $query->where('date', '>', now()->format('Y-m-d'))
+                        ->orWhere(function ($q) use ($params) {
+                            $q->where('date', now()->format('Y-m-d'))
+                                ->where('time', '>=', now()->format('H:i:s'));
+                        });
+                })
+                ->first();
+
+            if ($existingCall) {
+                throw new \Exception("У кандидата уже есть активный созвон (ID: {$existingCall->id}, тип: {$existingCall->type}, дата: {$existingCall->date}, время: {$existingCall->time})");
+            }
 
             $call = Call::create([
-                'type' => CallEnum::FINAL->value,
+                'type' => CallEnum::FINAL ->value,
                 'meeting_link' => $params['meeting_link'],
                 'date' => $params['date'],
                 'time' => $params['time'],
-                'candidate_id' => $taskStatus['user_id'],
+                'candidate_id' => $candidateId,
                 'tutor_id' => $taskStatus['tutor_id'],
                 'hr_manager_id' => $taskStatus['hr_manager_id']
             ]);
 
             $tutor = User::with('telegramUser')->findOrFail($taskStatus['tutor_id']);
             $hrManager = User::with('telegramUser')->findOrFail($taskStatus['hr_manager_id']);
-            $candidate = User::with('telegramUser')->findOrFail($taskStatus['user_id']);
+            $candidate = User::with('telegramUser')->findOrFail($candidateId);
 
             $emailData = [
                 'candidateName' => $candidate->name,
@@ -154,22 +170,20 @@ class TaskStatusAction
                 'companyName' => 'ATWINTA'
             ];
 
-            // Отправка уведомлений кандидату
+            // Отправка уведомлений
             $this->sendEmailNotification($candidate->email, new CallMail($emailData));
             $this->sendTelegramCallNotification($candidate, $call, 'final');
 
-            // Отправка уведомлений тьютору
             $this->sendEmailNotification($tutor->email, new CallMail($emailData));
             $this->sendTelegramCallNotification($tutor, $call, 'final');
 
-            // Отправка уведомлений HR-менеджеру
             $this->sendEmailNotification($hrManager->email, new CallMail($emailData));
             $this->sendTelegramCallNotification($hrManager, $call, 'final');
 
             return 'Финальный созвон назначен.';
 
         } catch (\Exception $e) {
-            Log::error('Ошибка при назначении созвона', [
+            Log::error('Ошибка при назначении финального созвона', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -181,20 +195,36 @@ class TaskStatusAction
     {
         try {
             $taskStatus = TaskStatus::findOrFail($params['id']);
+            $candidateId = $taskStatus['user_id'];
+
+            // Проверяем есть ли у кандидата активные созвоны
+            $existingCall = Call::where('candidate_id', $candidateId)
+                ->where(function ($query) use ($params) {
+                    $query->where('date', '>', now()->format('Y-m-d'))
+                        ->orWhere(function ($q) use ($params) {
+                            $q->where('date', now()->format('Y-m-d'))
+                                ->where('time', '>=', now()->format('H:i:s'));
+                        });
+                })
+                ->first();
+
+            if ($existingCall) {
+                throw new \Exception("У кандидата уже есть активный созвон (ID: {$existingCall->id}, тип: {$existingCall->type}, дата: {$existingCall->date}, время: {$existingCall->time})");
+            }
 
             $call = Call::create([
                 'type' => CallEnum::TECHNICAL->value,
                 'meeting_link' => $params['meeting_link'],
                 'date' => $params['date'],
                 'time' => $params['time'],
-                'candidate_id' => $taskStatus['user_id'],
+                'candidate_id' => $candidateId,
                 'tutor_id' => $taskStatus['tutor_id'],
                 'hr_manager_id' => $taskStatus['hr_manager_id']
             ]);
 
             $tutor = User::with('telegramUser')->findOrFail($taskStatus['tutor_id']);
             $hrManager = User::with('telegramUser')->findOrFail($taskStatus['hr_manager_id']);
-            $candidate = User::with('telegramUser')->findOrFail($taskStatus['user_id']);
+            $candidate = User::with('telegramUser')->findOrFail($candidateId);
 
             $emailData = [
                 'candidateName' => $candidate->name,
@@ -206,22 +236,20 @@ class TaskStatusAction
                 'companyName' => 'ATWINTA'
             ];
 
-            // Отправка уведомлений кандидату
+            // Отправка уведомлений
             $this->sendEmailNotification($candidate->email, new CallMail($emailData));
             $this->sendTelegramCallNotification($candidate, $call, 'technical');
 
-            // Отправка уведомлений тьютору
             $this->sendEmailNotification($tutor->email, new CallMail($emailData));
             $this->sendTelegramCallNotification($tutor, $call, 'technical');
 
-            // Отправка уведомлений HR-менеджеру
             $this->sendEmailNotification($hrManager->email, new CallMail($emailData));
             $this->sendTelegramCallNotification($hrManager, $call, 'technical');
 
             return 'Технический созвон назначен.';
 
         } catch (\Exception $e) {
-            Log::error('Ошибка при назначении созвона', [
+            Log::error('Ошибка при назначении технического созвона', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
@@ -269,11 +297,11 @@ class TaskStatusAction
             $text = "📢 <b>Статус задания изменен</b>\n\n";
             $text .= "📌 <b>Задание:</b> {$task->task->title}\n";
             $text .= "📝 <b>Статус:</b> {$statusMessages[$status]}\n";
-            
+
             if ($comment) {
                 $text .= "💬 <b>Комментарий:</b>\n{$comment}\n";
             }
-            
+
             $text .= "\n🔗 <a href='{$siteUrl}'>Перейти на сайт</a>";
 
             if ($filePath) {

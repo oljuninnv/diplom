@@ -243,14 +243,33 @@ class ApplicationAction
             $application = Application::findOrFail($id);
             Log::info('Заявка найдена', ['application' => $application->toArray()]);
 
+            $candidateId = $application['user_id'];
+            $proposedDate = $array['date'];
+            $proposedTime = $array['time'];
+
+            // Проверяем есть ли у кандидата будущие созвоны
+            $futureCalls = Call::where('candidate_id', $candidateId)
+                ->where(function ($query) use ($proposedDate, $proposedTime) {
+                    $query->where('date', '>', $proposedDate)
+                        ->orWhere(function ($q) use ($proposedDate, $proposedTime) {
+                            $q->where('date', $proposedDate)
+                                ->where('time', '>', $proposedTime);
+                        });
+                })
+                ->first();
+
+            if ($futureCalls) {
+                throw new \Exception("У кандидата уже есть активный созвон (ID: {$futureCalls->id}, тип: {$futureCalls->type}, дата: {$futureCalls->date}, время: {$futureCalls->time})");
+            }
+
             $callData = [
                 'type' => CallEnum::PRIMARY->value,
                 'meeting_link' => $array['meeting_link'],
-                'date' => $array['date'],
-                'time' => $array['time'],
-                'candidate_id' => $application['user_id'],
+                'date' => $proposedDate,
+                'time' => $proposedTime,
+                'candidate_id' => $candidateId,
                 'hr_manager_id' => $array['hr-manager'],
-                'tutor_id' => $array['tutor'] ?? null // Делаем tutor_id необязательным
+                'tutor_id' => $array['tutor'] ?? null
             ];
 
             $call = Call::create($callData);
@@ -274,7 +293,7 @@ class ApplicationAction
 
             $emailData = [
                 'candidateName' => $candidate->name,
-                'tutorName' => $users['tutor']->name ?? null, // Учитываем отсутствие тьютора
+                'tutorName' => $users['tutor']->name ?? null,
                 'hrManagerName' => $hrManager->name,
                 'date' => $call->date,
                 'time' => $call->time,
@@ -282,10 +301,9 @@ class ApplicationAction
                 'companyName' => 'ATWINTA'
             ];
 
-            // Отправка уведомлений
             $this->sendCallNotifications(
                 $candidate,
-                $users['tutor'] ?? null, // Передаем null если тьютора нет
+                $users['tutor'] ?? null,
                 $hrManager,
                 $call,
                 'primary'
