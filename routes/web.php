@@ -12,6 +12,7 @@ use App\Http\Controllers\WorkerChatController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TelegramLinkController;
+use App\Http\Controllers\ApplicationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +103,22 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('meetings', MeetingController::class);
         Route::get('/users/{user}', [MeetingController::class, 'getUserData']);
     });
+});
+
+Route::group(['middleware' => 'auth','role:ADMIN,SUPER_ADMIN'], function () {
+    Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
+    Route::post('/applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
+    Route::post('/applications/{application}/decline', [ApplicationController::class, 'decline'])->name('applications.decline');
+    Route::post('/applications/{application}/under-consideration', [ApplicationController::class, 'underConsideration'])->name('applications.under_consideration');
+    Route::post('/applications/{application}/assign-call', [ApplicationController::class, 'assignCall'])->name('applications.assign_call');
+    Route::get('/applications/{application}/download', [ApplicationController::class, 'download'])
+    ->name('applications.download');
+});
+
+Route::get('/departments/{department}/tasks', function (App\Models\Department $department) {
+    return \App\Models\Task::whereHas('post', function($query) use ($department) {
+        $query->where('department_id', $department->id);
+    })->select('id', 'title')->get();
 });
 
 Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('tasks')->group(function () {

@@ -265,8 +265,8 @@ class ApplicationAction
             $callData = [
                 'type' => CallEnum::PRIMARY->value,
                 'meeting_link' => $array['meeting_link'],
-                'date' => $proposedDate,
-                'time' => $proposedTime,
+                'date' => $array['date'],
+                'time' => $array['time'],
                 'candidate_id' => $candidateId,
                 'hr_manager_id' => $array['hr-manager'],
                 'tutor_id' => $array['tutor'] ?? null

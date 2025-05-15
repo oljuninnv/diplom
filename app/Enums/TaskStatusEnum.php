@@ -8,7 +8,6 @@ enum TaskStatusEnum: string
     case UNDER_REVIEW = 'на проверке';
     case APPROVED = 'одобрено';
     case REVISION = 'доработка';
-    case COMPLETED = 'выполнено';
     case FAILED = 'провалено';
 
     public static function getAll(): array
@@ -18,7 +17,6 @@ enum TaskStatusEnum: string
             self::UNDER_REVIEW->value => self::UNDER_REVIEW->value,
             self::APPROVED->value => self::APPROVED->value,
             self::REVISION->value => self::REVISION->value,
-            self::COMPLETED->value => self::COMPLETED->value,
             self::FAILED->value => self::FAILED->value,
         ];
     }
