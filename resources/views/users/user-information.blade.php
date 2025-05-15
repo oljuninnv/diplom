@@ -46,23 +46,37 @@
 
                             <div class="mb-6">
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input type="email" id="email" name="email" value="{{ auth()->user()->email }}"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring focus:ring-blue-500 focus:border-blue-500"
-                                    required>
-                                <p class="mt-1 text-xs text-gray-500">Ваш основной email для входа в систему</p>
-                                <p id="email-error" class="mt-1 text-xs text-red-500 hidden">Введите корректный email
-                                    (например, example@domain.com)</p>
+                                <div class="relative">
+                                    <input type="email" id="email" name="email" value="{{ auth()->user()->email }}"
+                                        class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
+                                        disabled readonly>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M14.243 5.757a6 6 0 10-.986 9.284 1 1 0 111.087 1.678A8 8 0 1118 10a3 3 0 01-4.8 2.401A4 4 0 1114 10a1 1 0 102 0c0-1.537-.586-3.07-1.757-4.243zM12 10a2 2 0 10-4 0 2 2 0 004 0z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Email можно изменить только через администратора</p>
                             </div>
 
                             <div class="mb-6">
                                 <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Номер
                                     телефона</label>
-                                <input type="tel" id="phone" name="phone" value="{{ auth()->user()->phone }}"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="+7 (XXX) XXX-XX-XX">
-                                <p class="mt-1 text-xs text-gray-500">Используется для связи с вами</p>
-                                <p id="phone-error" class="mt-1 text-xs text-red-500 hidden">Введите корректный номер
-                                    телефона (например, +7 (XXX) XXX-XX-XX)</p>
+                                <div class="relative">
+                                    <input type="tel" id="phone" name="phone" value="{{ auth()->user()->phone }}"
+                                        class="block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-600 cursor-not-allowed"
+                                        disabled readonly>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zm3 14a1 1 0 100-2 1 1 0 000 2z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-500">Номер телефона можно изменить только через администратора</p>
                             </div>
 
                             <!-- Редактируемое поле - Аватар -->
@@ -83,7 +97,7 @@
                                         @endif
                                     </div>
                                     <input type="file" id="avatar" name="avatar"
-                                        accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                                        accept="image/jpeg,image/png,image/jpg,image/webp"
                                         class="flex-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                                 </div>
                                 <p class="mt-1 text-xs text-gray-500">Рекомендуемый размер: 200×200 пикселей</p>
@@ -242,17 +256,6 @@
     </div>
 
     <script>
-        // Регулярные выражения для валидации
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^\+7\s?\(\d{3}\)\s?\d{3}-\d{2}-\d{2}$/;
-
-        // Элементы формы
-        const emailInput = document.getElementById('email');
-        const phoneInput = document.getElementById('phone');
-        const emailError = document.getElementById('email-error');
-        const phoneError = document.getElementById('phone-error');
-        const submitButton = document.querySelector('button[type="submit"]');
-
         // Обработка отвязки Telegram
         document.getElementById('unlink-telegram-btn')?.addEventListener('click', async function() {
             if (!confirm('Вы уверены, что хотите отвязать Telegram аккаунт?')) {
@@ -281,60 +284,6 @@
                 console.error('Error:', error);
                 alert('Ошибка: ' + error.message);
             }
-        });
-
-        // Функция валидации email
-        function validateEmail() {
-            if (!emailRegex.test(emailInput.value)) {
-                emailError.classList.remove('hidden');
-                emailInput.classList.add('border-red-500');
-                return false;
-            } else {
-                emailError.classList.add('hidden');
-                emailInput.classList.remove('border-red-500');
-                return true;
-            }
-        }
-
-        // Функция валидации телефона
-        function validatePhone() {
-            if (phoneInput.value && !phoneRegex.test(phoneInput.value)) {
-                phoneError.classList.remove('hidden');
-                phoneInput.classList.add('border-red-500');
-                return false;
-            } else {
-                phoneError.classList.add('hidden');
-                phoneInput.classList.remove('border-red-500');
-                return true;
-            }
-        }
-
-        // Слушатели событий
-        emailInput.addEventListener('input', validateEmail);
-        emailInput.addEventListener('blur', validateEmail);
-        phoneInput.addEventListener('input', validatePhone);
-        phoneInput.addEventListener('blur', validatePhone);
-
-        // Валидация перед отправкой формы
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const isEmailValid = validateEmail();
-            const isPhoneValid = validatePhone();
-
-            if (!isEmailValid || !isPhoneValid) {
-                e.preventDefault();
-            }
-        });
-
-        // Маска для телефона (опционально)
-        phoneInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 1) {
-                value = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value.substring(7,
-                    9) + '-' + value.substring(9, 11);
-            } else if (value.length === 1) {
-                value = '+7 (' + value;
-            }
-            e.target.value = value;
         });
 
         document.querySelectorAll('.tab-link').forEach(link => {

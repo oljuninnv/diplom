@@ -47,11 +47,9 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // Валидация данных
+        // Валидация данных (только для аватара, так как email и телефон теперь не редактируются)
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -61,10 +59,6 @@ class ProfileController extends Controller
         }
 
         try {
-            // Обновляем основные данные
-            $user->email = $request->email;
-            $user->phone = $request->phone;
-
             // Обработка аватара
             if ($request->hasFile('avatar')) {
                 // Удаляем старый аватар
