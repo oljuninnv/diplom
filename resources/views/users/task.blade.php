@@ -93,7 +93,7 @@
                     <div class="flex justify-end">
                         <button type="submit"
                             class="w-full px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 @if (!$canEdit) bg-gray-400 cursor-not-allowed @endif"
-                            @if (!$canEdit && $taskStatus->status !== 'доработка') disabled @endif>
+                            @if (!$canEdit && $taskStatus->status !== 'доработка' || $taskStatus->status === 'принят') disabled @endif>
                             @if ($canEdit && $taskStatus->status !== 'доработка')
                                 Отправить
                             @elseif($taskStatus->status === 'доработка')
