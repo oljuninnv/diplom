@@ -9,6 +9,7 @@ enum TaskStatusEnum: string
     case APPROVED = 'одобрено';
     case REVISION = 'доработка';
     case FAILED = 'провалено';
+    case ADOPTED = 'принят';
 
     public static function getAll(): array
     {
@@ -18,6 +19,7 @@ enum TaskStatusEnum: string
             self::APPROVED->value => self::APPROVED->value,
             self::REVISION->value => self::REVISION->value,
             self::FAILED->value => self::FAILED->value,
+            self::ADOPTED->value => self::ADOPTED->value,
         ];
     }
 

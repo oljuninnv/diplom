@@ -85,7 +85,7 @@ class TaskStatusResource extends ModelResource
                 ),
             ActionButton::make('Задание провалено')
                 ->showInDropdown()
-                ->canSee(fn($model) => $model->status === TaskStatusEnum::UNDER_REVIEW->value)
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::UNDER_REVIEW->value || $model->status === TaskStatusEnum::APPROVED->value)
                 ->inModal(
                     'Задание провалено',
                     fn(TaskStatus $taskStatus) => FormBuilder::make()
@@ -113,6 +113,10 @@ class TaskStatusResource extends ModelResource
                         ->asyncMethod('final_call')
                         ->submit('Назначить')
                 ),
+            ActionButton::make('Принять')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::APPROVED->value)
+                ->method('adopted'),
             ActionButton::make('Назначить технический созвон')
                 ->showInDropdown()
                 ->canSee(fn($model) => $model->status === TaskStatusEnum::IN_PROGRESS->value || $model->status === TaskStatusEnum::UNDER_REVIEW->value)
@@ -166,6 +170,16 @@ class TaskStatusResource extends ModelResource
         return MoonShineJsonResponse::make()
             ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
             ->toast('Задание было одобрено', ToastType::SUCCESS);
+    }
+
+    public function adopted(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $id = (int) $request->get('resourceItem');
+        $reportAction = new TaskStatusAction();
+        $reportAction->adopted($id);
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Пользователь принят', ToastType::SUCCESS);
     }
 
     public function failed(MoonShineRequest $request): MoonShineJsonResponse
@@ -308,7 +322,7 @@ class TaskStatusResource extends ModelResource
             Select::make('HR-менеджер', 'hr_manager_id')
                 ->options(
                     User::query()
-                        ->whereHas('role', fn($q) => $q->whereIn('name', [UserRoleEnum::ADMIN->value,UserRoleEnum::SUPER_ADMIN->value]))
+                        ->whereHas('role', fn($q) => $q->whereIn('name', [UserRoleEnum::ADMIN->value, UserRoleEnum::SUPER_ADMIN->value]))
                         ->get()
                         ->pluck('name', 'id')
                         ->toArray()

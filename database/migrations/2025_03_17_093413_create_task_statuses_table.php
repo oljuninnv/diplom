@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('hr_manager_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('task_id')->constrained('tasks')->onDelete('cascade');
             $table->string('github_repo')->nullable();
-            $table->enum('status', ['в процессе', 'на проверке', 'одобрено', 'доработка', 'выполнено', 'провалено']);
+            $table->enum('status', ['в процессе', 'на проверке', 'одобрено', 'доработка', 'принят', 'провалено']);
             $table->date('end_date')->nullable();
             $table->timestamps();
         });
