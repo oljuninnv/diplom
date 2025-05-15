@@ -72,11 +72,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>{{ $companyName }}</h1>
-            <h2>Назначен созвон</h2>
+            <h1>ATWINTA</h1>
+            <p>Digital-агентство</p>
         </div>
 
         <div class="content">
+            <h2>Назначен созвон!</h2>
             <table>
                 <tr>
                     <th>Поле</th>
