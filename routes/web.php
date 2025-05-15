@@ -107,6 +107,9 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('tasks')->group(function () {
     Route::get('/get_tasks', [TaskController::class, 'getTasks']);
     Route::get('/candidate/{id}', [TaskController::class, 'getCandidateInfo']);
+    Route::get('/worker/{id}', [TaskController::class, 'getWorkerInfo']);
+    Route::get('/tutor/{id}', [TaskController::class, 'getTutorInfo']);
+    Route::get('/hr-manager/{id}', [TaskController::class, 'getHrManagerInfo']);
     Route::get('/task-status/{id}', [TaskController::class, 'getTaskStatus']);
     Route::get('/task/{taskStatusId}', [TaskController::class, 'getTaskInfo']);
     Route::put('/status/{taskStatusId}', [TaskController::class, 'updateStatus']);

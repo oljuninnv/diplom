@@ -29,7 +29,7 @@ class TaskController extends Controller
         $search = $request->input('search', '');
         $status = $request->input('status', '');
 
-        $query = TaskStatus::with(['user', 'task'])
+        $query = TaskStatus::with(['user', 'task', 'tutor', 'hr_manager'])
             ->when($search, function ($query, $search) {
                 $query->whereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%");
@@ -50,6 +50,16 @@ class TaskController extends Controller
                 'task_status_id' => $taskStatus->id,
                 'name' => $taskStatus->user->name,
                 'avatar' => $taskStatus->user->avatar_url,
+                'tutor' => $taskStatus->tutor ? [
+                    'id' => $taskStatus->tutor->id,
+                    'name' => $taskStatus->tutor->name,
+                    'avatar' => $taskStatus->tutor->avatar_url,
+                ] : null,
+                'hr_manager' => $taskStatus->hr_manager ? [
+                    'id' => $taskStatus->hr_manager->id,
+                    'name' => $taskStatus->hr_manager->name,
+                    'avatar' => $taskStatus->hr_manager->avatar_url,
+                ] : null,
                 'task' => [
                     'id' => $taskStatus->task->id,
                     'title' => $taskStatus->task->title,
@@ -96,6 +106,44 @@ class TaskController extends Controller
             'telegram' => $candidate->telegram_user_id
                 ? $candidate->telegramUser->username
                 : null,
+        ]);
+    }
+
+    // Добавим новый метод для получения информации о тьюторе
+    public function getTutorInfo($id)
+    {
+        $tutor = User::with('worker')->findOrFail($id);
+
+        return response()->json([
+            'name' => $tutor->name,
+            'email' => $tutor->email,
+            'phone' => $tutor->phone,
+            'telegram' => $tutor->telegram_user_id
+                ? $tutor->telegramUser->username
+                : null,
+            'post' => $tutor->worker->post->name ?? null,
+            'department' => $tutor->worker->department->name ?? null,
+            'level' => $tutor->worker->level_of_experience ?? null,
+            'hire_date' => $tutor->worker->hire_date ?? null,
+        ]);
+    }
+
+    // Добавим новый метод для получения информации о HR-менеджере
+    public function getHrManagerInfo($id)
+    {
+        $hrManager = User::findOrFail($id);
+
+        return response()->json([
+            'name' => $hrManager->name,
+            'email' => $hrManager->email,
+            'phone' => $hrManager->phone,
+            'telegram' => $hrManager->telegram_user_id
+                ? $hrManager->telegramUser->username
+                : null,
+            'post' => $hrManager->worker->post->name ?? null,
+            'department' => $hrManager->worker->department->name ?? null,
+            'level' => $hrManager->worker->level_of_experience ?? null,
+            'hire_date' => $hrManager->worker->hire_date ?? null,
         ]);
     }
 
@@ -206,11 +254,11 @@ class TaskController extends Controller
             $text = "📢 <b>Статус задания изменен</b>\n\n";
             $text .= "📌 <b>Задание:</b> {$taskStatus->task->title}\n";
             $text .= "📝 <b>Статус:</b> {$statusMessages[$status]}\n";
-            
+
             if ($comment) {
                 $text .= "💬 <b>Комментарий:</b>\n{$comment}\n";
             }
-            
+
             $text .= "\n🔗 <a href='{$siteUrl}'>Вернуться на сайт</a>";
 
             // Если есть файл отчета

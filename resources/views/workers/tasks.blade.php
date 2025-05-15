@@ -55,6 +55,10 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Задание</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Тьютор</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                HR-менеджер</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Дедлайн</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Ссылка на задание</th>
@@ -115,6 +119,12 @@
 
     <!-- Модальное окно информации о кандидате -->
     @include('candidates.modals.candidate-info')
+
+    <!-- Модальное окно информации о тьюторе -->
+    @include('workers.modals.tutor-info')
+
+    <!-- Модальное окно информации о HR-менеджере -->
+    @include('workers.modals.hr-manager-info')
 
     <!-- Модальное окно информации о задании -->
     @include('candidates.modals.task-info')
@@ -206,14 +216,34 @@
                         <div class="text-sm text-gray-900 cursor-pointer" onclick="showTaskModal(${candidate.task_status_id})">${candidate.task.title}</div>
                         <div class="text-sm text-gray-500">${candidate.task.difficulty}</div>
                     </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${candidate.tutor ? `
+                                <div class="flex items-center cursor-pointer" onclick="showTutorModal(${candidate.tutor.id})">
+                                    <img class="h-10 w-10 rounded-full" src="${candidate.tutor.avatar}" alt="${candidate.tutor.name}">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">${candidate.tutor.name}</div>
+                                    </div>
+                                </div>
+                            ` : '<div class="text-sm text-gray-500">Не назначен</div>'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        ${candidate.hr_manager ? `
+                                <div class="flex items-center cursor-pointer" onclick="showHrManagerModal(${candidate.hr_manager.id})">
+                                    <img class="h-10 w-10 rounded-full" src="${candidate.hr_manager.avatar}" alt="${candidate.hr_manager.name}">
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">${candidate.hr_manager.name}</div>
+                                    </div>
+                                </div>
+                            ` : '<div class="text-sm text-gray-500">Не назначен</div>'}
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
                         ${candidate.task.deadline || 'Не указан'}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         ${candidate.task.github ? 
                             `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
-                                                        ${candidate.task.github}
-                                                    </a>` 
+                                    ${candidate.task.github}
+                                </a>` 
                             : ''
                         }
                     </td>
@@ -226,9 +256,9 @@
                         <div class="flex justify-center space-x-2">
                             ${showChangeStatus ? 
                                 `<button onclick="showStatusModal(${candidate.task_status_id})" 
-                                                         class="text-blue-600 hover:text-blue-900 mr-3">
-                                                            Изменить статус
-                                                        </button>` 
+                                     class="text-blue-600 hover:text-blue-900 mr-3">
+                                        Изменить статус
+                                    </button>` 
                                 : ''
                             }
                         </div>
@@ -237,7 +267,7 @@
             `;
                     }).join('') :
                     `<tr>
-            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+            <td colspan="8" class="px-6 py-4 text-center text-sm text-gray-500">
                 Нет данных для отображения
             </td>
         </tr>`;
@@ -254,6 +284,47 @@
                         document.getElementById('modal-candidate-telegram').textContent = data.telegram ||
                             'Не указан';
                         document.getElementById('candidate-modal').classList.remove('hidden');
+                    });
+            };
+
+            window.showTutorModal = function(tutorId) {
+                fetch(`/tasks/tutor/${tutorId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('modal-tutor-name').textContent = data.name;
+                        document.getElementById('modal-tutor-email').textContent = data.email;
+                        document.getElementById('modal-tutor-phone').textContent = data.phone;
+                        document.getElementById('modal-tutor-telegram').textContent = data.telegram ||
+                            'Не указан';
+                        document.getElementById('modal-tutor-post').textContent = data.post || 'Не указана';
+                        document.getElementById('modal-tutor-department').textContent = data.department ||
+                            'Не указан';
+                        document.getElementById('modal-tutor-level').textContent = data.level ||
+                        'Не указан';
+                        document.getElementById('modal-tutor-hire-date').textContent = data.hire_date ||
+                            'Не указана';
+                        document.getElementById('tutor-modal').classList.remove('hidden');
+                    });
+            };
+
+            window.showHrManagerModal = function(hrManagerId) {
+                fetch(`/tasks/hr-manager/${hrManagerId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('modal-hr-manager-name').textContent = data.name;
+                        document.getElementById('modal-hr-manager-email').textContent = data.email;
+                        document.getElementById('modal-hr-manager-phone').textContent = data.phone;
+                        document.getElementById('modal-hr-manager-telegram').textContent = data.telegram ||
+                            'Не указан';
+                        document.getElementById('modal-hr-manager-post').textContent = data.post ||
+                            'Не указана';
+                        document.getElementById('modal-hr-manager-department').textContent = data
+                            .department || 'Не указан';
+                        document.getElementById('modal-hr-manager-level').textContent = data.level ||
+                            'Не указан';
+                        document.getElementById('modal-hr-manager-hire-date').textContent = data
+                            .hire_date || 'Не указана';
+                        document.getElementById('hr-manager-modal').classList.remove('hidden');
                     });
             };
 
@@ -468,6 +539,10 @@
                     this.closest('.modal').classList.add('hidden');
                 });
             });
+
+            window.closeModal = function(modalId) {
+                document.getElementById(modalId).classList.add('hidden');
+            };
 
             // Запускаем приложение
             init();
