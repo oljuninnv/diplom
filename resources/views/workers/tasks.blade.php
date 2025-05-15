@@ -200,6 +200,7 @@
                         const status = candidate.task.status.toLowerCase();
                         const isFinalStatus = ['одобрено', 'провалено', 'в процессе'].includes(status);
                         const isInProgress = status === 'в процессе' || status === 'доработка';
+                        const isAdopted = status === 'принят';
                         const showChangeStatus = !isFinalStatus && !isInProgress;
 
                         return `
@@ -254,7 +255,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex justify-center space-x-2">
-                            ${showChangeStatus ? 
+                            ${showChangeStatus && !isAdopted ? 
                                 `<button onclick="showStatusModal(${candidate.task_status_id})" 
                                      class="text-blue-600 hover:text-blue-900 mr-3">
                                         Изменить статус
