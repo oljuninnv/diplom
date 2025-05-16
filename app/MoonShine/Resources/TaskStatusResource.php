@@ -123,7 +123,7 @@ class TaskStatusResource extends ModelResource
                 ->method('deny'),
             ActionButton::make('Назначить технический созвон')
                 ->showInDropdown()
-                ->canSee(fn($model) => $model->status === TaskStatusEnum::IN_PROGRESS->value || $model->status === TaskStatusEnum::UNDER_REVIEW->value)
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::IN_PROGRESS->value || $model->status === TaskStatusEnum::UNDER_REVIEW->value|| $model->status === TaskStatusEnum::REVISION->value)
                 ->inModal(
                     'Назначить технический созвон',
                     fn(TaskStatus $taskStatus) => FormBuilder::make()

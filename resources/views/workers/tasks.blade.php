@@ -139,7 +139,8 @@
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div
+                class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
                 <div>
                     <div class="mt-3 text-center sm:mt-5">
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
@@ -149,26 +150,37 @@
                             <form id="technical-call-form" class="space-y-4">
                                 <input type="hidden" id="technical-call-task-id" name="task_id">
                                 <div>
-                                    <label for="technical-call-date" class="block text-sm font-medium text-gray-700">Дата</label>
-                                    <input type="date" id="technical-call-date" name="date" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                    <label for="technical-call-date"
+                                        class="block text-sm font-medium text-gray-700">Дата</label>
+                                    <input type="date" id="technical-call-date" name="date"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        required>
                                 </div>
                                 <div>
-                                    <label for="technical-call-time" class="block text-sm font-medium text-gray-700">Время</label>
-                                    <input type="time" id="technical-call-time" name="time" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                    <label for="technical-call-time"
+                                        class="block text-sm font-medium text-gray-700">Время</label>
+                                    <input type="time" id="technical-call-time" name="time"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        required>
                                 </div>
                                 <div>
-                                    <label for="technical-call-link" class="block text-sm font-medium text-gray-700">Ссылка на звонок</label>
-                                    <input type="url" id="technical-call-link" name="meeting_link" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                    <label for="technical-call-link"
+                                        class="block text-sm font-medium text-gray-700">Ссылка на звонок</label>
+                                    <input type="url" id="technical-call-link" name="meeting_link"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        required>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                    <button type="button" onclick="submitTechnicalCall()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm">
+                    <button type="button" onclick="submitTechnicalCall()"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm">
                         Назначить
                     </button>
-                    <button type="button" onclick="closeModal('technical-call-modal')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                    <button type="button" onclick="closeModal('technical-call-modal')"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
                         Отмена
                     </button>
                 </div>
@@ -183,7 +195,8 @@
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div
+                class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
                 <div>
                     <div class="mt-3 text-center sm:mt-5">
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
@@ -193,26 +206,37 @@
                             <form id="final-call-form" class="space-y-4">
                                 <input type="hidden" id="final-call-task-id" name="task_id">
                                 <div>
-                                    <label for="final-call-date" class="block text-sm font-medium text-gray-700">Дата</label>
-                                    <input type="date" id="final-call-date" name="date" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                    <label for="final-call-date"
+                                        class="block text-sm font-medium text-gray-700">Дата</label>
+                                    <input type="date" id="final-call-date" name="date"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        required>
                                 </div>
                                 <div>
-                                    <label for="final-call-time" class="block text-sm font-medium text-gray-700">Время</label>
-                                    <input type="time" id="final-call-time" name="time" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                    <label for="final-call-time"
+                                        class="block text-sm font-medium text-gray-700">Время</label>
+                                    <input type="time" id="final-call-time" name="time"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        required>
                                 </div>
                                 <div>
-                                    <label for="final-call-link" class="block text-sm font-medium text-gray-700">Ссылка на звонок</label>
-                                    <input type="url" id="final-call-link" name="meeting_link" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                                    <label for="final-call-link" class="block text-sm font-medium text-gray-700">Ссылка на
+                                        звонок</label>
+                                    <input type="url" id="final-call-link" name="meeting_link"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        required>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                    <button type="button" onclick="submitFinalCall()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm">
+                    <button type="button" onclick="submitFinalCall()"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:col-start-2 sm:text-sm">
                         Назначить
                     </button>
-                    <button type="button" onclick="closeModal('final-call-modal')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                    <button type="button" onclick="closeModal('final-call-modal')"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:col-start-1 sm:text-sm">
                         Отмена
                     </button>
                 </div>
@@ -227,7 +251,8 @@
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div
+                class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
                 <div>
                     <div class="mt-3 text-center sm:mt-5">
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
@@ -242,10 +267,12 @@
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                    <button type="button" onclick="submitAdopt()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:col-start-2 sm:text-sm">
+                    <button type="button" onclick="submitAdopt()"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:col-start-2 sm:text-sm">
                         Принять
                     </button>
-                    <button type="button" onclick="closeModal('adopt-modal')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                    <button type="button" onclick="closeModal('adopt-modal')"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:col-start-1 sm:text-sm">
                         Отмена
                     </button>
                 </div>
@@ -260,7 +287,8 @@
                 <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div
+                class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
                 <div>
                     <div class="mt-3 text-center sm:mt-5">
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
@@ -270,18 +298,22 @@
                             <form id="reject-form" class="space-y-4">
                                 <input type="hidden" id="reject-task-id" name="task_id">
                                 <div>
-                                    <label for="reject-comment" class="block text-sm font-medium text-gray-700">Комментарий</label>
-                                    <textarea id="reject-comment" name="comment" rows="3" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
+                                    <label for="reject-comment"
+                                        class="block text-sm font-medium text-gray-700">Комментарий</label>
+                                    <textarea id="reject-comment" name="comment" rows="3"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"></textarea>
                                 </div>
                             </form>
                         </div>
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
-                    <button type="button" onclick="submitReject()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm">
+                    <button type="button" onclick="submitReject()"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm">
                         Отказать
                     </button>
-                    <button type="button" onclick="closeModal('reject-modal')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                    <button type="button" onclick="closeModal('reject-modal')"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:col-start-1 sm:text-sm">
                         Отмена
                     </button>
                 </div>
@@ -380,23 +412,23 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     ${candidate.tutor ? `
-                                        <div class="flex items-center cursor-pointer" onclick="showTutorModal(${candidate.tutor.id})">
-                                            <img class="h-10 w-10 rounded-full" src="${candidate.tutor.avatar}" alt="${candidate.tutor.name}">
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">${candidate.tutor.name}</div>
-                                            </div>
-                                        </div>
-                                    ` : '<div class="text-sm text-gray-500">Не назначен</div>'}
+                                                <div class="flex items-center cursor-pointer" onclick="showTutorModal(${candidate.tutor.id})">
+                                                    <img class="h-10 w-10 rounded-full" src="${candidate.tutor.avatar}" alt="${candidate.tutor.name}">
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">${candidate.tutor.name}</div>
+                                                    </div>
+                                                </div>
+                                            ` : '<div class="text-sm text-gray-500">Не назначен</div>'}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     ${candidate.hr_manager ? `
-                                        <div class="flex items-center cursor-pointer" onclick="showHrManagerModal(${candidate.hr_manager.id})">
-                                            <img class="h-10 w-10 rounded-full" src="${candidate.hr_manager.avatar}" alt="${candidate.hr_manager.name}">
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">${candidate.hr_manager.name}</div>
-                                            </div>
-                                        </div>
-                                    ` : '<div class="text-sm text-gray-500">Не назначен</div>'}
+                                                <div class="flex items-center cursor-pointer" onclick="showHrManagerModal(${candidate.hr_manager.id})">
+                                                    <img class="h-10 w-10 rounded-full" src="${candidate.hr_manager.avatar}" alt="${candidate.hr_manager.name}">
+                                                    <div class="ml-4">
+                                                        <div class="text-sm font-medium text-gray-900">${candidate.hr_manager.name}</div>
+                                                    </div>
+                                                </div>
+                                            ` : '<div class="text-sm text-gray-500">Не назначен</div>'}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm ${isDeadlinePassed(candidate.task.deadline) ? 'text-red-600' : 'text-gray-500'}">
                                     ${candidate.task.deadline || 'Не указан'}
@@ -404,8 +436,8 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     ${candidate.task.github ? 
                                         `<a href="${candidate.task.github}" target="_blank" class="text-blue-600 hover:text-blue-900">
-                                            ${candidate.task.github}
-                                        </a>` 
+                                                    ${candidate.task.github}
+                                                </a>` 
                                     : ''}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -417,33 +449,33 @@
                                     <div class="flex justify-center space-x-2">
                                         ${showChangeStatus ? 
                                             `<button onclick="showStatusModal(${candidate.task_status_id})" 
-                                                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
-                                                    Изменить статус
-                                                </button>` 
+                                                        class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                                            Изменить статус
+                                                        </button>` 
                                             : ''
                                         }
                                         ${(status === 'доработка' || status === 'в процессе') && (isHrManager || isTutor) ?
                                             `<button onclick="showTechnicalCallModal(${candidate.task_status_id})" 
-                                                class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600">
+                                                    class="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600">
                                                     Тех. созвон
                                                 </button>` 
                                             : ''
                                         }
                                         ${status === 'одобрено' && isHrManager ?
                                             `<div class="flex space-x-2">
-                                                <button onclick="showFinalCallModal(${candidate.task_status_id})" 
-                                                    class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
-                                                        Фин. созвон
-                                                    </button>
-                                                <button onclick="showAdoptModal(${candidate.task_status_id})" 
-                                                    class="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800">
-                                                        Принять
-                                                    </button>
-                                                <button onclick="showRejectModal(${candidate.task_status_id})" 
-                                                    class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                                                        Отказать
-                                                    </button>
-                                            </div>` 
+                                                        <button onclick="showFinalCallModal(${candidate.task_status_id})" 
+                                                            class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">
+                                                                Фин. созвон
+                                                            </button>
+                                                        <button onclick="showAdoptModal(${candidate.task_status_id})" 
+                                                            class="px-3 py-1 bg-green-700 text-white rounded hover:bg-green-800">
+                                                                Принять
+                                                            </button>
+                                                        <button onclick="showRejectModal(${candidate.task_status_id})" 
+                                                            class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                                                                Отказать
+                                                            </button>
+                                                    </div>` 
                                             : ''
                                         }
                                     </div>
@@ -485,7 +517,7 @@
                         document.getElementById('modal-tutor-department').textContent = data.department ||
                             'Не указан';
                         document.getElementById('modal-tutor-level').textContent = data.level ||
-                        'Не указан';
+                            'Не указан';
                         document.getElementById('modal-tutor-hire-date').textContent = data.hire_date ||
                             'Не указана';
                         document.getElementById('tutor-modal').classList.remove('hidden');
@@ -582,6 +614,23 @@
 
             window.showTechnicalCallModal = function(taskStatusId) {
                 document.getElementById('technical-call-task-id').value = taskStatusId;
+
+                // Добавим подсказку о том, кто будет участвовать в созвоне
+                const isHrManager = @json(auth()->user()->isAdmin());
+                const isTutor = @json(auth()->user()->isTutorWorker());
+
+                let participantsNote = '';
+                if (isHrManager) {
+                    participantsNote = 'В созвоне будут участвовать вы (HR-менеджер) и кандидат.';
+                } else if (isTutor) {
+                    participantsNote = 'В созвоне будут участвовать вы (тьютор) и кандидат.';
+                }
+
+                const noteElement = document.getElementById('technical-call-participants-note');
+                if (noteElement) {
+                    noteElement.textContent = participantsNote;
+                }
+
                 document.getElementById('technical-call-modal').classList.remove('hidden');
             };
 
@@ -609,7 +658,8 @@
                     const response = await fetch(`/tasks/technical_call/${taskId}`, {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content,
                             'Accept': 'application/json',
                             'Content-Type': 'application/json'
                         },
@@ -639,7 +689,8 @@
                     const response = await fetch(`/tasks/final_call/${taskId}`, {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content,
                             'Accept': 'application/json',
                             'Content-Type': 'application/json'
                         },
@@ -667,7 +718,8 @@
                     const response = await fetch(`/tasks/adopted/${taskId}`, {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content,
                             'Accept': 'application/json'
                         }
                     });
@@ -695,7 +747,8 @@
                     const response = await fetch(`/tasks/failed/${taskId}`, {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .content,
                             'Accept': 'application/json',
                             'Content-Type': 'application/json'
                         },

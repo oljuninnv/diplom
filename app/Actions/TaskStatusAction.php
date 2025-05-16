@@ -258,6 +258,7 @@ class TaskStatusAction
         try {
             $taskStatus = TaskStatus::findOrFail($params['id']);
             $candidateId = $taskStatus['user_id'];
+            $currentUser = auth()->user();
 
             // Проверяем есть ли у кандидата активные созвоны
             $existingCall = Call::where('candidate_id', $candidateId)
@@ -274,41 +275,99 @@ class TaskStatusAction
                 throw new \Exception("У кандидата уже есть активный созвон (ID: {$existingCall->id}, тип: {$existingCall->type}, дата: {$existingCall->date}, время: {$existingCall->time})");
             }
 
-            $call = Call::create([
-                'type' => CallEnum::TECHNICAL->value,
-                'meeting_link' => $params['meeting_link'],
-                'date' => $params['date'],
-                'time' => $params['time'],
-                'candidate_id' => $candidateId,
-                'tutor_id' => $taskStatus['tutor_id'],
-                'hr_manager_id' => $taskStatus['hr_manager_id']
-            ]);
+            // Если пользователь аутентифицирован - новый сценарий (только инициатор + кандидат)
+            if ($currentUser) {
+                $tutorId = null;
+                $hrManagerId = null;
 
-            $tutor = User::with('telegramUser')->findOrFail($taskStatus['tutor_id']);
-            $hrManager = User::with('telegramUser')->findOrFail($taskStatus['hr_manager_id']);
-            $candidate = User::with('telegramUser')->findOrFail($candidateId);
+                if ($currentUser->isTutorWorker()) {
+                    $tutorId = $currentUser->id;
+                } elseif ($currentUser->isAdmin()) { // предполагаем, что это HR
+                    $hrManagerId = $currentUser->id;
+                } else {
+                    throw new \Exception("Только тьютор или HR-менеджер может назначить технический созвон");
+                }
 
-            $emailData = [
-                'candidateName' => $candidate->name,
-                'tutorName' => $tutor->name,
-                'hrManagerName' => $hrManager->name,
-                'date' => $call->date,
-                'time' => $call->time,
-                'meetingLink' => $call->meeting_link,
-                'companyName' => 'ATWINTA'
-            ];
+                $call = Call::create([
+                    'type' => CallEnum::TECHNICAL->value,
+                    'meeting_link' => $params['meeting_link'],
+                    'date' => $params['date'],
+                    'time' => $params['time'],
+                    'candidate_id' => $candidateId,
+                    'tutor_id' => $tutorId,
+                    'hr_manager_id' => $hrManagerId
+                ]);
 
-            // Отправка уведомлений
-            $this->sendEmailNotification($candidate->email, new CallMail($emailData));
-            $this->sendTelegramCallNotification($candidate, $call, 'technical');
+                $candidate = User::with('telegramUser')->findOrFail($candidateId);
 
-            $this->sendEmailNotification($tutor->email, new CallMail($emailData));
-            $this->sendTelegramCallNotification($tutor, $call, 'technical');
+                $emailData = [
+                    'candidateName' => $candidate->name,
+                    'date' => $call->date,
+                    'time' => $call->time,
+                    'meetingLink' => $call->meeting_link,
+                    'companyName' => 'ATWINTA'
+                ];
 
-            $this->sendEmailNotification($hrManager->email, new CallMail($emailData));
-            $this->sendTelegramCallNotification($hrManager, $call, 'technical');
+                if ($tutorId) {
+                    $tutor = User::with('telegramUser')->findOrFail($tutorId);
+                    $emailData['tutorName'] = $tutor->name;
 
-            return 'Технический созвон назначен.';
+                    $this->sendEmailNotification($tutor->email, new CallMail($emailData));
+                    $this->sendTelegramCallNotification($tutor, $call, 'technical');
+                }
+
+                if ($hrManagerId) {
+                    $hrManager = User::with('telegramUser')->findOrFail($hrManagerId);
+                    $emailData['hrManagerName'] = $hrManager->name;
+
+                    $this->sendEmailNotification($hrManager->email, new CallMail($emailData));
+                    $this->sendTelegramCallNotification($hrManager, $call, 'technical');
+                }
+
+                // Отправка уведомлений кандидату
+                $this->sendEmailNotification($candidate->email, new CallMail($emailData));
+                $this->sendTelegramCallNotification($candidate, $call, 'technical');
+
+                return 'Технический созвон назначен.';
+            }
+            // Если пользователь не аутентифицирован - старый сценарий (все участники)
+            else {
+                $call = Call::create([
+                    'type' => CallEnum::TECHNICAL->value,
+                    'meeting_link' => $params['meeting_link'],
+                    'date' => $params['date'],
+                    'time' => $params['time'],
+                    'candidate_id' => $candidateId,
+                    'tutor_id' => $taskStatus['tutor_id'],
+                    'hr_manager_id' => $taskStatus['hr_manager_id']
+                ]);
+
+                $tutor = User::with('telegramUser')->findOrFail($taskStatus['tutor_id']);
+                $hrManager = User::with('telegramUser')->findOrFail($taskStatus['hr_manager_id']);
+                $candidate = User::with('telegramUser')->findOrFail($candidateId);
+
+                $emailData = [
+                    'candidateName' => $candidate->name,
+                    'tutorName' => $tutor->name,
+                    'hrManagerName' => $hrManager->name,
+                    'date' => $call->date,
+                    'time' => $call->time,
+                    'meetingLink' => $call->meeting_link,
+                    'companyName' => 'ATWINTA'
+                ];
+
+                // Отправка уведомлений всем участникам
+                $this->sendEmailNotification($candidate->email, new CallMail($emailData));
+                $this->sendTelegramCallNotification($candidate, $call, 'technical');
+
+                $this->sendEmailNotification($tutor->email, new CallMail($emailData));
+                $this->sendTelegramCallNotification($tutor, $call, 'technical');
+
+                $this->sendEmailNotification($hrManager->email, new CallMail($emailData));
+                $this->sendTelegramCallNotification($hrManager, $call, 'technical');
+
+                return 'Технический созвон назначен (все участники).';
+            }
 
         } catch (\Exception $e) {
             Log::error('Ошибка при назначении технического созвона', [
