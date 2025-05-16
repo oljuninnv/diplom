@@ -72,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile/telegram/unlink', [ProfileController::class, 'unlinkTelegram'])->name('profile.telegram.unlink');
     Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-    
+
     // Задания
     Route::middleware(['role:USER'])->group(function () {
         Route::get('/task', [CandidateTaskController::class, 'show'])->name('task');
@@ -105,18 +105,18 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
-Route::group(['middleware' => 'auth','role:ADMIN,SUPER_ADMIN'], function () {
+Route::group(['middleware' => 'auth', 'role:ADMIN,SUPER_ADMIN'], function () {
     Route::get('/applications', [ApplicationController::class, 'index'])->name('applications.index');
     Route::post('/applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('/applications/{application}/decline', [ApplicationController::class, 'decline'])->name('applications.decline');
     Route::post('/applications/{application}/under-consideration', [ApplicationController::class, 'underConsideration'])->name('applications.under_consideration');
     Route::post('/applications/{application}/assign-call', [ApplicationController::class, 'assignCall'])->name('applications.assign_call');
     Route::get('/applications/{application}/download', [ApplicationController::class, 'download'])
-    ->name('applications.download');
+        ->name('applications.download');
 });
 
 Route::get('/departments/{department}/tasks', function (App\Models\Department $department) {
-    return \App\Models\Task::whereHas('post', function($query) use ($department) {
+    return \App\Models\Task::whereHas('post', function ($query) use ($department) {
         $query->where('department_id', $department->id);
     })->select('id', 'title')->get();
 });
@@ -132,6 +132,10 @@ Route::middleware(['auth', 'role:ADMIN,SUPER_ADMIN,TUTOR_WORKER'])->prefix('task
     Route::put('/status/{taskStatusId}', [TaskController::class, 'updateStatus']);
     Route::post('/report/{taskStatusId}', [TaskController::class, 'createReport']);
     Route::get('/statuses', [TaskController::class, 'getStatuses']);
+    Route::post('/adopted/{taskStatusId}', [TaskController::class, 'adopted']);
+    Route::post('/failed/{taskStatusId}', [TaskController::class, 'failed']);
+    Route::post('/technical_call/{taskStatusId}', [TaskController::class, 'technicalCall']);
+    Route::post('/final_call/{taskStatusId}', [TaskController::class, 'finalCall']);
 });
 
 Route::post('/telegram-webhook', [MessageController::class, '__invoke']);

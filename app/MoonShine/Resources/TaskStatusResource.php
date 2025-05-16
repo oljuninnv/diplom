@@ -85,7 +85,7 @@ class TaskStatusResource extends ModelResource
                 ),
             ActionButton::make('Задание провалено')
                 ->showInDropdown()
-                ->canSee(fn($model) => $model->status === TaskStatusEnum::UNDER_REVIEW->value || $model->status === TaskStatusEnum::APPROVED->value)
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::UNDER_REVIEW->value)
                 ->inModal(
                     'Задание провалено',
                     fn(TaskStatus $taskStatus) => FormBuilder::make()
@@ -117,6 +117,10 @@ class TaskStatusResource extends ModelResource
                 ->showInDropdown()
                 ->canSee(fn($model) => $model->status === TaskStatusEnum::APPROVED->value)
                 ->method('adopted'),
+            ActionButton::make('Отказать')
+                ->showInDropdown()
+                ->canSee(fn($model) => $model->status === TaskStatusEnum::APPROVED->value)
+                ->method('deny'),
             ActionButton::make('Назначить технический созвон')
                 ->showInDropdown()
                 ->canSee(fn($model) => $model->status === TaskStatusEnum::IN_PROGRESS->value || $model->status === TaskStatusEnum::UNDER_REVIEW->value)
@@ -180,6 +184,16 @@ class TaskStatusResource extends ModelResource
         return MoonShineJsonResponse::make()
             ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
             ->toast('Пользователь принят', ToastType::SUCCESS);
+    }
+
+    public function deny(MoonShineRequest $request): MoonShineJsonResponse
+    {
+        $id = (int) $request->get('resourceItem');
+        $reportAction = new TaskStatusAction();
+        $reportAction->deny($id);
+        return MoonShineJsonResponse::make()
+            ->events([AlpineJs::event(JsEvent::TABLE_UPDATED, $this->getListComponentName())])
+            ->toast('Отказано пользователю', ToastType::SUCCESS);
     }
 
     public function failed(MoonShineRequest $request): MoonShineJsonResponse

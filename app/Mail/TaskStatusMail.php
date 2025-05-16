@@ -33,6 +33,7 @@ class TaskStatusMail extends Mailable
             'approved' => 'Задание одобрено',
             'failed' => 'Задание не принято',
             'adopted' => 'Пользователь принят в компанию',
+            'deny' => 'Пользователь не принят',
             default => 'Статус задания изменен'
         };
 

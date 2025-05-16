@@ -153,7 +153,38 @@ class TaskStatusAction
             $params['file_path'] ?? null
         );
 
-        return 'Задание провалено';
+        return 'Пользователь принят';
+    }
+
+    public function deny(int $id)
+    {
+        $task = TaskStatus::findOrFail($id);
+        $task->update(['status' => TaskStatusEnum::FAILED->value]);
+
+        $user = User::with('telegramUser')->findOrFail($task->user_id);
+
+        // Отправка email с обработкой ошибок
+        $this->sendEmailNotification(
+            $user->email,
+            new TaskStatusMail(
+                $user,
+                'deny',
+                $task->id,
+                $params['comment'] ?? null,
+                $params['file_path'] ?? null
+            )
+        );
+
+        // Отправка в Telegram
+        $this->sendTelegramTaskStatusNotification(
+            $user,
+            $task,
+            'deny',
+            $params['comment'] ?? null,
+            $params['file_path'] ?? null
+        );
+
+        return 'Пользователю отказано';
     }
 
     public function final_call(array $params)
@@ -319,8 +350,7 @@ class TaskStatusAction
             $telegram = new Api(config('telegram.bot_token'));
             $siteUrl = env('WEBHOOK_URL', 'https://your-default-site.com');
 
-            if ($status === TaskStatusEnum::ADOPTED->value)
-            {
+            if ($status === TaskStatusEnum::ADOPTED->value) {
                 $text = "📢 <b>>Поздравляем! Вы успешно прошли тестовое задание и финальное собеседование.</b>\n\n";
                 $text .= "📝 В ближайшее время с вами свяжется наш hr-менеджер для согласования деталей вашего трудоустройства.\n";
                 $text .= "Благодарим вас за проделанную работу.\n";
@@ -333,6 +363,23 @@ class TaskStatusAction
 
                 return;
             }
+
+            if ($status === 'deny') {
+                $text = "📢 <b>Спасибо за ваше участие!</b>\n\n";
+                $text .= "К сожалению, мы не можем предложить вам позицию в нашей компании на данный момент.\n";
+                $text .= "Ваши усилия и время, затраченные на тестовое задание и собеседование, были очень ценными для нас.\n";
+                $text .= "Это решение не отражает ваши профессиональные качества, и мы уверены, что вы найдете подходящую возможность в ближайшее время.\n";
+                $text .= "Желаем вам удачи в дальнейших поисках!";
+
+                $telegram->sendMessage([
+                    'chat_id' => $user->telegramUser->telegram_id,
+                    'text' => $text,
+                    'parse_mode' => 'HTML'
+                ]);
+
+                return;
+            }
+
 
             $statusMessages = [
                 TaskStatusEnum::REVISION->value => '🔄 Задание отправлено на доработку',

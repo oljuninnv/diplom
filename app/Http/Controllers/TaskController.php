@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\TaskStatusAction;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Report;
@@ -304,6 +305,61 @@ class TaskController extends Controller
             TaskStatusEnum::FAILED->value => 'Задание провалено',
             default => 'Статус задания изменен'
         };
+    }
+
+    // Добавить в TaskController
+    public function adopted($taskStatusId)
+    {
+        try {
+            $action = new TaskStatusAction();
+            $result = $action->adopted($taskStatusId);
+            return response()->json(['success' => true, 'message' => $result]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function failed($taskStatusId, Request $request)
+    {
+        try {
+            $action = new TaskStatusAction();
+            $result = $action->deny($taskStatusId);
+            return response()->json(['success' => true, 'message' => $result]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function technicalCall($taskStatusId, Request $request)
+    {
+        try {
+            $action = new TaskStatusAction();
+            $result = $action->technical_call([
+                'id' => $taskStatusId,
+                'meeting_link' => $request->input('meeting_link'),
+                'date' => $request->input('date'),
+                'time' => $request->input('time'),
+            ]);
+            return response()->json(['success' => true, 'message' => $result]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function finalCall($taskStatusId, Request $request)
+    {
+        try {
+            $action = new TaskStatusAction();
+            $result = $action->final_call([
+                'id' => $taskStatusId,
+                'meeting_link' => $request->input('meeting_link'),
+                'date' => $request->input('date'),
+                'time' => $request->input('time'),
+            ]);
+            return response()->json(['success' => true, 'message' => $result]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     // Получение списка доступных статусов
