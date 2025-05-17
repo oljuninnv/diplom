@@ -15,6 +15,45 @@
             </div>
         @endif
 
+        <!-- Информация о кураторе и HR -->
+        @if($taskStatus->tutor || $taskStatus->hr_manager)
+        <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+            <div class="p-6 sm:p-8">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Контактные лица</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @if($taskStatus->tutor)
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                            <img class="h-10 w-10 rounded-full object-cover" 
+                                 src="{{ $taskStatus->tutor->avatar_url }}" 
+                                 alt="Аватар куратора">
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">Куратор</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $taskStatus->tutor->name }}</p>
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($taskStatus->hr_manager)
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10">
+                            <img class="h-10 w-10 rounded-full object-cover" 
+                                 src="{{ $taskStatus->hr_manager->avatar_url }}" 
+                                 alt="Аватар HR-менеджера">
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">HR-менеджер</p>
+                            <p class="text-sm font-medium text-gray-900">{{ $taskStatus->hr_manager->name }}</p>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
+
+        <!-- Остальной код страницы остается без изменений -->
         <!-- Карточка с заданием -->
         <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
             <div class="p-6 sm:p-8">
